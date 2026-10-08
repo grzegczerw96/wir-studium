@@ -230,6 +230,8 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-child::aft
     transform-origin:0 50%;scale:1 var(--s,0);translate:-50% var(--y,0px);
     transition:scale .6s var(--e,cubic-bezier(.76,0,.24,1)),translate .6s var(--e,cubic-bezier(.76,0,.24,1)),height .6s cubic-bezier(.76,0,.24,1)}
   .plist.hovering{--e:cubic-bezier(.25,1,.5,1)}
+  .plist.hl .pr-h{opacity:.25}
+  .plist.hl .pr.active .pr-h,.pr:hover .pr-h{opacity:1}
   .player.keep{height:0;scale:1!important}
 }
 
@@ -293,7 +295,7 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-child::aft
   </section>
 
   <section class="index" id="projects" aria-label="Wszystkie projekty">
-    <div id="rows"></div>
+    <div class="plist" id="rows"></div>
   </section>
 
   <section class="cta" id="contact">
