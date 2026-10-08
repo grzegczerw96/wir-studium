@@ -510,13 +510,13 @@ html.motion .mani-pin{position:sticky;top:0}
   const fine=!(small||coarse);
   gsap.set(ws,{transformPerspective:420,transformOrigin:'50% 50% -0.4em'});
   mtl.set({},{},1);                                                   // fixes the total length at 1
-  mtl.fromTo(ws,{rotationX:-90,yPercent:85,opacity:0},{rotationX:0,yPercent:0,opacity:1,duration:.085,ease:'power1.out',stagger:{amount:fine?.17:.15}},.255)
+  mtl.fromTo(ws,{rotationX:-90,yPercent:85,opacity:0},{rotationX:0,yPercent:0,opacity:1,duration:.085,ease:'power1.out',stagger:{amount:fine?.17:.15}},.24)
      .fromTo('#orbWrap1',{y:0,scale:1},{y:()=>innerHeight*.12,scale:.62,duration:.33,ease:'power1.inOut',immediateRender:false},.17);
   // thumbnails wait in a row above the screen, then drop one after another, swelling to ~1.6x mid-fall
   const thumbsEl=document.getElementById('thumbs');
   const above=()=>-(thumbsEl.getBoundingClientRect().top-document.querySelector('.mani-pin').getBoundingClientRect().top+thumbsEl.offsetHeight+30);
   gsap.utils.toArray('.thumb').forEach((el,i)=>{
-    const at=.155+i*.016,d=.135;   // the whole row is in the air almost at once
+    const at=.155+i*.018,d=.15;   // the whole row is in the air almost at once
     mtl.fromTo(el,{y:above},{y:0,duration:d,ease:'power1.inOut',immediateRender:true},at)
        .fromTo(el,{scale:1},{scale:1.6,duration:d/2,ease:'sine.out'},at)
        .to(el,{scale:1,duration:d/2,ease:'sine.in'},at+d/2);
