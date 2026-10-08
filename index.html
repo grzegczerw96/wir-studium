@@ -104,7 +104,7 @@ html.motion .mani-pin{position:sticky;top:0}
 @media (max-width:700px){
   html.motion .mani{height:650svh}
   .intro-pin{padding-top:84px}
-  .slot{width:min(84vw,420px);margin-top:14px}
+  .slot{width:min(84vw,420px);aspect-ratio:1.15;margin-top:14px}
   .hero-note{max-width:62vw;font-size:13px;margin-top:20px}
   .mani-txt{top:15%;font-size:6.2vw;line-height:1.02;text-indent:16%;text-align:left}
   .thumbs{bottom:4svh}
@@ -164,6 +164,9 @@ html.motion .mani-pin{position:sticky;top:0}
 .toast.on{transform:translate(-50%,0);visibility:visible;transition:transform .5s cubic-bezier(.2,.9,.2,1)}
 .motion-pill{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:65;display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 32px);background:#fff;border:1px solid var(--line);padding:10px 10px 10px 14px;font-size:12px;color:#444}
 .motion-pill[hidden]{display:none}
+.motion-pill.mini{padding:0;border-radius:999px;gap:0}
+.motion-pill.mini span{display:none}
+.motion-pill.mini button{padding:6px 10px;font-size:10px}
 .motion-pill button{background:var(--ink);color:#fff;padding:8px 12px;font:500 11px var(--mono);text-transform:uppercase}
 </style>
 </head>
@@ -237,7 +240,9 @@ html.motion .mani-pin{position:sticky;top:0}
   const reduce=sysReduce&&!forced;
   if(sysReduce){const mp=document.getElementById('mp'),b=document.getElementById('mpBtn');mp.hidden=false;
     if(forced){mp.querySelector('span').textContent='Animacje włączone ręcznie.';b.textContent='Wyłącz'}
-    b.addEventListener('click',()=>{try{forced?localStorage.removeItem('wir-motion'):localStorage.setItem('wir-motion','on')}catch(e){}location.reload()})}
+    b.addEventListener('click',()=>{try{forced?localStorage.removeItem('wir-motion'):localStorage.setItem('wir-motion','on')}catch(e){}location.reload()});
+    // after a few seconds the notice shrinks to a small chip so it never covers the page
+    setTimeout(()=>{mp.classList.add('mini');b.textContent=forced?'Ruch: wł.':'Ruch: wył.';b.title=forced?'Wyłącz animacje':'Włącz animacje'},4000)}
   const G=!!window.gsap&&!!window.ScrollTrigger&&!reduce;
   const coarse=matchMedia('(pointer: coarse)').matches;      // touch screens: native scrolling, lighter effects
   const small=matchMedia('(max-width: 700px)').matches;
