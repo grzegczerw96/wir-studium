@@ -391,6 +391,74 @@ html.motion .wi--light{height:350svh;margin-top:0}
   html.motion .aw-ul{scale:calc(.7 + var(--t,0)*.3)}
 }
 
+/* ===== talk + footer (measured from the original): a giant line slides right → left across the screen, the coil
+   comes back in the middle and moves aside for a chat-style form whose three boxes slide in from the left;
+   then the form fades and the footer title flips in over the coil. Sections are not stacking contexts, so the fixed
+   coil layer (z 4) sits between their black background and their text (z 5). ===== */
+.talk,.footer{--r:3.865vw;position:relative;color:#fcfcfc;background:var(--room,var(--ink))}
+@media (min-width:600px){.talk,.footer{--r:2.083vw}}
+@media (min-width:1025px){.talk,.footer{--r:min(1.111vw,2.556vh)}}
+.tk-title-wrap,.tk-form-wrap,.ft-wrap{position:relative;z-index:5}
+.tk-title-wrap{pointer-events:none;padding:100px var(--gut) 40px;overflow-x:clip}   /* clip, not hidden: keeps the sticky line working */
+.tk-title{margin:0;font:900 calc(var(--r)*4)/.9 var(--grot);letter-spacing:-.02em;text-transform:uppercase;padding-right:.075em}
+html.motion .tk-title-wrap{height:500svh;margin-top:-30svh;padding:0}
+html.motion .tk-title-sticky{position:sticky;top:0;height:100svh;display:flex;align-items:center;padding-top:calc(var(--gut) + 37px)}
+html.motion .tk-title{white-space:nowrap;translate:calc(100vw - var(--gut) - (100vw + 100%)*var(--p,0)) 0}
+.tk-form-sticky{display:flex;align-items:center;padding:20px var(--gut)}
+html.motion .tk-form-wrap{height:500svh;margin-top:-250svh}
+html.motion .tk-form-sticky{position:sticky;top:0;height:100svh;padding:calc(var(--gut) + 55px) var(--gut) var(--gut)}
+.tk-form{display:flex;flex-direction:column;align-items:flex-end;gap:10px;width:100%;height:calc(var(--r)*33.75);min-height:340px;max-height:100%;transition:opacity .35s cubic-bezier(.45,0,.55,1)}
+.tk-box{position:relative;display:flex;justify-content:flex-end;width:100%}
+.tk-box--msg{flex:1;min-height:0}
+.tk-line{position:relative;width:100%;border:1px solid #2b2b2b;border-radius:4px;overflow:clip;translate:calc((-100% - var(--gut) - 1px)*var(--start,0)) 0}
+.tk-box--msg .tk-line{height:100%}
+.tk-lw{display:flex;justify-content:space-between;align-items:center;padding:20px;font:300 10px/1.6 var(--mono);text-transform:uppercase}
+.tk-msg{height:100%;display:flex;flex-direction:column;gap:20px;padding:20px;font:400 calc(var(--r)*1.375)/1.16 var(--grot);overflow:auto}
+.tk-msg p{margin:0}
+.tk-key{display:inline-block;vertical-align:middle;margin-left:6px;padding:6px 10px;border-radius:100vmax;background:rgba(216,215,213,.08);font:300 10px/1.6 var(--mono);text-transform:uppercase}
+.tk-field{display:flex;flex-direction:column;gap:10px}
+.tk-field[hidden],.tk-done[hidden]{display:none}
+.tk-q{opacity:.4}
+.tk-field textarea{width:100%;background:transparent;border:0;border-bottom:1px solid #2b2b2b;color:#fcfcfc;font:inherit;resize:none;padding:4px 0}
+.tk-field textarea:focus{outline:none;border-bottom-color:#fcfcfc}
+.tk-send{padding:10px;border-radius:4px;background:rgba(216,215,213,.08);color:rgba(252,252,252,.3);font:300 10px/1.6 var(--mono);text-transform:uppercase;transition:background .3s,color .3s}
+.tk-send:not(:disabled){background:#d8d7d5;color:#050505}
+.tk-place{display:none}
+@media (min-width:1025px){
+  .tk-title{font-size:calc(var(--r)*18.75)}
+  .tk-form{width:calc(var(--r)*42.5);flex:none}
+  .tk-msg{font-size:calc(var(--r)*1.5625)}
+  .tk-place{display:flex;flex:1;align-self:stretch;margin-left:calc(var(--r)*2.8125)}
+}
+@media (min-width:600px) and (max-width:1024px){.tk-title{font-size:calc(var(--r)*12.5)}}
+.ft-wrap{display:flex;flex-direction:column;justify-content:space-between;gap:60px;padding:calc(var(--gut) + 55px) var(--gut) calc(var(--gut) + env(safe-area-inset-bottom,0px))}
+html.motion .footer{height:350svh;margin-top:-160svh}
+html.motion .ft-wrap{position:sticky;top:0;height:100svh}
+.ft-head{position:relative;display:flex;flex-direction:column;gap:32px;align-items:flex-start;width:100%}
+@media (min-width:1025px){.ft-head{flex-direction:row;justify-content:space-between;gap:0}}
+.ft-title{margin:0;font:900 calc(var(--r)*3.125)/.8 var(--grot);letter-spacing:-.04em;text-transform:uppercase}
+.ft-title .ab-ln{display:block;white-space:nowrap;perspective:calc(var(--r)*31.25)}
+.ft-title .ch{display:inline-block;transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em);backface-visibility:hidden}
+.ft-social{display:flex;flex-direction:column;gap:15px;width:calc(var(--r)*7.5);min-width:96px;font:400 15px/1.2 var(--grot)}
+.ft-label{color:#989a96}
+.ft-links{display:flex;flex-direction:column;align-items:flex-start}
+.ft-links a{transition:opacity .35s cubic-bezier(.45,0,.55,1)}
+@media (hover:hover){.ft-links:hover a{opacity:.2}.ft-links a:hover{opacity:1;transition-timing-function:cubic-bezier(.5,1,.89,1)}}
+.ft-end{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:var(--gut);font-size:9.75px}
+.ft-center{display:flex;gap:12px;overflow:clip}
+.ft-tag{display:inline-block;transform:translateY(calc((100% + 1px)*var(--p,0)))}
+.ft-mail{position:relative;font:inherit;color:inherit;text-transform:uppercase}
+.ft-mail::after{content:"";position:absolute;right:0;bottom:.15em;height:1px;width:0;background:currentColor;transition:width .35s cubic-bezier(.5,1,.89,1)}
+.ft-mail:hover::after{left:0;width:100%}
+@media (min-width:1025px){
+  .ft-title{font-size:calc(var(--r)*8.75)}
+  .ft-social{position:absolute;right:0;bottom:0;translate:0 70%;padding-bottom:13px}
+  .ft-copy{position:absolute;left:0}.ft-mail{position:absolute;right:0}
+}
+.stage3{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;visibility:hidden}
+.stage3 canvas{width:100%;height:100%;display:block}
+html:not(.motion) .stage3{display:none}
+
 /* ===== closing ===== */
 .cta{position:relative;z-index:3;background:var(--paper);color:var(--ink);padding:120px var(--gut) calc(28px + env(safe-area-inset-bottom,0px));display:grid;gap:56px;overflow:hidden}
 .cta .mega{font-size:var(--mega2,16vw)}
@@ -502,14 +570,30 @@ html.motion .wi--light{height:350svh;margin-top:0}
     </section>
   </section>
 
-  <section class="cta" id="contact">
-    <h2 class="mega" id="mega2"><span class="ln"><span>Pogadajmy</span></span></h2>
-    <div class="cta-row">
-      <p>Masz pomysł, który powinien się ruszać? Napisz kilka zdań, odpowiemy w ciągu dwóch dni roboczych.</p>
-      <button class="mail" type="button" id="mail">hej@wir.studio</button>
-    </div>
-    <div class="foot mono"><span>Wir Studio · marka fikcyjna, studium techniki</span><span>Grafika generowana w przeglądarce</span></div>
+  <section class="talk" id="contact" aria-label="Kontakt">
+    <div class="tk-title-wrap" id="tkTitleWrap"><div class="tk-title-sticky" id="tkTitleSticky"><h2 class="tk-title" id="tkTitle">Pogadajmy o pomysłach</h2></div></div>
+    <div class="tk-form-wrap" id="tkFormWrap"><div class="tk-form-sticky" id="tkFormSticky">
+      <form class="tk-form" id="tkForm" autocomplete="off">
+        <div class="tk-box"><div class="tk-line"><div class="tk-lw"><span>Do: Wir</span><span>( hej@wir.studio )</span></div></div></div>
+        <div class="tk-box tk-box--msg"><div class="tk-line"><div class="tk-msg">
+          <p>👋 Cześć! Tu bot Wir. Pomogę Ci opisać kolejny projekt: wystarczy kilka zdań, a przygotujemy propozycję.</p>
+          <p class="tk-go">Zaczynamy? 👉 Naciśnij Enter <span class="tk-key">Enter</span></p>
+          <label class="tk-field" id="tkField" hidden><span class="tk-q">Napisz w kilku zdaniach, czego potrzebujesz.</span><textarea id="tkInput" rows="3" placeholder="Np. strona premiery produktu, start w marcu…"></textarea></label>
+          <p class="tk-done" id="tkDone" hidden>Dzięki! To strona demonstracyjna, więc nic nie zostało wysłane, ale tak wyglądałby koniec rozmowy.</p>
+        </div></div></div>
+        <div class="tk-box"><div class="tk-line"><div class="tk-lw"><span>…</span><button type="submit" class="tk-send" id="tkSend" disabled>Wyślij projekt</button></div></div></div>
+      </form>
+      <div class="tk-place" id="tkPlace"></div>
+    </div></div>
   </section>
+  <footer class="footer" id="footer"><div class="ft-wrap" id="ftWrap">
+    <div class="ft-head">
+      <h2 class="ft-title" id="ftTitle"><span class="ab-ln">Kręcimy się</span> <span class="ab-ln">od 2019</span></h2>
+      <div class="ft-social"><span class="ft-label">Social</span><div class="ft-links"><a href="#footer">Behance</a><a href="#footer">Instagram</a><a href="#footer">LinkedIn</a><a href="#footer">Dribbble</a></div></div>
+    </div>
+    <div class="ft-end mono"><span class="ft-copy">©2026 Wir Studio · marka fikcyjna</span><span class="ft-center"><span class="ft-tag">Pracujemy</span><span class="ft-tag">zdalnie</span><span class="ft-tag">z Gdańska</span></span><button class="ft-mail" id="mail" type="button">hej@wir.studio</button></div>
+  </div></footer>
+  <div class="stage3" id="stage3" aria-hidden="true"><canvas id="orb3"></canvas></div>
 </main>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -545,7 +629,7 @@ html.motion .wi--light{height:350svh;margin-top:0}
     if(varName==='--mega'){const cap=Math.max(48,(innerHeight-96-Math.min(innerWidth*.42,560)/1.62-110)/(lines.length*.86));fs=Math.min(fs,cap)}
     el.style.setProperty(varName,fs+'px');
   }
-  const fitAll=()=>{fit(document.getElementById('mega'),'--mega');fit(document.getElementById('mega2'),'--mega2')};
+  const fitAll=()=>{fit(document.getElementById('mega'),'--mega')};
   fitAll();
   // split headline letters for the intro
   document.querySelectorAll('#mega .ln>span').forEach(s=>{s.innerHTML=[...s.textContent].map(c=>c===' '?' ':`<span class="ch">${c}</span>`).join('')});
@@ -592,7 +676,8 @@ html.motion .wi--light{height:350svh;margin-top:0}
     return {draw,size,canvas,setProgress:v=>{prog=v},setDark:v=>{canvas.style.opacity=1-v;canvas.style.transform=`scale(${1-.22*v})`}};
   }
   /* ---- WebGL coil: real metal, studio reflections, GPU-rendered. Falls back to the 2D coil above. ---- */
-  function GLCoil(canvas){
+  function GLCoil(canvas,opt={}){
+    const mk=opt.mouse||1;
     if(!window.THREE)return null;
     let renderer;
     try{renderer=new THREE.WebGLRenderer({canvas,antialias:!coarse,alpha:true,powerPreference:'high-performance'})}catch(e){return null}
@@ -629,7 +714,7 @@ html.motion .wi--light{height:350svh;margin-top:0}
       const dt=Math.min(.05,Math.max(0,t-last));last=t;
       spin+=dt*(.32+Math.min(vel,4)*.8);vel*=.93;            // scroll speed spins it faster, then it calms down
       mx+=(tmx-mx)*.05;my+=(tmy-my)*.05;                       // the cursor tilts it slightly
-      grp.rotation.set(tilt+Math.sin(t*.37)*.1+my*.3,Math.sin(t*.23)*.2+mx*.4,spin);grp.scale.setScalar(pscale*(1-.15*dark));
+      grp.rotation.set(tilt+Math.sin(t*.37)*.1+my*.3*mk,Math.sin(t*.23)*.2+mx*.4*mk,spin);grp.scale.setScalar(pscale*(1-.15*dark));
       renderer.render(scene,cam);
     }
     const full=geo.index.count;
@@ -639,7 +724,9 @@ html.motion .wi--light{height:350svh;margin-top:0}
     // the last 20% fades what is left together with the texts
     const setDark=v=>{dark=v;setShade(.9+.1*v,.35-1.5*v);canvas.style.opacity=v<.8?1:Math.max(0,(1-v)/.2)};
     const setPose=(tl,sc)=>{tilt=tl;pscale=sc};
-    return {draw,size,canvas,setDark,setShade,setPose,kick:v=>{vel=Math.max(vel,Math.abs(v))},
+    // place the coil centre at screen pixel (px,py) of its canvas (camera at z 9, 30° fov → 4.823 units of height)
+    const setPos=(px,py)=>{if(!W)size();if(!H)return;const k=2*9*Math.tan(Math.PI/12)/H;grp.position.set((px-W/2)*k,-(py-H/2)*k,0)};
+    return {draw,size,canvas,setDark,setShade,setPose,setPos,kick:v=>{vel=Math.max(vel,Math.abs(v))},
       setProgress:v=>geo.setDrawRange(0,Math.floor(full*Math.min(1,Math.max(0,v))/6)*6)};   // the wire is drawn along its length
   }
   const orbCanvas=document.getElementById('orb1');
@@ -652,6 +739,10 @@ html.motion .wi--light{height:350svh;margin-top:0}
   const coil2=GLCoil(orb2);
   if(coil2){new IntersectionObserver(es=>es[0].isIntersecting?visible.add(coil2):visible.delete(coil2)).observe(document.getElementById('clients'));
     new ResizeObserver(()=>coil2.size()).observe(orb2)}
+  const orb3=document.getElementById('orb3');
+  const coil3=GLCoil(orb3,{mouse:2.5});
+  if(coil3){const vis3=new Set();const io3=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?vis3.add(e.target):vis3.delete(e.target));vis3.size?visible.add(coil3):visible.delete(coil3);document.getElementById('stage3').style.visibility=vis3.size?'visible':'hidden'});
+    io3.observe(document.getElementById('contact'));io3.observe(document.getElementById('footer'));addEventListener('resize',()=>coil3.size())}
   let t0=performance.now();
   function frame(now){const t=(now-t0)/1000;visible.forEach(c=>c.draw(reduce?2.2:t));if(!reduce)requestAnimationFrame(frame)}
   requestAnimationFrame(frame);
@@ -776,6 +867,13 @@ html.motion .wi--light{height:350svh;margin-top:0}
     else{g.strokeStyle=P[1];g.globalAlpha=.6;g.lineWidth=3;g.beginPath();g.arc(x+cw/2,y+ch*.55,cw*.24,0,Math.PI*(1+k%2));g.stroke();g.globalAlpha=1}
     return `url(${c.toDataURL('image/jpeg',.88)})`}
   document.querySelectorAll('.aw-fig i').forEach((i,k)=>i.style.backgroundImage=poster(k));
+  // chat form: Enter (or a click) opens the question, typing enables the button; nothing is sent anywhere
+  {const form=document.getElementById('tkForm'),field=document.getElementById('tkField'),inp=document.getElementById('tkInput'),send=document.getElementById('tkSend'),done=document.getElementById('tkDone');
+   const open=()=>{if(!field.hidden)return;field.hidden=false;form.querySelector('.tk-go').style.opacity=.4;inp.focus({preventScroll:true})};
+   form.querySelector('.tk-key').addEventListener('click',open);
+   addEventListener('keydown',e=>{if(e.key!=='Enter'||!field.hidden)return;const r=form.getBoundingClientRect();if(r.top<innerHeight*.6&&r.bottom>innerHeight*.4&&getComputedStyle(form).opacity>.5){e.preventDefault();open()}});
+   inp.addEventListener('input',()=>{send.disabled=inp.value.trim().length<3});
+   form.addEventListener('submit',e=>{e.preventDefault();if(send.disabled)return;field.hidden=true;done.hidden=false;send.disabled=true;say('Wersja demonstracyjna: nic nie zostało wysłane')})}
   const rowsEl=document.getElementById('rows');
   rowsEl.innerHTML=ROWS.map((r,i)=>`
     <article class="pr"><div class="pr-w">
@@ -1139,6 +1237,50 @@ html.motion .wi--light{height:350svh;margin-top:0}
     awTl.add(tl,Math.floor(n/2)/6)});
   if(isDesk()&&!coarse)awTl.fromTo('#awUl',{'--t':0},{'--t':1,duration:1,ease:'power4.out'},0);
 
+  /* ---- page back to black at the end of "about" (the original's endTl: from the bottom 15% below the screen
+     until 45% above the top, power1.inOut) ---- */
+  gsap.fromTo(document.documentElement,{'--room':'rgb(252,252,252)'},{'--room':'rgb(5,5,5)',ease:'power1.inOut',immediateRender:false,
+    scrollTrigger:{trigger:'#about',start:'bottom 115%',end:'bottom -45%',scrub:true,invalidateOnRefresh:true}});
+
+  /* ---- talk ----
+     title: slides from the right edge to fully out on the left while its 5-screen track scrolls (linear)
+     coil: fades in and climbs out of the dark as the section arrives (quart in-out), centred under the header,
+       grows .65 → 1 and tips from 18° to 72°; then moves to the free space right of the form (.6) and tips to 45°;
+       finally drifts to the footer corner (.85, edge-on)
+     form: its three boxes slide in from the left one after another (quad in-out, scrub .5); fades out as the footer comes */
+  gsap.timeline({scrollTrigger:{trigger:'#tkTitleWrap',start:'top top',end:'bottom bottom',scrub:true,invalidateOnRefresh:true}})
+    .fromTo('#tkTitle',{'--p':0},{'--p':1,ease:'none'});
+  const tkLines=[...document.querySelectorAll('.tk-line')],tkFormWrap=document.getElementById('tkFormWrap'),tkForm=document.getElementById('tkForm');
+  gsap.timeline({scrollTrigger:{trigger:tkFormWrap,start:'top top',end:'+=200%',scrub:.5,invalidateOnRefresh:true}})
+    .fromTo(tkLines,{'--start':1},{'--start':0,ease:'power1.inOut',stagger:.1},0);
+  const P3={o:0,d:1,x:.5,y:.5,s:.65,t:Math.PI/10};
+  const cX=()=>innerWidth/2,cY=()=>{const pad=document.getElementById('tkTitleSticky').getBoundingClientRect?parseFloat(getComputedStyle(document.getElementById('tkTitleSticky')).paddingTop)||0:0;return isDesk()?pad+.5*(innerHeight-pad):innerHeight/2};
+  const plc=()=>{const p=document.getElementById('tkPlace'),st=document.getElementById('tkFormSticky');if(!isDesk()||!p.offsetWidth)return {x:innerWidth*1.1,y:cY()};
+    return {x:p.offsetLeft+p.offsetWidth/2,y:p.offsetTop+p.offsetHeight/2}};
+  const midEnd=()=>tkFormWrap.offsetTop+2.5*innerHeight;
+  // (starts at 70% rather than the bottom edge: our coil layer sits above the white section, so it must not show over the list)
+  gsap.timeline({scrollTrigger:{trigger:'#contact',start:'top 70%',end:'top top',scrub:true,invalidateOnRefresh:true}})
+    .fromTo(P3,{o:0,d:1,t:Math.PI/10},{o:1,d:0,t:Math.PI/2.5,duration:1,ease:'power4.inOut'},0)
+    .fromTo(P3,{x:()=>cX(),y:()=>cY()},{x:()=>cX(),y:()=>cY(),duration:1,ease:'none'},0)
+    .fromTo(P3,{s:()=>isDesk()?.65:.35},{s:()=>isDesk()?1:.6,duration:.75,ease:'power1.inOut'},.25);
+  gsap.timeline({scrollTrigger:{trigger:'#contact',start:'top top',end:()=>'+='+midEnd(),scrub:true,invalidateOnRefresh:true}})
+    .fromTo(P3,{x:()=>cX(),y:()=>cY(),t:Math.PI/2.5},{x:()=>plc().x,y:()=>plc().y,t:Math.PI/4,duration:1,ease:'power4.inOut',immediateRender:false},0)
+    .fromTo(P3,{s:()=>isDesk()?1:.6},{s:()=>isDesk()?.6:.4,duration:.75,ease:'power1.inOut',immediateRender:false},.25);
+  gsap.timeline({scrollTrigger:{trigger:'#contact',start:()=>'top+='+midEnd()+' top',end:'bottom bottom',scrub:.5,invalidateOnRefresh:true}})
+    .fromTo(tkForm,{opacity:1},{opacity:()=>isDesk()?0:1,duration:1,ease:'power1.inOut',immediateRender:false});
+  gsap.timeline({scrollTrigger:{trigger:'#contact',start:()=>'top+='+midEnd()+' top',endTrigger:'#footer',end:()=>'bottom-='+innerHeight*1.75+' top',scrub:true,invalidateOnRefresh:true}})
+    .fromTo(P3,{x:()=>plc().x,y:()=>plc().y,t:Math.PI/4},{x:()=>isDesk()?plc().x*.97:innerWidth,y:()=>isDesk()?plc().y:cY()*.825,t:Math.PI/2,duration:1,ease:'power4.inOut',immediateRender:false},0)
+    .fromTo(P3,{s:()=>isDesk()?.6:.4},{s:()=>isDesk()?.85:.65,duration:.75,ease:'power1.inOut',immediateRender:false},.25);
+  if(coil3)gsap.ticker.add(()=>{if(!visible.has(coil3))return;coil3.setPos(P3.x,P3.y);coil3.setPose(P3.t,P3.s*.62);coil3.setShade(P3.d,1.6-2.8*P3.d);
+    document.getElementById('stage3').style.opacity=P3.o});
+  // footer title letters flip in; the small centre tags rise
+  const ftTitle=document.getElementById('ftTitle');
+  ftTitle.querySelectorAll('.ab-ln').forEach(l=>{l.innerHTML=[...l.textContent].map(c=>c===' '?' ':`<span class="ch">${c}</span>`).join('')});
+  const ftCh=ftTitle.querySelectorAll('.ch');gsap.set(ftCh,{'--rx':'-90deg','--sy':1.5});gsap.set('.ft-tag',{'--p':1.1});
+  ScrollTrigger.create({trigger:'#ftWrap',start:'top 60%',once:true,onEnter:()=>{
+    gsap.to(ftCh,{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',stagger:.035});
+    gsap.to('.ft-tag',{'--p':0,duration:.5,ease:'power1.out',stagger:.12,delay:.4})}});
+
   // project rows: lines grow from the middle, tags slide up (rightmost first), the title flips in
   prs.forEach(pr=>{
     ScrollTrigger.create({trigger:pr,start:'top 92%',once:true,onEnter:()=>pr.classList.add('in')});
@@ -1146,7 +1288,6 @@ html.motion .wi--light{height:350svh;margin-top:0}
   });
   // on phones and tablets the first row opens by itself once the list is in view
   if(!isDesk())ScrollTrigger.create({trigger:rowsEl,start:'top 70%',once:true,onEnter:()=>setTimeout(()=>{if(!openPr)openRow(prs[0])},600)});
-  gsap.from('#mega2 .ln>span',{yPercent:100,duration:1.4,ease:'expo.out',scrollTrigger:{trigger:'.cta',start:'top 70%',once:true}});
 
 })();
 </script>
