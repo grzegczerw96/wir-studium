@@ -275,7 +275,7 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
 .ab-title .ch{display:inline-block;transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em);backface-visibility:hidden}
 .ab-title .ab-ln{perspective:calc(var(--r)*31.25)}
 .ab-sub{margin:0;color:#141414;font:400 calc(var(--r)*2.25)/1 var(--serif);max-width:23.3em}
-.ab-content{display:flex;flex-direction:column;gap:var(--ms)}
+.ab-content{position:relative;z-index:1;display:flex;flex-direction:column;gap:var(--ms)}
 .ab-vid{position:relative;margin:0;width:100%;aspect-ratio:374/414;flex:none}
 .ab-vid .img{border-radius:4px;overflow:hidden;opacity:0;transform:scale(.5);transition:opacity .65s cubic-bezier(.25,1,.5,1),transform .65s cubic-bezier(.25,1,.5,1)}
 .ab-vid.in .img,html:not(.motion) .ab-vid .img{opacity:1;transform:none}
@@ -320,7 +320,7 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
 /* ===== clients: a black window opens from the middle of the screen, the coil comes back out of the dark inside it,
    then a short title and a long serif list of names; hovering a name dims the others and shows its mark ===== */
 .clients{position:relative;margin-top:calc(var(--ms)*-.5)}
-html.motion .clients{height:350svh}
+html.motion .clients{height:350svh;margin-top:-100svh}
 .cl-wrap{display:flex;align-items:flex-end;padding-bottom:var(--gut)}
 html.motion .cl-wrap{position:sticky;top:0;height:100svh}
 .cl-box{position:relative;width:100%;min-height:70svh;background:#000;color:#fcfcfc;border-radius:4px;overflow:hidden;
@@ -342,6 +342,54 @@ html.motion .cl-box{height:calc(100svh - var(--gut)*3 - 55px);min-height:0}
   .cl-text .client:hover .w{color:#fcfcfc}
 }
 .cl-text.off,.cl-text.off *{pointer-events:none!important}
+
+/* ===== awards (measured from the original's stylesheet and script) =====
+   header: the same label/title play as before the work cards, dark on white
+   posters: three columns pinned for 4 screens; the outer ones come down from above, the middle one rises from below;
+     they grow .75 → 1 and close in from 20% towards the middle; at the end the columns fly apart sideways and the
+     last two posters of the middle column split up/down
+   list: two columns of names that flip in pair by pair, small tags rise, hairlines grow; the whole list grows .7 → 1 */
+.awards{--r:inherit;color:#141414;display:flex;flex-direction:column;gap:calc(var(--r)*6.25)}
+.wi--light{color:#141414;background:transparent;padding:0}
+.wi--light .wi-l{color:#fcfcfc}
+html.motion .awards{gap:0;margin-top:-60svh}
+html.motion .wi--light{height:350svh;margin-top:0}
+.aw-imgs{position:relative;width:100%}
+.aw-wrap{display:grid;grid-template-columns:1fr 1fr;gap:var(--gut)}
+.aw-col{display:contents}
+.aw-fig{position:relative;margin:0;width:100%;aspect-ratio:.8333;opacity:0;transform:scale(.75);transition:opacity .65s cubic-bezier(.5,1,.89,1),transform .65s cubic-bezier(.5,1,.89,1)}
+.aw-fig.in,html:not(.motion) .aw-fig{opacity:1;transform:none}
+.aw-fig i{position:absolute;inset:0;border-radius:4px;background:#ecebe5 center/cover no-repeat}
+.aw-list{position:relative}
+.aw-lwrap{display:flex;align-items:center}
+.aw-ul{list-style:none;margin:0;padding:0;width:100%;display:grid;grid-template-columns:1fr}
+.aw-item{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;gap:var(--gut);padding:calc(var(--r)*1.875) 0;font:400 calc(var(--r)*2.25)/1 var(--serif)}
+.aw-item:not(:last-child)::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:var(--w,100%);background:#141414;opacity:.2}
+.aw-name{margin:0;font:inherit}
+.aw-name .ch{display:inline-block;transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em);backface-visibility:hidden}
+.aw-name{perspective:calc(var(--r)*31.25)}
+.aw-tags{display:flex;flex-wrap:wrap;gap:10px;overflow:hidden;margin:-8px 0;padding:8px 0}
+.aw-tag{font:300 clamp(9px,.7vw,10px)/1.6 var(--mono);padding:.9em;letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(43,43,43,.2);border-radius:4px;color:#141414;transform:translateY(calc((101% + 8px)*var(--p,0)))}
+@media (min-width:600px){.aw-item{font-size:calc(var(--r)*2.875)}}
+@media (min-width:1025px){
+  .aw-item{flex-direction:row;align-items:center;justify-content:space-between;gap:0}
+  .aw-item:not(:last-child):nth-last-child(2)::after{content:none}
+  .aw-ul{grid-template-columns:1fr 1fr;column-gap:calc(var(--r)*5);padding:0 calc(var(--r)*3.75 - var(--gut))}
+  html.motion .aw-imgs{height:400svh;margin-top:-75svh;overflow:clip}
+  html.motion .aw-wrap{position:sticky;top:0;height:100svh;display:flex;justify-content:space-between;align-items:flex-start;gap:calc(var(--r)*5);padding:0 calc(var(--r)*3.75 - var(--gut))}
+  html.motion .aw-col{display:flex;flex-direction:column;flex-shrink:0;gap:calc(var(--r)*11.875)}
+  html.motion .aw-fig{width:calc(var(--r)*18.75);opacity:1;transform:none;transition:none;scale:calc(.75 + var(--scale,0)*.25)}
+  html.motion .aw-col:nth-child(odd){translate:calc((-20% + 20%*var(--scale,0))*var(--dir,0) + (100% + var(--gut) + var(--r)*4.0625)*var(--dir,0)*var(--spacing,0)) calc(-101% + var(--progress,0)*(101% + 50svh - var(--v-spacing,0px)))}
+  html.motion .aw-col:nth-child(2n){--y:calc(var(--progress,0)*(100% + 50svh - var(--v-spacing,0px)));translate:0 calc(100svh + 1px - var(--y))}
+  html.motion .aw-col:first-child{--dir:-1}
+  html.motion .aw-col:nth-child(3){--dir:1}
+  html.motion .aw-col:nth-child(2) .aw-fig:last-child{--dir:1}
+  html.motion .aw-col:nth-child(2) .aw-fig:nth-last-child(2){--dir:-1}
+  html.motion .aw-col:nth-child(2) .aw-fig:last-child,html.motion .aw-col:nth-child(2) .aw-fig:nth-last-child(2){translate:0 calc((var(--v-spacing,0px)*-1 + 50svh + 101%)*var(--spacing,0)*var(--dir))}
+  html.motion .aw-list{height:250svh;margin-top:-190svh}
+  html.motion .aw-lwrap{position:sticky;top:0;height:100svh;padding-top:calc(var(--gut) + 55px)}
+  html.motion .aw-ul{scale:calc(.7 + var(--t,0)*.3)}
+}
 
 /* ===== closing ===== */
 .cta{position:relative;z-index:3;background:var(--paper);color:var(--ink);padding:120px var(--gut) calc(28px + env(safe-area-inset-bottom,0px));display:grid;gap:56px;overflow:hidden}
@@ -444,6 +492,13 @@ html.motion .cl-box{height:calc(100svh - var(--gut)*3 - 55px);min-height:0}
           <p class="cl-text" id="clText"><span class="client">Szlak</span> / <span class="client">Chronos Atelier</span> / <span class="client">Pociąg+</span> / <span class="client">Prąd Festival</span> / <span class="client">Herbaciarnia Liść</span> / <span class="client">Mleczarnia Łąka</span> / <span class="client">Kolej Bałtycka</span> / <span class="client">Atelier Nowak</span> / <span class="client">Bistro Pod Lipą</span> / <span class="client">Studio Sonar</span> / <span class="client">Piekarnia Rano</span> / <span class="client">Teatr Mały</span> / <span class="client">Księgarnia Strona</span> / <span class="client">Rowery Wiatr</span> / <span class="client">Muzeum Wody</span> / <span class="client">Kino Neon</span></p>
         </div>
       </div>
+    </section>
+    <section class="awards" id="awards" aria-label="Nagrody">
+      <div class="wi wi--light" id="awHead">
+        <div class="wi-track"><div class="wi-w"><span class="wi-l"><span class="wi-lt">Nagrody i wyróżnienia</span></span><h2 class="wi-t">Nagrody nie są celem, ale miło, gdy ktoś zauważy detale</h2></div></div>
+      </div>
+      <section class="aw-imgs" id="awImgs"><div class="aw-wrap" id="awWrap"><div class="aw-col"><figure class="aw-fig"><i></i></figure><figure class="aw-fig"><i></i></figure><figure class="aw-fig"><i></i></figure><figure class="aw-fig"><i></i></figure></div><div class="aw-col"><figure class="aw-fig"><i></i></figure><figure class="aw-fig"><i></i></figure><figure class="aw-fig"><i></i></figure><figure class="aw-fig"><i></i></figure></div><div class="aw-col"><figure class="aw-fig"><i></i></figure><figure class="aw-fig"><i></i></figure><figure class="aw-fig"><i></i></figure><figure class="aw-fig"><i></i></figure></div></div></section>
+      <section class="aw-list" id="awList"><div class="aw-lwrap"><ul class="aw-ul" id="awUl"><li class="aw-item"><h3 class="aw-name">Siatka</h3><div><div class="aw-tags"><span class="aw-tag">SD ×5</span><span class="aw-tag">WR ×13</span><span class="aw-tag">DD ×2</span><span class="aw-tag">PR ×1</span></div></div></li><li class="aw-item"><h3 class="aw-name">Kerning</h3><div><div class="aw-tags"><span class="aw-tag">SD ×2</span><span class="aw-tag">DA ×2</span></div></div></li><li class="aw-item"><h3 class="aw-name">Rytm</h3><div><div class="aw-tags"><span class="aw-tag">SD ×1</span></div></div></li><li class="aw-item"><h3 class="aw-name">Piksel</h3><div><div class="aw-tags"><span class="aw-tag">SD ×3</span><span class="aw-tag">DD ×2</span></div></div></li><li class="aw-item"><h3 class="aw-name">Pętla</h3><div><div class="aw-tags"><span class="aw-tag">SD ×2</span><span class="aw-tag">UI ×2</span></div></div></li><li class="aw-item"><h3 class="aw-name">Kompozycja</h3><div><div class="aw-tags"><span class="aw-tag">SW ×1</span></div></div></li></ul></div></section>
     </section>
   </section>
 
@@ -710,6 +765,17 @@ html.motion .cl-box{height:calc(100svh - var(--gut)*3 - 55px);min-height:0}
   clNames.forEach((n,k)=>{const on=v=>()=>{if(!window.gsap){clMarks[k].style.opacity=v;return}gsap.killTweensOf(clMarks[k]);
       gsap.to(clMarks[k],{opacity:v,duration:.35,ease:v?'power1.out':'power1.inOut',delay:v?0:.125})};
     n.addEventListener('mouseenter',on(1));n.addEventListener('mouseleave',on(0))});
+  // award posters: a coloured card on a pale mat, drawn once
+  function poster(k){const w=300,h=360,c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
+    const P=[['#e8392b','#fff'],['#4b3b8f','#fff'],['#f2a93b','#1a1a1a'],['#3d4fa0','#fff'],['#e8743b','#fff'],['#6cd2ea','#10303a'],['#f7f5ef','#1a1a1a'],['#5b8fd8','#fff']][k%8];
+    g.fillStyle='#ecebe5';g.fillRect(0,0,w,h);const cw=w*.62,ch=h*.66,x=(w-cw)/2,y=(h-ch)/2;
+    g.fillStyle='rgba(0,0,0,.08)';g.fillRect(x+3,y+5,cw,ch);g.fillStyle=P[0];g.fillRect(x,y,cw,ch);
+    g.fillStyle=P[1];g.font='600 13px Inter Tight, Arial';g.fillText(['Strona dnia','Wyróżnienie','Strona dnia','Projekt dnia','Strona miesiąca','Strona dnia','Wybór jury','Strona dnia'][k%8],x+12,y+26);
+    g.font='400 10px Inter Tight, Arial';g.fillText(['12.03.2026','04.11.2025','28.02.2025','09.07.2024'][k%4],x+12,y+42);g.fillText('Wir Studio',x+12,y+ch-14);
+    if(k%3===0){g.globalAlpha=.25;for(let i=0;i<6;i++){g.fillRect(x+12,y+64+i*14,cw*(.4+((i*37+k*13)%50)/100),6)}g.globalAlpha=1}
+    else{g.strokeStyle=P[1];g.globalAlpha=.6;g.lineWidth=3;g.beginPath();g.arc(x+cw/2,y+ch*.55,cw*.24,0,Math.PI*(1+k%2));g.stroke();g.globalAlpha=1}
+    return `url(${c.toDataURL('image/jpeg',.88)})`}
+  document.querySelectorAll('.aw-fig i').forEach((i,k)=>i.style.backgroundImage=poster(k));
   const rowsEl=document.getElementById('rows');
   rowsEl.innerHTML=ROWS.map((r,i)=>`
     <article class="pr"><div class="pr-w">
@@ -951,20 +1017,20 @@ html.motion .cl-box{height:calc(100svh - var(--gut)*3 - 55px);min-height:0}
   //  S0+.02 → +.52: the label's pill opens from its middle and both texts flip up (quart in-out);
   //  hold until +2.2; +2.2 → +3.2: they part again and fade (label left, title right).
   //  The coil sinks into the dark from S0-.95 to S0+2.25 (quad in-out); cards rise from the bottom at +2.5.
-  const wiL=document.querySelector('.wi-l'),wiT=document.querySelector('.wi-t');
-  splitWords(wiT);splitWords(document.querySelector('.wi-lt'));
-  const wiWords=document.querySelectorAll('.wi-t .fl'),wiLw=document.querySelectorAll('.wi-lt .fl');
-  const sx=()=>Math.round(innerWidth*.0336);
-  const wtl=gsap.timeline({defaults:{ease:'none'},scrollTrigger:{trigger:'#wi',start:'top top',end:()=>'+='+innerHeight*3.25,scrub:true,invalidateOnRefresh:true}});
-  const vh=1/3.25;
-  wtl.set({},{},1)
-    .fromTo(wiL,{x:sx},{x:0,duration:1.15*vh,ease:'power1.out'},0)
-    .fromTo(wiT,{x:()=>-sx()},{x:0,duration:1.15*vh,ease:'power1.out'},0)
-    .fromTo(wiL,{'--p':'50%',opacity:0},{'--p':'0%',opacity:1,duration:.5*vh,ease:'power4.inOut'},.02*vh)
-    .fromTo(wiLw,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5*vh,ease:'power4.inOut'},.04*vh)
-    .fromTo(wiWords,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5*vh,ease:'power4.inOut',stagger:{each:.012*vh}},.04*vh)
-    .to(wiL,{x:()=>-sx(),opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh)
-    .to(wiT,{x:sx,opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh);
+  function headerPlay(sec){const L=sec.querySelector('.wi-l'),T=sec.querySelector('.wi-t');
+    splitWords(T);splitWords(sec.querySelector('.wi-lt'));
+    const W=T.querySelectorAll('.fl'),LW=sec.querySelectorAll('.wi-lt .fl');
+    const sx=()=>Math.round(innerWidth*.0336),vh=1/3.25;
+    gsap.timeline({defaults:{ease:'none'},scrollTrigger:{trigger:sec,start:'top top',end:()=>'+='+innerHeight*3.25,scrub:true,invalidateOnRefresh:true}})
+      .set({},{},1)
+      .fromTo(L,{x:sx},{x:0,duration:1.15*vh,ease:'power1.out'},0)
+      .fromTo(T,{x:()=>-sx()},{x:0,duration:1.15*vh,ease:'power1.out'},0)
+      .fromTo(L,{'--p':'50%',opacity:0},{'--p':'0%',opacity:1,duration:.5*vh,ease:'power4.inOut'},.02*vh)
+      .fromTo(LW,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5*vh,ease:'power4.inOut'},.04*vh)
+      .fromTo(W,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5*vh,ease:'power4.inOut',stagger:{each:.012*vh}},.04*vh)
+      .to(L,{x:()=>-sx(),opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh)
+      .to(T,{x:sx,opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh)}
+  headerPlay(document.getElementById('wi'));
   const shade={v:0};
   // ends with the texts (S0+3.2 screens) instead of before them
   gsap.to(shade,{v:1,ease:'power1.inOut',scrollTrigger:{trigger:'#wi',start:'top 95%',end:'top -320%',scrub:true}});
@@ -1045,9 +1111,33 @@ html.motion .cl-box{height:calc(100svh - var(--gut)*3 - 55px);min-height:0}
     .fromTo(pose,{d:1},{d:0,duration:1,ease:'power4.inOut'},0)
     .fromTo(pose,{s:()=>isDesk()?.5:.35},{s:()=>isDesk()?1:.5,duration:.75,ease:'power1.inOut'},.25)   // phones: .35 → .5
     .fromTo(pose,{t:Math.PI/4},{t:Math.PI/2,duration:1,ease:'power4.inOut'},0);
-  if(coil2)gsap.ticker.add(()=>{if(!visible.has(coil2))return;coil2.setPose(pose.t,pose.s);coil2.setShade(pose.d,1.6-2.8*pose.d);orb2.style.opacity=pose.o;
+  gsap.ticker.add(()=>{clBox.style.opacity=pose.o});
+  if(coil2)gsap.ticker.add(()=>{if(!visible.has(coil2))return;coil2.setPose(pose.t,pose.s);coil2.setShade(pose.d,1.6-2.8*pose.d);
     // the whole window fades as it scrolls away at the end
     const r=clBox.getBoundingClientRect();clWrap.style.opacity=Math.min(1,Math.max(0,(r.top+.35*r.height)/(.3*r.height)))});
+
+  /* ---- awards ---- */
+  headerPlay(document.getElementById('awHead'));
+  const awWrap=document.getElementById('awWrap'),awFigs=[...document.querySelectorAll('.aw-fig')];
+  if(isDesk()&&!coarse){
+    const vsp=()=>{const f=awFigs[1];const gap=parseFloat(getComputedStyle(f.parentNode).rowGap)||0;awWrap.style.setProperty('--v-spacing',(f.offsetHeight+.5*gap)+'px')};
+    vsp();addEventListener('resize',vsp);
+    gsap.timeline({scrollTrigger:{trigger:'#awImgs',start:'top top',end:'bottom bottom',scrub:true,invalidateOnRefresh:true}})
+      .fromTo(awWrap,{'--progress':0},{'--progress':1,duration:1,ease:'power1.inOut'},0)
+      .fromTo(awWrap,{'--scale':0},{'--scale':1,duration:1,ease:'power1.inOut'},.2)
+      .fromTo(awWrap,{'--spacing':0},{'--spacing':1,duration:1,ease:'power4.inOut'},.8);
+  }else awFigs.forEach(f=>ScrollTrigger.create({trigger:f,start:'top 92%',once:true,onEnter:()=>f.classList.add('in')}));
+  // list: each pair of names plays its own little timeline, scrubbed one sixth apart; the list grows .7 → 1
+  const awItems=[...document.querySelectorAll('.aw-item')];
+  const awTl=gsap.timeline({scrollTrigger:isDesk()&&!coarse?{trigger:'#awList',start:'top top',end:'bottom bottom',scrub:true,invalidateOnRefresh:true}:{trigger:'#awList',start:'top 80%',once:true}});
+  awItems.forEach((it,n)=>{const h=it.querySelector('.aw-name');h.innerHTML=[...h.textContent].map(c=>c===' '?' ':`<span class="ch">${c}</span>`).join('');
+    const ch=h.querySelectorAll('.ch'),tags=it.querySelectorAll('.aw-tag');
+    const tl=gsap.timeline()
+      .fromTo(ch,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',stagger:.035},0)
+      .fromTo(tags,{'--p':1},{'--p':0,duration:.5,ease:'power1.out',stagger:.12},.25)
+      .fromTo(it,{'--w':'0%'},{'--w':'100%',duration:1.25,ease:'power4.inOut'},.1);
+    awTl.add(tl,Math.floor(n/2)/6)});
+  if(isDesk()&&!coarse)awTl.fromTo('#awUl',{'--t':0},{'--t':1,duration:1,ease:'power4.out'},0);
 
   // project rows: lines grow from the middle, tags slide up (rightmost first), the title flips in
   prs.forEach(pr=>{
