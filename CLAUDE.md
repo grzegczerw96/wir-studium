@@ -29,7 +29,12 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
   - brak kursora „DISCOVER” i brak dociągania w manifeście.
 - **Nasze dodatki, których oryginał nie ma** (zostawione celowo, do decyzji Grzegorza):
   - nagłówek chowa się przy przewijaniu w dół, bo inaczej tekst sekcji przejeżdża pod logo i przyciskiem;
-  - na telefonie formularz kontaktowy startuje od położenia ogona wielkiego napisu (patrz §5), a nie od stałego progu.
+  - na telefonie formularz kontaktowy startuje od położenia ogona wielkiego napisu (patrz §5), a nie od stałego progu; resztka napisu gaśnie tuż przed pierwszą ramką.
+- **Zmiany po uwagach Grzegorza z 9.10.2026** (odstępstwa od oryginału wynikające z jego uwag; nie cofać bez pytania):
+  - paski w intro na telefonie przylegają do dolnej krawędzi (w oryginale jest pod nimi 3,5rem bieli);
+  - na ekranach dotykowych strona sama nie przewija (bez dociągania w intro i u klientów, bez przyciągania formularza i stopki), bo walczy to z palcem i pędem;
+  - tytuł stopki składa się szybciej niż w oryginale (litera .5 s, co .018, gotowy w połowie toru);
+  - „Kontakt” w menu prowadzi do gotowego formularza, a nie na górę sekcji (tam jest szare przejście koloru).
 - **Fonty jak w oryginale:**
   - Inter Tight w roli Helvetica Now Display;
   - Instrument Serif w roli kroju szeryfowego;
@@ -48,6 +53,7 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
    - na desktopie 1280×620;
    - na telefonie 375×812 (`is_mobile`, `has_touch`);
    - brak przewijania w poziomie i brak błędów w konsoli.
+   - **Filmy Grzegorza** (`.mp4`): brak ffmpeg; klatki wyciąga zainstalowany Chrome przez Playwright (strona z `<video>` ładowana jako plik, przewijanie `currentTime`, zrzut), a kilka klatek składa się w jeden arkusz.
 5. **Commit** jako `grzegczerw96 <greg.wolwlod@gmail.com>`, z opisem po polsku. Push na `main`, GitHub Pages aktualizuje się po ok. 1 minucie. Przy sprawdzaniu dopisz do adresu `?v=<hash>`, żeby ominąć cache.
 6. **Sprawdź na żywo** wersję z Pages, potem zaktualizuj artefakt.
 7. **Po testach przywróć widok przeglądarki** do ustawienia „desktop”.
@@ -55,7 +61,7 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
 ## 4. Technologia
 
 - **GSAP 3.12.5 + ScrollTrigger** (cdnjs) do wszystkich animacji. Osie czasu są podpięte pod przewijanie (`scrub`).
-- **Lenis 1.1.13** (`lerp: .1`) działa wszędzie, tak jak w oryginale: od 1025 px z płynnym kółkiem, poniżej z `smoothWheel:false` i `syncTouch:false`. Telefon przewija się więc natywnie, ale strona może prowadzić przewijanie (dociąganie, `lock`). Instancja jest dostępna jako `window.__lenis`.
+- **Lenis 1.1.13** (`lerp: .1`) działa wszędzie, tak jak w oryginale: od 1025 px z płynnym kółkiem, poniżej z `smoothWheel:false` i `syncTouch:false`. Telefon przewija się natywnie; Lenis służy tam tylko do blokowania przewijania przy otwartym menu i skoków z menu. Instancja jest dostępna jako `window.__lenis`.
 - **Three.js r149** do spirali 3D (`GLCoil`):
   - geometria: `TubeGeometry` po helisie, materiał `MeshPhysicalMaterial`, otoczenie PMREM („ciemne studio z paskami softboxów”);
   - przyciemnianie od góry: shader `onBeforeCompile` z uniformami `uY`/`uW`/`uAmt`;
@@ -84,7 +90,7 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
 | Nagrody | plakaty 400svh, lista 250svh | Kolumny plakatów przesuwane zmiennymi `--progress`/`--scale`/`--spacing`; pary nazw na liście rozpisane co 1/6 osi |
 | Kontakt: tytuł | 500svh, margin −30svh | Wielki napis przesuwa się z prawej krawędzi do całkowitego zniknięcia z lewej (liniowo) |
 | Kontakt: formularz | 500svh (telefon 300), margin −250svh | Trzy ramki wjeżdżają z lewej (`--start` 1→0, quad in-out, co .1, scrub .5): u nas od formWrap+1,2 H przez 1,25 H (telefon od +0,9 H przez 1,1 H). Wygaszanie od formWrap+2,5 H do „dół kontaktu przy dole” (tylko desktop) |
-| Stopka | 350svh, margin −160svh (telefon −50svh) | Jedna oś przewijana od „góra przy górze” do „dół przy dole”: litery tytułu (1,1 s quart in-out, co .035), copyright przy .25, social przy .3+i/10, tagi na środku przy .2 (quart in-out, co .15), e-mail przy .75. **Nic ze stopki nie pojawia się, zanim formularz zgaśnie** |
+| Stopka | 350svh, margin −160svh (telefon −50svh) | Jedna oś przewijana od „góra przy górze” do „dół przy dole”: litery tytułu (oryginał 1,1 s quart in-out, co .035; u nas szybciej: .5 s, co .018), copyright przy .25, social przy .3+i/10, tagi na środku przy .2 (quart in-out, co .15), e-mail przy .75. **Nic ze stopki nie pojawia się, zanim formularz zgaśnie** |
 
 ### Telefon i tablet (do 1024 px; zmierzone w oryginale przy 375×812, 1rem = 14,5 px)
 
@@ -92,8 +98,8 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
 |---|---|
 | Nagłówek | Padding 1,25rem; przycisk 2,5rem z obwódką o kryciu .2; linia pod rzędem logo przez całą szerokość, krycie .2, rysuje się od lewej (1 s, od 600 px 1,5 s, opóźnienie .5 s); przycisk wpada z góry z obrotem −10° (1 s quart out) |
 | Menu | Strona gaśnie (.35 s), tło → `#DBDAD5` (.6 s); czarna scena ze spiralą kurczy się z całego ekranu do ramki pod nagłówkiem (.6 s quart in-out, rogi 4 px); biała karta z linkami odsłania się od góry (.65 s od .35 s); linki co 1/8 s od .45 s (napis wjeżdża, linia rośnie, czarne kółko ze strzałką się otwiera); adres na dole; zamykanie to odwrócenie 1,25× |
-| Intro | Tytuł, okno i tekst wyśrodkowane w pionie między nagłówkiem a paskami; okno 15rem (tablet 20rem), proporcja 260/160, marginesy 2,44/4,61 svh; tekst 16,25rem, .9375rem, wyjustowany z ostatnią linią, wcięcie 4,75em i 1,35em po pierwszym słowie. 4 paski (1 px, .25, .5, 2,5rem; odstępy 1,1875/1/.75rem) 3,5rem nad dołem; wjeżdżają od najniższego, zatrzymane na 75% |
-| Intro, przewijanie | Krawędzie okna otwierają się przez 75% zakresu (quad out), rogi znikają w ostatnich 25%; dociąganie jak w hero oryginału: >10%, prędkość <50 px/klatkę → do końca w `min(.25+|v/50−1|+|p−1|, 1,25)` s (telefon ×.75) |
+| Intro | Tytuł, okno i tekst wyśrodkowane w pionie między nagłówkiem a paskami; okno 15rem (tablet 20rem), proporcja 260/160, marginesy 2,44/4,61 svh; tekst 16,25rem, .9375rem, wyjustowany z ostatnią linią, wcięcie 4,75em i 1,35em po pierwszym słowie. 4 paski (1 px, .25, .5, 2,5rem; odstępy 1,1875/1/.75rem); w oryginale 3,5rem nad dołem, u nas przy samym dole (decyzja Grzegorza); wjeżdżają od najniższego, zatrzymane na 75% |
+| Intro, przewijanie | Krawędzie okna otwierają się przez 75% zakresu (quad out), rogi znikają w ostatnich 25%; dociąganie jak w hero oryginału (tylko mysz/gładzik): >10%, prędkość <50 px/klatkę → do końca w `min(.25+|v/50−1|+|p−1|, 1,25)` s |
 | Manifest | Tekst 2,25rem (tablet 2,875rem), interlinia 1, wyjustowany, wcięcie 15rem, góra na 20% ekranu; tylko 4 miniatury po 5rem (tablet 8), dół 5,5 svh |
 | „Wybrane realizacje”, „Nagrody” | Bez przypiętego toru: etykieta z lewej, tytuł z prawej (1,375rem, max 12,125rem; tablet 1,5625rem/1,16, max 18,75rem); odtwarzane raz po wejściu na ekran, 1,75× szybciej (etykieta z 3rem w prawo, tytuł z 3rem w lewo). Odstęp nad nagłówkiem i pod nim 6,25rem |
 | Karty | Wszystkie w ramce 374/464, tytuł 1,375rem; tagi schowane (pokazują się tylko po najechaniu, czyli na desktopie) |
@@ -139,7 +145,7 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
   | Manifest w oryginale, początek | > 20% | do końca | 2,5 s |
   | Manifest w oryginale, koniec | < 50% | z powrotem | 2 s |
 
-  U nas działa to na zdarzeniu `scroll` Lenisa: 180 ms po zatrzymaniu, tylko gdy nic nie jedzie automatycznie (`window.__autoScrolling`), z zabezpieczeniem czasowym na zdjęcie tej flagi. Od kiedy Lenis działa także na telefonie, dociąganie (intro, klienci, formularz, stopka) działa tam jak w oryginale.
+  U nas działa to na zdarzeniu `scroll` Lenisa: 180 ms po zatrzymaniu, tylko gdy nic nie jedzie automatycznie (`window.__autoScrolling`), z zabezpieczeniem czasowym na zdjęcie tej flagi. Wszystko to działa tylko z myszą lub gładzikiem (`carry = !coarse`); na ekranach dotykowych przewijanie jest w pełni natywne (decyzja z 9.10.2026, w oryginale działa też na telefonie).
 
 ### 6.4 Wzorce kodu
 - **Oś czasu znormalizowana do 1:** `tl.set({}, {}, 1)`. Pozycje elementów zapisujemy wtedy w procentach długości sekcji, a nie w sekundach.
@@ -171,6 +177,11 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
 | Litery tekstu intro w pionie, jedna pod drugą | `text-indent` dziedziczą elementy `inline-block` (słowa, litery) | `text-indent:0` na `.wd` i `.c` |
 | Automatycznie rozwinięty wiersz listy cofa stronę | Przewijanie do wiersza bez sprawdzenia, czy lista jest widoczna (po włączeniu Lenisa na telefonie) | Przewijać tylko przy liście na ekranie i bez innej jazdy, jak w oryginale |
 | Komentarz `//` na końcu linii zabił kod | Jedna linia zawierała dwie instrukcje | Komentarze w osobnej linii |
+| Telefon „muli” przy przewijaniu | Pasek adresu wywołuje `resize` (zmienia się tylko wysokość), a `relayout` robił `ScrollTrigger.refresh()` w trakcie przewijania; do tego automatyczna jazda z `lock` walczyła z palcem | Na dotyku `resize` tylko przy zmianie szerokości; bez automatycznej jazdy na dotyku |
+| Biały pasek pod intro na prawdziwym telefonie | Przypięte ekrany w `svh`, a po schowaniu paska adresu ekran jest wyższy | `height:100dvh` (z `svh` jako zapasem) dla intro, manifestu i stopki |
+| Menu → Kontakt: szare tło i ciemna spirala | Skok na górę sekcji wypada w środku przejścia koloru strony | Skok do końca wjazdu formularza (`window.__contactY`) |
+| Spirala kontaktu wystaje nad sekcję | Warstwa spirali jest stała i pokazuje się od 70% ekranu | `clip-path` warstwy przycięty do górnej krawędzi sekcji kontaktu |
+| Menu na desktopie ucina „Kontakt” przy 620 px | Rozmiar liter tylko od szerokości | `min(9,5vw, (100svh − 230px)/4,7)` |
 
 ## 8. Lista kontrolna przed oddaniem sekcji
 

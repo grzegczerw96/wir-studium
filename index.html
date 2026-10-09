@@ -76,7 +76,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 .menu.open{visibility:visible}
 html:not(.motion) .menu.open{clip-path:none}
 .menu-nav{display:grid;align-content:center;gap:clamp(4px,1vw,12px)}
-.menu-nav a{display:flex;align-items:baseline;gap:clamp(12px,2vw,28px);font:900 clamp(44px,9.5vw,148px)/.88 var(--wide);letter-spacing:-.045em;text-transform:uppercase;transition:opacity .35s,transform .5s cubic-bezier(.2,.8,.2,1);width:max-content;max-width:100%}
+/* (the size also follows the height, so all five links fit on a low screen: 1280×620 gave 121px and cut "Kontakt") */
+.menu-nav a{display:flex;align-items:baseline;gap:clamp(12px,2vw,28px);font:900 clamp(36px,min(9.5vw,(100svh - 230px)/4.7),148px)/.88 var(--wide);letter-spacing:-.045em;text-transform:uppercase;transition:opacity .35s,transform .5s cubic-bezier(.2,.8,.2,1);width:max-content;max-width:100%}
 .menu-nav a small{font:300 11px var(--mono);letter-spacing:.06em;opacity:.55;transform:translateY(-1.2em)}
 .menu-nav .w{display:inline-block;white-space:nowrap}
 .menu-nav .c{display:inline-block}
@@ -119,7 +120,8 @@ html:not(.motion) .menu.open{clip-path:none}
 
 /* ===== intro ===== */
 .intro{position:relative}
-.intro-pin{position:relative;height:100svh;min-height:600px;overflow:hidden;display:flex;flex-direction:column;padding:96px var(--gut) 0}
+/* dvh: on a phone the pinned screens follow the address bar, so nothing white shows under them when it slides away */
+.intro-pin{position:relative;height:100svh;height:100dvh;min-height:600px;overflow:hidden;display:flex;flex-direction:column;padding:96px var(--gut) 0}
 html.motion .intro{height:200svh}
 html.motion .intro-pin{position:sticky;top:0}
 .mega{margin:0;font-family:var(--wide);font-weight:900;font-stretch:125%;text-transform:uppercase;letter-spacing:-.045em;line-height:.84;text-align:center;font-size:var(--mega,18vw)}
@@ -143,13 +145,13 @@ html.motion .box{position:fixed}
 /* phones and tablets (the original's base layout): title, window and note form one group centred between the header
    and the four stripes; the window is 15rem (tablets 20rem) at 260/160, the note 16.25rem, justified on both edges */
 @media (max-width:1024px){
-  .intro-pin{padding:calc(var(--gut) + var(--r)*3.625 + env(safe-area-inset-top,0px)) var(--gut) calc(var(--r)*9.6875 + 1px)}
+  .intro-pin{padding:calc(var(--gut) + var(--r)*3.625 + env(safe-area-inset-top,0px)) var(--gut) calc(var(--r)*7.6875 + 1px)}
   .mega{margin-top:auto}
   .slot{width:calc(var(--r)*15);aspect-ratio:260/160;margin:2.44svh auto 4.61svh}
   .hero-note{margin:0 0 auto;width:calc(var(--r)*16.25);max-width:none;font-size:calc(var(--r)*.9375);line-height:1.2;text-align:justify;text-align-last:justify;text-indent:4.75em}
   .hero-note .wd,.hero-note .c{text-indent:0}
   .hero-note>span:first-child>.wd:first-child{margin-right:1.35em}
-  .stripes{bottom:calc(var(--r)*3.5);gap:0}
+  .stripes{bottom:0;gap:0}   /* flush with the bottom edge (the original leaves 3.5rem of white below; it read as a gap) */
   .stripes i:nth-child(4){display:none}
   .stripes i:nth-child(2){height:calc(var(--r)*.25);margin-top:calc(var(--r)*1.1875)}
   .stripes i:nth-child(3){height:calc(var(--r)*.5);margin-top:var(--r)}
@@ -167,7 +169,7 @@ html.motion .box{position:fixed}
 /* ===== manifesto (black room) ===== */
 .mani{position:relative;z-index:3;background:var(--ink);color:#f2f2f2}
 html.motion .mani{background:transparent}
-.mani-pin{position:relative;height:100svh;min-height:600px;overflow:hidden}
+.mani-pin{position:relative;height:100svh;height:100dvh;min-height:600px;overflow:hidden}
 html.motion .mani{height:647svh}   /* pinned for ~5.5 screens of scrolling */
 html.motion .mani-pin{position:sticky;top:0}
 .mani-txt{position:absolute;left:var(--gut);right:var(--gut);top:20%;z-index:2;margin:0;font:400 max(20px,3.2vw)/1 var(--serif);letter-spacing:-.01em;text-align:justify;text-align-last:left;text-indent:32%}
@@ -531,7 +533,7 @@ html.motion .tk-form-sticky{position:sticky;top:0;height:100svh;padding:calc(var
 .ft-wrap{display:flex;flex-direction:column;justify-content:space-between;gap:60px;padding:calc(var(--gut) + 55px) var(--gut) calc(var(--gut) + env(safe-area-inset-bottom,0px))}
 html.motion .footer{height:350svh;margin-top:-50svh}   /* phones/tablets, as in the original */
 @media (min-width:1025px){html.motion .footer{margin-top:-160svh}}
-html.motion .ft-wrap{position:sticky;top:0;height:100svh}
+html.motion .ft-wrap{position:sticky;top:0;height:100svh;height:100dvh}
 .ft-head{position:relative;display:flex;flex-direction:column;gap:32px;align-items:flex-start;width:100%}
 @media (min-width:1025px){.ft-head{flex-direction:row;justify-content:space-between;gap:0}}
 .ft-title{margin:0;font:900 calc(var(--r)*3.125)/.9 var(--grot);letter-spacing:-.04em;text-transform:uppercase}
@@ -1142,8 +1144,10 @@ html:not(.motion) .stage3{display:none}
   addEventListener('keydown',e=>{if(e.key==='Escape'&&menuOpen)closeMenu()});
   menu.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const f=[...menu.querySelectorAll('a')];const i=f.indexOf(document.activeElement);
     if(e.shiftKey&&i<=0){e.preventDefault();menuBtn.focus()}else if(!e.shiftKey&&i===f.length-1){e.preventDefault();menuBtn.focus()}});
-  menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));
-    const top=t.getBoundingClientRect().top+scrollY;
+  // ("Kontakt" lands where the form is complete, on black — as the original jumps into its start-a-project section —
+  //  not on the section's top, which is still the grey end of the page-colour change with the coil in the dark)
+  menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const h=a.getAttribute('href'),t=document.querySelector(h);
+    const top=h==='#contact'&&window.__contactY?window.__contactY():t.getBoundingClientRect().top+scrollY;
     if(window.__lenis)window.__lenis.scrollTo(top,{immediate:true,force:true});else window.scrollTo({top,behavior:'instant'});
     window.ScrollTrigger&&ScrollTrigger.update();
     hd.classList.remove('away');
@@ -1161,7 +1165,9 @@ html:not(.motion) .stage3{display:none}
   const relayout=()=>{fitAll();setStart();coils.forEach(c=>{c.size();if(reduce)c.draw(2.2)});if(window.ScrollTrigger)ScrollTrigger.refresh()};
   if(document.fonts)document.fonts.ready.then(relayout);
   addEventListener('load',relayout);
-  addEventListener('resize',relayout);
+  // (touch screens: the address bar sliding in and out fires resize with only the height changed — a full refresh then,
+  //  in the middle of a scroll, made the page stutter; only a new width re-measures)
+  {let lastW=innerWidth;addEventListener('resize',()=>{if(coarse&&innerWidth===lastW)return;lastW=innerWidth;relayout()})}
   // a late font can change the title or the note by a line, which moves the centred window: measure again then
   {let raf=0,first=true;const ro=new ResizeObserver(()=>{if(first){first=false;return}cancelAnimationFrame(raf);raf=requestAnimationFrame(relayout)});
    ro.observe(document.getElementById('mega'));ro.observe(document.querySelector('.hero-note'))}
@@ -1175,6 +1181,9 @@ html:not(.motion) .stage3{display:none}
   // so phones scroll natively while the page can still carry the scroll (auto-scroll, snapping) and lock it meanwhile
   let lenis=null;
   if(window.Lenis){lenis=new Lenis({lerp:.1,smoothWheel:isDesk(),syncTouch:false});lenis.on('scroll',ScrollTrigger.update);gsap.ticker.add(t=>lenis.raf(t*1000));window.__lenis=lenis}
+  // the page carries the scroll on its own (auto-scroll, snapping) only with a mouse or trackpad: on a touch screen a
+  // programmatic scroll fights the finger and the native momentum, and the lock stops the finger dead (felt as stutter)
+  const carry=!coarse;
 
   /* ---- header: hides while scrolling down, comes back on the way up (our addition: nothing runs under it); as in the
      original the hairline draws itself in and the button drops in on load; the middle shows which section you are in ---- */
@@ -1214,7 +1223,7 @@ html:not(.motion) .stage3{display:none}
   const redraw=st=>{setStart();const a=st.animation;if(!a)return;const p=a.progress();a.invalidate();a.progress(Math.min(1,p+.001)).progress(p)};
   const tl=gsap.timeline({scrollTrigger:{trigger:'#intro',start:'top top',end:'bottom bottom',scrub:.6,invalidateOnRefresh:true,onRefresh:redraw,
     onUpdate:st=>{const L=window.__lenis,p=st.progress;
-      if(!L||menuOpen||window.__autoScrolling||st.direction<=0||p<=.1||p>=.95||Math.abs(L.velocity)>=50)return;
+      if(!L||!carry||menuOpen||window.__autoScrolling||st.direction<=0||p<=.1||p>=.95||Math.abs(L.velocity)>=50)return;
       const v=Math.abs(L.velocity),dur=Math.min(.25+Math.abs(v/50-1)+Math.abs(p-1),1.25)*(isDesk()?1:.75);
       window.__autoScrolling=true;
       L.scrollTo(st.end,{duration:dur,lock:true,force:true,easing:v<25?quadIO:quadOut,onComplete:()=>{window.__autoScrolling=false}});
@@ -1412,7 +1421,7 @@ html:not(.motion) .stage3{display:none}
       // (the original reads the smooth scroller's own velocity in px per frame: below 50 it takes over; below 25 it
       //  eases in and out, faster than that it only eases out, so it carries on at your speed without a pause)
       const L=window.__lenis;
-      if(L&&!auto&&!window.__autoScrolling&&st.direction>0&&p>.15&&p<.95&&Math.abs(L.velocity)<50){
+      if(L&&carry&&!auto&&!window.__autoScrolling&&st.direction>0&&p>.15&&p<.95&&Math.abs(L.velocity)<50){
         const s=Math.abs(L.velocity);auto=window.__autoScrolling=true;const dur=Math.min(.5+Math.abs(s/50-1)+Math.abs(p-1),1.5);
         L.scrollTo(st.end,{duration:dur,lock:true,force:true,easing:s<25?(t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2):(t=>1-(1-t)*(1-t)),
           onComplete:()=>{auto=window.__autoScrolling=false}});
@@ -1483,10 +1492,15 @@ html:not(.motion) .stage3{display:none}
   const tkMob=()=>{const W=innerWidth,H=innerHeight,w=tkTitle.offsetWidth,g=remPx()*1.25;
     const p=Math.min(1,(W*.58-g+w)/(W+w)),tail=absTop(tkTitleWrap)+p*(tkTitleWrap.offsetHeight-H),f=absTop(tkFormWrap);
     const s=Math.max(f+.9*H,tail);return {s,e:Math.max(s+.5*H,Math.min(s+1.1*H,f+2*H))}};
-  const tkIn=gsap.timeline({scrollTrigger:{trigger:tkFormWrap,start:()=>isDesk()?'top+='+innerHeight*1.2+' top':tkMob().s,end:()=>isDesk()?'+='+innerHeight*1.25:tkMob().e,scrub:.5,invalidateOnRefresh:true}})
-    .fromTo(tkLines,{'--start':1},{'--start':0,ease:'power1.inOut',stagger:.1},0);
+  const tkIn=gsap.timeline({scrollTrigger:{trigger:tkFormWrap,start:()=>isDesk()?'top+='+innerHeight*1.2+' top':tkMob().s,end:()=>isDesk()?'+='+innerHeight*1.25:tkMob().e,scrub:isDesk()?.5:true,invalidateOnRefresh:true}})
+    .fromTo(tkLines,{'--start':1},{'--start':0,ease:'power1.inOut',stagger:.1},isDesk()?0:.1);
+  // phones: whatever is left of the line fades just before the first box comes in, so the two never share the screen
+  // (and the boxes follow the scroll without lag, so a quick flick up cannot leave them over the returning line)
+  if(!isDesk())tkIn.fromTo(tkTitle,{opacity:1},{opacity:0,duration:.1,ease:'none'},0);
   const P3={o:0,d:1,x:.5,y:.5,s:.65,t:Math.PI/10};
-  const cX=()=>innerWidth/2,cY=()=>{const pad=document.getElementById('tkTitleSticky').getBoundingClientRect?parseFloat(getComputedStyle(document.getElementById('tkTitleSticky')).paddingTop)||0:0;return isDesk()?pad+.5*(innerHeight-pad):innerHeight/2};
+  // the coil sits on the middle of the line (the line is centred below the sticky box's top padding)
+  const tkSticky=document.getElementById('tkTitleSticky');
+  const cX=()=>innerWidth/2,cY=()=>{const pad=parseFloat(getComputedStyle(tkSticky).paddingTop)||0;return pad+.5*(tkSticky.clientHeight-pad)};
   const plc=()=>{const p=document.getElementById('tkPlace'),st=document.getElementById('tkFormSticky');if(!isDesk()||!p.offsetWidth)return {x:innerWidth*1.1,y:cY()};
     return {x:p.offsetLeft+p.offsetWidth/2,y:p.offsetTop+p.offsetHeight/2}};
   const midEnd=()=>tkFormWrap.offsetTop+2.5*innerHeight;
@@ -1504,7 +1518,7 @@ html:not(.motion) .stage3{display:none}
      – inside the entry range past 10% → carried on until the whole form is in;
      – inside the fade-out range below 80% → carried back to where the form is whole (the footer slides back down);
      1.75 s, quad in-out; – inside the footer past 10% → carried on to the end of the page (2 s) */
-  if(window.__lenis){const L=window.__lenis,inS=tkIn.scrollTrigger,outS=tkOut.scrollTrigger;let snapT=0;
+  if(window.__lenis&&carry){const L=window.__lenis,inS=tkIn.scrollTrigger,outS=tkOut.scrollTrigger;let snapT=0;
     const snap=()=>{if(L.isScrolling||window.__autoScrolling)return;
       const y=L.scroll,pin=(y-inS.start)/(inS.end-inS.start),pout=(y-outS.start)/(outS.end-outS.start);let to=null;
       const fS=window.__ftST,pft=fS?(y-fS.start)/(fS.end-fS.start):0;
@@ -1516,8 +1530,12 @@ html:not(.motion) .stage3{display:none}
   gsap.timeline({scrollTrigger:{trigger:'#contact',start:()=>'top+='+midEnd()+' top',endTrigger:'#footer',end:()=>'bottom-='+innerHeight*1.75+' top',scrub:true,invalidateOnRefresh:true}})
     .fromTo(P3,{x:()=>plc().x,y:()=>plc().y,t:Math.PI/4},{x:()=>isDesk()?plc().x*.97:innerWidth,y:()=>isDesk()?plc().y:cY()*.825,t:Math.PI/2,duration:1,ease:'power4.inOut',immediateRender:false},0)
     .fromTo(P3,{s:()=>isDesk()?.6:.4},{s:()=>isDesk()?.85:.65,duration:.75,ease:'power1.inOut',immediateRender:false},.25);
+  // (the coil layer is cut at the contact section's top edge, so it never shows over the light end of "about")
+  const stage3=document.getElementById('stage3'),contactEl=document.getElementById('contact');let s3clip='';
   if(coil3)gsap.ticker.add(()=>{if(!visible.has(coil3))return;coil3.setPos(P3.x,P3.y);coil3.setPose(P3.t,P3.s*.62);coil3.setShade(P3.d,1.6-2.8*P3.d);
-    document.getElementById('stage3').style.opacity=P3.o});
+    stage3.style.opacity=P3.o;const top=Math.round(contactEl.getBoundingClientRect().top),c=top>0?`inset(${top}px 0 0 0)`:'none';
+    if(c!==s3clip){s3clip=c;stage3.style.clipPath=c}});
+  window.__contactY=()=>tkIn.scrollTrigger.end;
   /* footer (the original's timeline, scrubbed from the footer's top at the top to its bottom at the bottom — so nothing
      of it shows until the form has nearly faded): the title letters flip up one after another (1.1 quart in-out, .035
      apart), the copyright line at .25, the social lines at .3 + i/10, the centre tags rise at .2 (quart in-out, .15
@@ -1527,7 +1545,8 @@ html:not(.motion) .stage3{display:none}
   const ftCh=ftTitle.querySelectorAll('.ch');
   const ftLine=el=>{splitWords(el);el.style.perspective=Math.max(200,el.clientWidth)+'px';const ws=el.querySelectorAll('.fl');gsap.set(ws,{'--rx':'-90deg','--sy':1.5});return ws};
   const ftTl=gsap.timeline({scrollTrigger:{trigger:'#footer',start:'top top',end:'bottom bottom',scrub:true,invalidateOnRefresh:true}});
-  ftCh.forEach((c,i)=>ftTl.fromTo(c,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',immediateRender:true},.035*i));
+  // (faster than the original, at Grzegorz's request: .5 per letter, .018 apart, so the title is whole by half the track)
+  ftCh.forEach((c,i)=>ftTl.fromTo(c,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power4.inOut',immediateRender:true},.018*i));
   ftTl.fromTo(ftLine(document.querySelector('.ft-copy')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.25)
     .fromTo('.ft-tag',{'--p':1.1},{'--p':0,duration:1,ease:'power4.inOut',stagger:.15},.2)
     .fromTo(ftLine(document.getElementById('mail')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.75);
@@ -1541,7 +1560,10 @@ html:not(.motion) .stage3{display:none}
     flipOnView(pr.querySelector('.pr-t'),pr,0);
   });
   // on phones and tablets the first row opens by itself once the list is in view
-  if(!isDesk())ScrollTrigger.create({trigger:rowsEl,start:'top 70%',once:true,onEnter:()=>setTimeout(()=>{if(!openPr)openRow(prs[0])},600)});
+  // (only if the list is still on screen by then — a jump past it must not grow the page above you)
+  if(!isDesk()){let used=false;const tryOpen=()=>setTimeout(()=>{const r=rowsEl.getBoundingClientRect();
+      if(used||openPr||r.bottom<0||r.top>innerHeight)return;used=true;openRow(prs[0])},600);
+    ScrollTrigger.create({trigger:rowsEl,start:'top 70%',end:'bottom top',onEnter:tryOpen,onEnterBack:tryOpen})}
 
 })();
 </script>
