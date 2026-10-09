@@ -777,9 +777,9 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
   if(fluids.length)gsap.ticker.add(()=>fluids.forEach(f=>{if(f.st.visible)f.draw()}));
 
   // transition: measured on the original at 800px screen height, from the moment the thumbnails are gone (S0):
-  //  S0 → +1.5 screens: label slides in from the right, title from the left (43px, quad out);
+  //  S0 → +1.15 screens: label slides in from the right, title from the left (43px, quad out);
   //  S0+.02 → +.52: the label's pill opens from its middle and both texts flip up (quart in-out);
-  //  hold until +2.25; +2.25 → +3.25: they part again and fade (label left, title right).
+  //  hold until +2.2; +2.2 → +3.2: they part again and fade (label left, title right).
   //  The coil sinks into the dark from S0-.95 to S0+2.25 (quad in-out); cards rise from the bottom at +2.5.
   const wiL=document.querySelector('.wi-l'),wiT=document.querySelector('.wi-t');
   splitWords(wiT);splitWords(document.querySelector('.wi-lt'));
@@ -788,13 +788,13 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
   const wtl=gsap.timeline({defaults:{ease:'none'},scrollTrigger:{trigger:'#wi',start:'top top',end:()=>'+='+innerHeight*3.25,scrub:true,invalidateOnRefresh:true}});
   const vh=1/3.25;
   wtl.set({},{},1)
-    .fromTo(wiL,{x:sx},{x:0,duration:1.5*vh,ease:'power1.out'},0)
-    .fromTo(wiT,{x:()=>-sx()},{x:0,duration:1.5*vh,ease:'power1.out'},0)
+    .fromTo(wiL,{x:sx},{x:0,duration:1.15*vh,ease:'power1.out'},0)
+    .fromTo(wiT,{x:()=>-sx()},{x:0,duration:1.15*vh,ease:'power1.out'},0)
     .fromTo(wiL,{'--p':'50%',opacity:0},{'--p':'0%',opacity:1,duration:.5*vh,ease:'power4.inOut'},.02*vh)
     .fromTo(wiLw,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5*vh,ease:'power4.inOut'},.04*vh)
     .fromTo(wiWords,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5*vh,ease:'power4.inOut',stagger:{each:.012*vh}},.04*vh)
-    .to(wiL,{x:()=>-sx(),opacity:0,duration:1*vh,ease:'power1.inOut'},2.25*vh)
-    .to(wiT,{x:sx,opacity:0,duration:1*vh,ease:'power1.inOut'},2.25*vh);
+    .to(wiL,{x:()=>-sx(),opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh)
+    .to(wiT,{x:sx,opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh);
   const shade={v:0};
   gsap.to(shade,{v:1,ease:'power1.inOut',onUpdate:()=>coils[0].setDark&&coils[0].setDark(shade.v),
     scrollTrigger:{trigger:'#wi',start:'top 95%',end:'top -225%',scrub:true}});
