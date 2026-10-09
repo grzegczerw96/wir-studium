@@ -1290,13 +1290,14 @@ html:not(.motion) .stage3{display:none}
   /* snapping, as in the original: once you stop scrolling (not dragging, not auto-scrolling)
      – inside the entry range past 10% → carried on until the whole form is in;
      – inside the fade-out range below 80% → carried back to where the form is whole (the footer slides back down);
-     1.75 s, quad in-out */
+     1.75 s, quad in-out; – inside the footer past 10% → carried on to the end of the page (2 s) */
   if(window.__lenis){const L=window.__lenis,inS=tkIn.scrollTrigger,outS=tkOut.scrollTrigger;let snapT=0;
     const snap=()=>{if(L.isScrolling||window.__autoScrolling)return;
       const y=L.scroll,pin=(y-inS.start)/(inS.end-inS.start),pout=(y-outS.start)/(outS.end-outS.start);let to=null;
-      if(pin>.1&&pin<.995)to=inS.end;else if(pout>.005&&pout<.8)to=outS.start;
+      const fS=window.__ftST,pft=fS?(y-fS.start)/(fS.end-fS.start):0;
+      if(pin>.1&&pin<.995)to=inS.end;else if(pout>.005&&pout<.8)to=outS.start;else if(fS&&pft>.1&&pft<.995)to=fS.end;
       if(to===null)return;window.__autoScrolling=true;
-      L.scrollTo(to,{duration:1.75,lock:true,force:true,easing:t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2,onComplete:()=>{window.__autoScrolling=false}});
+      L.scrollTo(to,{duration:to===(window.__ftST&&window.__ftST.end)?2:1.75,lock:true,force:true,easing:t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2,onComplete:()=>{window.__autoScrolling=false}});
       setTimeout(()=>{window.__autoScrolling=false},2150)};
     L.on('scroll',()=>{clearTimeout(snapT);if(!window.__autoScrolling)snapT=setTimeout(snap,180)})}
   gsap.timeline({scrollTrigger:{trigger:'#contact',start:()=>'top+='+midEnd()+' top',endTrigger:'#footer',end:()=>'bottom-='+innerHeight*1.75+' top',scrub:true,invalidateOnRefresh:true}})
@@ -1304,13 +1305,22 @@ html:not(.motion) .stage3{display:none}
     .fromTo(P3,{s:()=>isDesk()?.6:.4},{s:()=>isDesk()?.85:.65,duration:.75,ease:'power1.inOut',immediateRender:false},.25);
   if(coil3)gsap.ticker.add(()=>{if(!visible.has(coil3))return;coil3.setPos(P3.x,P3.y);coil3.setPose(P3.t,P3.s*.62);coil3.setShade(P3.d,1.6-2.8*P3.d);
     document.getElementById('stage3').style.opacity=P3.o});
-  // footer title letters flip in; the small centre tags rise
+  /* footer (the original's timeline, scrubbed from the footer's top at the top to its bottom at the bottom — so nothing
+     of it shows until the form has nearly faded): the title letters flip up one after another (1.1 quart in-out, .035
+     apart), the copyright line at .25, the social lines at .3 + i/10, the centre tags rise at .2 (quart in-out, .15
+     apart), the address at .75 */
   const ftTitle=document.getElementById('ftTitle');
   ftTitle.querySelectorAll('.ab-ln').forEach(l=>{l.innerHTML=[...l.textContent].map(c=>c===' '?' ':`<span class="ch">${c}</span>`).join('')});
-  const ftCh=ftTitle.querySelectorAll('.ch');gsap.set(ftCh,{'--rx':'-90deg','--sy':1.5});gsap.set('.ft-tag',{'--p':1.1});
-  ScrollTrigger.create({trigger:'#ftWrap',start:'top 60%',once:true,onEnter:()=>{
-    gsap.to(ftCh,{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',stagger:.035});
-    gsap.to('.ft-tag',{'--p':0,duration:.5,ease:'power1.out',stagger:.12,delay:.4})}});
+  const ftCh=ftTitle.querySelectorAll('.ch');
+  const ftLine=el=>{splitWords(el);el.style.perspective=Math.max(200,el.clientWidth)+'px';const ws=el.querySelectorAll('.fl');gsap.set(ws,{'--rx':'-90deg','--sy':1.5});return ws};
+  const ftTl=gsap.timeline({scrollTrigger:{trigger:'#footer',start:'top top',end:'bottom bottom',scrub:true,invalidateOnRefresh:true}});
+  ftCh.forEach((c,i)=>ftTl.fromTo(c,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',immediateRender:true},.035*i));
+  ftTl.fromTo(ftLine(document.querySelector('.ft-copy')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.25)
+    .fromTo('.ft-tag',{'--p':1.1},{'--p':0,duration:1,ease:'power4.inOut',stagger:.15},.2)
+    .fromTo(ftLine(document.getElementById('mail')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.75);
+  [document.querySelector('.ft-label'),...document.querySelectorAll('.ft-links a')].forEach((el,i)=>
+    ftTl.fromTo(ftLine(el),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.3+i/10));
+  window.__ftST=ftTl.scrollTrigger;
 
   // project rows: lines grow from the middle, tags slide up (rightmost first), the title flips in
   prs.forEach(pr=>{
