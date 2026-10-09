@@ -1268,9 +1268,9 @@ html:not(.motion) .stage3{display:none}
     .fromTo('#tkTitle',{'--p':0},{'--p':1,ease:'none'});
   const tkLines=[...document.querySelectorAll('.tk-line')],tkFormWrap=document.getElementById('tkFormWrap'),tkForm=document.getElementById('tkForm');
   // entry: the original starts when the form track reaches the top (title still ~60% through) and runs two screens;
-  // here it starts 1.0 screen later, when the title's tail is half way across, and runs 1.4 screens, so the first box
-  // only shows once the line has left — and it is complete before the fade-out range begins
-  const tkIn=gsap.timeline({scrollTrigger:{trigger:tkFormWrap,start:()=>'top+='+innerHeight+' top',end:'+=140%',scrub:.5,invalidateOnRefresh:true}})
+  // here it starts 1.2 screens later, when the title's tail is a quarter of the way in from the left, and runs 1.25
+  // screens, so the first box only shows as the line leaves — and it is complete before the fade-out range begins
+  const tkIn=gsap.timeline({scrollTrigger:{trigger:tkFormWrap,start:()=>'top+='+innerHeight*1.2+' top',end:'+=125%',scrub:.5,invalidateOnRefresh:true}})
     .fromTo(tkLines,{'--start':1},{'--start':0,ease:'power1.inOut',stagger:.1},0);
   const P3={o:0,d:1,x:.5,y:.5,s:.65,t:Math.PI/10};
   const cX=()=>innerWidth/2,cY=()=>{const pad=document.getElementById('tkTitleSticky').getBoundingClientRect?parseFloat(getComputedStyle(document.getElementById('tkTitleSticky')).paddingTop)||0:0;return isDesk()?pad+.5*(innerHeight-pad):innerHeight/2};
