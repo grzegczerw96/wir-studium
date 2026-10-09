@@ -1,7 +1,7 @@
 # Wir Studio: studium animacji i przewodnik budowania stron z ruchem
 
 Ten plik czyta Claude na początku każdej sesji w tym repozytorium. Jest też notatką dla Grzegorza: jak budujemy takie strony i co sprawia, że wyglądają profesjonalnie.
-Stan na 9.10.2026, ostatnie zmiany: stopka, formularz kontaktowy, wersja na telefon.
+Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375×812) i przeniesiona sekcja po sekcji, menu na telefon jak w oryginale, wspólna jednostka `--r`.
 
 ---
 
@@ -27,6 +27,9 @@ Stan na 9.10.2026, ostatnie zmiany: stopka, formularz kontaktowy, wersja na tele
   - formularz kontaktowy wjeżdża później niż w cappen, dopiero gdy wielki napis prawie zniknął;
   - spirala przed kontaktem zaczyna się pojawiać od 70% wysokości ekranu (nasza warstwa spirali leży nad białą sekcją);
   - brak kursora „DISCOVER” i brak dociągania w manifeście.
+- **Nasze dodatki, których oryginał nie ma** (zostawione celowo, do decyzji Grzegorza):
+  - nagłówek chowa się przy przewijaniu w dół, bo inaczej tekst sekcji przejeżdża pod logo i przyciskiem;
+  - na telefonie formularz kontaktowy startuje od położenia ogona wielkiego napisu (patrz §5), a nie od stałego progu.
 - **Fonty jak w oryginale:**
   - Inter Tight w roli Helvetica Now Display;
   - Instrument Serif w roli kroju szeryfowego;
@@ -40,7 +43,7 @@ Stan na 9.10.2026, ostatnie zmiany: stopka, formularz kontaktowy, wersja na tele
    - **Panel przeglądarki musi być widoczny.** Gdy jest schowany, `requestAnimationFrame` staje: preloader oryginału się nie kończy, a skrypty czekające na klatki wiszą.
 2. **Zmień `index.html`.** Cała strona to jeden plik: HTML, CSS i JS razem.
 3. **Sprawdź składnię:** wytnij skrypt inline i uruchom `node --check`.
-4. **Test lokalny w Playwright** (Chromium, `--use-gl=swiftshader`), z kopią strony, w której biblioteki z CDN są podmienione na lokalne pliki. Testuj:
+4. **Test lokalny w Playwright** (Chromium, `--use-gl=swiftshader`), z kopią strony, w której biblioteki z CDN są podmienione na lokalne pliki. Na komputerze Grzegorza (Windows 10, Python 3.8): `pip install --target <scratchpad>/pw playwright==1.47.0`; pobrany Chromium Playwrighta nie startuje (błąd „konfiguracja równoczesna”), więc uruchamiaj zainstalowany Chrome przez `channel='chrome'`. W przeglądarce aplikacji system ma włączone ograniczanie ruchu: na naszej stronie ustaw `localStorage['wir-motion']='on'`. Testuj:
    - prawdziwymi ruchami kółka (`page.mouse.wheel`), a nie tylko skokami;
    - na desktopie 1280×620;
    - na telefonie 375×812 (`is_mobile`, `has_touch`);
@@ -52,17 +55,19 @@ Stan na 9.10.2026, ostatnie zmiany: stopka, formularz kontaktowy, wersja na tele
 ## 4. Technologia
 
 - **GSAP 3.12.5 + ScrollTrigger** (cdnjs) do wszystkich animacji. Osie czasu są podpięte pod przewijanie (`scrub`).
-- **Lenis 1.1.13** (`lerp: .1`) do płynnego przewijania, tylko na desktopie z myszą. Instancja jest dostępna jako `window.__lenis`, a na telefonie przewijanie jest natywne. Oryginał używa Lenisa z tymi samymi ustawieniami.
+- **Lenis 1.1.13** (`lerp: .1`) działa wszędzie, tak jak w oryginale: od 1025 px z płynnym kółkiem, poniżej z `smoothWheel:false` i `syncTouch:false`. Telefon przewija się więc natywnie, ale strona może prowadzić przewijanie (dociąganie, `lock`). Instancja jest dostępna jako `window.__lenis`.
 - **Three.js r149** do spirali 3D (`GLCoil`):
   - geometria: `TubeGeometry` po helisie, materiał `MeshPhysicalMaterial`, otoczenie PMREM („ciemne studio z paskami softboxów”);
   - przyciemnianie od góry: shader `onBeforeCompile` z uniformami `uY`/`uW`/`uAmt`;
   - API: `draw`, `size`, `setDark(v)`, `setShade(amt,y)`, `setPose(tilt,scale)`, `setPos(px,py)`, `kick`;
   - trzy instancje: intro i manifest (stała warstwa), okno klientów, kontakt i stopka (stała warstwa `.stage3`).
 - **Obrazy z efektem cieczy** (`Fluid`): mały quad WebGL z kadrowaniem typu cover (`uScale .75`), paralaksą w pionie i soczewką na wejściu (5 → 0).
-- **Jednostka płynna `--r`** odpowiada `rem` oryginału:
+- **Jednostka płynna `--r`** (na `:root`) odpowiada `rem` oryginału:
   - `min(1.111vw, 2.556vh)` na desktopie;
-  - `2.083vw` na tablecie;
+  - `2.083vw` na tablecie (600–1024 px);
   - `3.865vw` na telefonie.
+  - Margines strony `--gut` = `1.25 × --r`, jak `--global-padding` oryginału, na każdej szerokości. W px w JS: `remPx()`.
+  - Progi jak w oryginale: telefon do 599 px, tablet 600–1024 px, desktop od 1025 px. Większość układu telefonu w oryginale dotyczy całego zakresu do 1024 px.
 - **Wysokości sekcji** podajemy w `svh` („ile ekranów przewijania”), a sekcje przypinamy przez `position:sticky`, bez pinów GSAP.
 
 ## 5. Mapa strony i pomiary (desktop, H = wysokość ekranu)
@@ -80,6 +85,23 @@ Stan na 9.10.2026, ostatnie zmiany: stopka, formularz kontaktowy, wersja na tele
 | Kontakt: tytuł | 500svh, margin −30svh | Wielki napis przesuwa się z prawej krawędzi do całkowitego zniknięcia z lewej (liniowo) |
 | Kontakt: formularz | 500svh (telefon 300), margin −250svh | Trzy ramki wjeżdżają z lewej (`--start` 1→0, quad in-out, co .1, scrub .5): u nas od formWrap+1,2 H przez 1,25 H (telefon od +0,9 H przez 1,1 H). Wygaszanie od formWrap+2,5 H do „dół kontaktu przy dole” (tylko desktop) |
 | Stopka | 350svh, margin −160svh (telefon −50svh) | Jedna oś przewijana od „góra przy górze” do „dół przy dole”: litery tytułu (1,1 s quart in-out, co .035), copyright przy .25, social przy .3+i/10, tagi na środku przy .2 (quart in-out, co .15), e-mail przy .75. **Nic ze stopki nie pojawia się, zanim formularz zgaśnie** |
+
+### Telefon i tablet (do 1024 px; zmierzone w oryginale przy 375×812, 1rem = 14,5 px)
+
+| Element | Oryginał (i u nas) |
+|---|---|
+| Nagłówek | Padding 1,25rem; przycisk 2,5rem z obwódką o kryciu .2; linia pod rzędem logo przez całą szerokość, krycie .2, rysuje się od lewej (1 s, od 600 px 1,5 s, opóźnienie .5 s); przycisk wpada z góry z obrotem −10° (1 s quart out) |
+| Menu | Strona gaśnie (.35 s), tło → `#DBDAD5` (.6 s); czarna scena ze spiralą kurczy się z całego ekranu do ramki pod nagłówkiem (.6 s quart in-out, rogi 4 px); biała karta z linkami odsłania się od góry (.65 s od .35 s); linki co 1/8 s od .45 s (napis wjeżdża, linia rośnie, czarne kółko ze strzałką się otwiera); adres na dole; zamykanie to odwrócenie 1,25× |
+| Intro | Tytuł, okno i tekst wyśrodkowane w pionie między nagłówkiem a paskami; okno 15rem (tablet 20rem), proporcja 260/160, marginesy 2,44/4,61 svh; tekst 16,25rem, .9375rem, wyjustowany z ostatnią linią, wcięcie 4,75em i 1,35em po pierwszym słowie. 4 paski (1 px, .25, .5, 2,5rem; odstępy 1,1875/1/.75rem) 3,5rem nad dołem; wjeżdżają od najniższego, zatrzymane na 75% |
+| Intro, przewijanie | Krawędzie okna otwierają się przez 75% zakresu (quad out), rogi znikają w ostatnich 25%; dociąganie jak w hero oryginału: >10%, prędkość <50 px/klatkę → do końca w `min(.25+|v/50−1|+|p−1|, 1,25)` s (telefon ×.75) |
+| Manifest | Tekst 2,25rem (tablet 2,875rem), interlinia 1, wyjustowany, wcięcie 15rem, góra na 20% ekranu; tylko 4 miniatury po 5rem (tablet 8), dół 5,5 svh |
+| „Wybrane realizacje”, „Nagrody” | Bez przypiętego toru: etykieta z lewej, tytuł z prawej (1,375rem, max 12,125rem; tablet 1,5625rem/1,16, max 18,75rem); odtwarzane raz po wejściu na ekran, 1,75× szybciej (etykieta z 3rem w prawo, tytuł z 3rem w lewo). Odstęp nad nagłówkiem i pod nim 6,25rem |
+| Karty | Wszystkie w ramce 374/464, tytuł 1,375rem; tagi schowane (pokazują się tylko po najechaniu, czyli na desktopie) |
+| Lista projektów | Wiersz 1,875rem góra/dół, tytuł .9375rem, rok w mono .625rem po prawej; rozwinięcie: tekst i link do prawej. Przewinięcie do wiersza tylko wtedy, gdy lista jest na ekranie |
+| O nas | Środkowe zdjęcie 339/508; tytuł 4rem łamany między słowami (wiersze to rzędy słów z odstępem .625rem); kolor strony kończy przejście, gdy góra sekcji jest 30% nad ekranem |
+| Nagrody | Tylko pierwsza kolumna plakatów (padding 2,3125rem, odstęp 2,5rem; tablet 30rem), sekcja 12,5rem pod klientami; każda nazwa odtwarza się sama po wejściu na ekran |
+| Kontakt | Napis 7,5rem (tablet 12,5rem). Formularz rusza, gdy ogon napisu jest 42% od lewej, i kończy wjazd przed końcem toru formularza (`tkMob()`) |
+| Stopka | Lista social po prawej na 77% wysokości głowy (5,25rem, tablet 7,5rem); copyright, tagi i adres jeden pod drugim na środku (.609rem, tablet .625rem) |
 
 ## 6. Jak budować profesjonalne strony z ruchem (przewodnik)
 
@@ -117,7 +139,7 @@ Stan na 9.10.2026, ostatnie zmiany: stopka, formularz kontaktowy, wersja na tele
   | Manifest w oryginale, początek | > 20% | do końca | 2,5 s |
   | Manifest w oryginale, koniec | < 50% | z powrotem | 2 s |
 
-  U nas działa to na zdarzeniu `scroll` Lenisa: 180 ms po zatrzymaniu, tylko gdy nic nie jedzie automatycznie (`window.__autoScrolling`), z zabezpieczeniem czasowym na zdjęcie tej flagi.
+  U nas działa to na zdarzeniu `scroll` Lenisa: 180 ms po zatrzymaniu, tylko gdy nic nie jedzie automatycznie (`window.__autoScrolling`), z zabezpieczeniem czasowym na zdjęcie tej flagi. Od kiedy Lenis działa także na telefonie, dociąganie (intro, klienci, formularz, stopka) działa tam jak w oryginale.
 
 ### 6.4 Wzorce kodu
 - **Oś czasu znormalizowana do 1:** `tl.set({}, {}, 1)`. Pozycje elementów zapisujemy wtedy w procentach długości sekcji, a nie w sekundach.
@@ -144,6 +166,11 @@ Stan na 9.10.2026, ostatnie zmiany: stopka, formularz kontaktowy, wersja na tele
 | Teksty po bokach spirali „podjeżdżają” przy gaśnięciu | Sticky puszczał za wcześnie | Osobny tor `.wi-track` 385svh |
 | Skrypty w panelu wiszą, preloader oryginału stoi | Schowany panel przeglądarki zatrzymuje `requestAnimationFrame` | Panel na wierzchu przy pomiarach, nasza strona testowana w Playwright |
 | Przejścia CSS „nie działają” w pomiarach | Ten sam powód (schowany panel) | Czytać wartości inline, nie obliczone style |
+| Biały pasek 8 px wokół czarnych sekcji (Pages) | Brak `body{margin:0}` | Reset marginesu |
+| Okno intro 20–40 px niżej niż jego miejsce, zasłania tekst | Font dochodzi później i zmienia wysokość grupy; `ScrollTrigger.refresh()` w spoczynku nie przerysowuje osi z `scrub` | `ResizeObserver` na tytule i tekście; w `onRefresh`: `invalidate()` i drobne przesunięcie `progress` |
+| Litery tekstu intro w pionie, jedna pod drugą | `text-indent` dziedziczą elementy `inline-block` (słowa, litery) | `text-indent:0` na `.wd` i `.c` |
+| Automatycznie rozwinięty wiersz listy cofa stronę | Przewijanie do wiersza bez sprawdzenia, czy lista jest widoczna (po włączeniu Lenisa na telefonie) | Przewijać tylko przy liście na ekranie i bez innej jazdy, jak w oryginale |
+| Komentarz `//` na końcu linii zabił kod | Jedna linia zawierała dwie instrukcje | Komentarze w osobnej linii |
 
 ## 8. Lista kontrolna przed oddaniem sekcji
 
