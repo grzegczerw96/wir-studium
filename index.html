@@ -1538,20 +1538,24 @@ html:not(.motion) .stage3{display:none}
   window.__contactY=()=>tkIn.scrollTrigger.end;
   /* footer (the original's timeline, scrubbed from the footer's top at the top to its bottom at the bottom — so nothing
      of it shows until the form has nearly faded): the title letters flip up one after another (1.1 quart in-out, .035
-     apart), the copyright line at .25, the social lines at .3 + i/10, the centre tags rise at .2 (quart in-out, .15
-     apart), the address at .75 */
+     apart), the copyright line at .25, the social lines at .3 + i×.11, the centre tags rise at .27 (quart in-out, .15
+     apart), the address at .8; lines .35 each (fitted to the measured curves below) */
   const ftTitle=document.getElementById('ftTitle');
   ftTitle.querySelectorAll('.ab-ln').forEach(splitTitle);
   const ftCh=ftTitle.querySelectorAll('.ch');
   const ftLine=el=>{splitWords(el);el.style.perspective=Math.max(200,el.clientWidth)+'px';const ws=el.querySelectorAll('.fl');gsap.set(ws,{'--rx':'-90deg','--sy':1.5});return ws};
+  /* measured in the original with Playwright, frame by frame (1280×620, position in screens from the footer's top at
+     the top): letters move from .2, the first is whole at .6, every next one ~.03 later; copyright .35–.75, social
+     .42–1.5, tags .5–1.6, address 1.0–1.4, then nothing until the end (2.5). That is one timeline unit = 1.2 screens,
+     so the timeline is fixed at 2.08 units (2.5 screens). Each letter: .69 units, .025 apart (= .83 / .03 screens). */
   const ftTl=gsap.timeline({scrollTrigger:{trigger:'#footer',start:'top top',end:'bottom bottom',scrub:true,invalidateOnRefresh:true}});
-  // (faster than the original, at Grzegorz's request: .5 per letter, .018 apart, so the title is whole by half the track)
-  ftCh.forEach((c,i)=>ftTl.fromTo(c,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power4.inOut',immediateRender:true},.018*i));
-  ftTl.fromTo(ftLine(document.querySelector('.ft-copy')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.25)
-    .fromTo('.ft-tag',{'--p':1.1},{'--p':0,duration:1,ease:'power4.inOut',stagger:.15},.2)
-    .fromTo(ftLine(document.getElementById('mail')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.75);
+  ftTl.set({},{},2.08);
+  ftCh.forEach((c,i)=>ftTl.fromTo(c,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.69,ease:'power4.inOut',immediateRender:true},.025*i));
+  ftTl.fromTo(ftLine(document.querySelector('.ft-copy')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.35,ease:'power1.inOut'},.25)
+    .fromTo('.ft-tag',{'--p':1.1},{'--p':0,duration:1,ease:'power4.inOut',stagger:.15},.27)
+    .fromTo(ftLine(document.getElementById('mail')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.35,ease:'power1.inOut'},.8);
   [document.querySelector('.ft-label'),...document.querySelectorAll('.ft-links a')].forEach((el,i)=>
-    ftTl.fromTo(ftLine(el),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.3+i/10));
+    ftTl.fromTo(ftLine(el),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.35,ease:'power1.inOut'},.3+i*.11));
   window.__ftST=ftTl.scrollTrigger;
 
   // project rows: lines grow from the middle, tags slide up (rightmost first), the title flips in

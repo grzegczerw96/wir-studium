@@ -33,7 +33,6 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
 - **Zmiany po uwagach Grzegorza z 9.10.2026** (odstępstwa od oryginału wynikające z jego uwag; nie cofać bez pytania):
   - paski w intro na telefonie przylegają do dolnej krawędzi (w oryginale jest pod nimi 3,5rem bieli);
   - na ekranach dotykowych strona sama nie przewija (bez dociągania w intro i u klientów, bez przyciągania formularza i stopki), bo walczy to z palcem i pędem;
-  - tytuł stopki składa się szybciej niż w oryginale (litera .5 s, co .018, gotowy w połowie toru);
   - „Kontakt” w menu prowadzi do gotowego formularza, a nie na górę sekcji (tam jest szare przejście koloru).
 - **Fonty jak w oryginale:**
   - Inter Tight w roli Helvetica Now Display;
@@ -53,6 +52,7 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
    - na desktopie 1280×620;
    - na telefonie 375×812 (`is_mobile`, `has_touch`);
    - brak przewijania w poziomie i brak błędów w konsoli.
+   - **Pomiar oryginału bez panelu:** skrypt `probe.py` (Playwright z zainstalowanym Chrome) otwiera cappen albo naszą stronę, przewija do zadanych miejsc i wykonuje JS. W cappen przed pomiarem `window.main.scroller.stop()` (jego przyciąganie zwraca wtedy bieżącą pozycję), u nas `__autoScrolling` na stałe `true`. Litery oryginału mają `--rotateX` w `style`, nasze `--rx`. Liczby porównuje się w ekranach od początku sekcji.
    - **Filmy Grzegorza** (`.mp4`): brak ffmpeg; klatki wyciąga zainstalowany Chrome przez Playwright (strona z `<video>` ładowana jako plik, przewijanie `currentTime`, zrzut), a kilka klatek składa się w jeden arkusz.
 5. **Commit** jako `grzegczerw96 <greg.wolwlod@gmail.com>`, z opisem po polsku. Push na `main`, GitHub Pages aktualizuje się po ok. 1 minucie. Przy sprawdzaniu dopisz do adresu `?v=<hash>`, żeby ominąć cache.
 6. **Sprawdź na żywo** wersję z Pages, potem zaktualizuj artefakt.
@@ -90,7 +90,7 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
 | Nagrody | plakaty 400svh, lista 250svh | Kolumny plakatów przesuwane zmiennymi `--progress`/`--scale`/`--spacing`; pary nazw na liście rozpisane co 1/6 osi |
 | Kontakt: tytuł | 500svh, margin −30svh | Wielki napis przesuwa się z prawej krawędzi do całkowitego zniknięcia z lewej (liniowo) |
 | Kontakt: formularz | 500svh (telefon 300), margin −250svh | Trzy ramki wjeżdżają z lewej (`--start` 1→0, quad in-out, co .1, scrub .5): u nas od formWrap+1,2 H przez 1,25 H (telefon od +0,9 H przez 1,1 H). Wygaszanie od formWrap+2,5 H do „dół kontaktu przy dole” (tylko desktop) |
-| Stopka | 350svh, margin −160svh (telefon −50svh) | Jedna oś przewijana od „góra przy górze” do „dół przy dole”: litery tytułu (oryginał 1,1 s quart in-out, co .035; u nas szybciej: .5 s, co .018), copyright przy .25, social przy .3+i/10, tagi na środku przy .2 (quart in-out, co .15), e-mail przy .75. **Nic ze stopki nie pojawia się, zanim formularz zgaśnie** |
+| Stopka | 350svh, margin −160svh (telefon −50svh) | Jedna oś przewijana od „góra przy górze” do „dół przy dole”, zmierzona klatka po klatce w Playwright (pozycja w ekranach od góry stopki): litery ruszają od .2, pierwsza gotowa przy .6, każda następna ok. .03 później; copyright .35–.75, social .42–1.5, tagi .5–1.6, e-mail 1.0–1.4, potem nic do 2.5. Jednostka osi = 1,2 ekranu, więc oś ustalona na 2,08 (litera .69 co .025, linie .35). Dawne „1,1 s co .035” dawało litery 2× za wolne, copyright przy .25, social przy .3+i/10, tagi na środku przy .2 (quart in-out, co .15), e-mail przy .75. **Nic ze stopki nie pojawia się, zanim formularz zgaśnie** |
 
 ### Telefon i tablet (do 1024 px; zmierzone w oryginale przy 375×812, 1rem = 14,5 px)
 
