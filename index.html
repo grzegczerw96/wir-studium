@@ -437,7 +437,7 @@ html.motion .ft-wrap{position:sticky;top:0;height:100svh}
 .ft-head{position:relative;display:flex;flex-direction:column;gap:32px;align-items:flex-start;width:100%}
 @media (min-width:1025px){.ft-head{flex-direction:row;justify-content:space-between;gap:0}}
 .ft-title{margin:0;font:900 calc(var(--r)*3.125)/.8 var(--grot);letter-spacing:-.04em;text-transform:uppercase}
-.ft-title .ab-ln{display:block;white-space:nowrap;perspective:calc(var(--r)*31.25)}
+.ft-title .ab-ln{display:block;white-space:nowrap;margin:0;perspective:calc(var(--r)*31.25)}   /* left-aligned, as in the original */
 .ft-title .ch{display:inline-block;transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em);backface-visibility:hidden}
 .ft-social{display:flex;flex-direction:column;gap:15px;width:calc(var(--r)*7.5);min-width:96px;font:400 15px/1.2 var(--grot)}
 .ft-label{color:#989a96}
