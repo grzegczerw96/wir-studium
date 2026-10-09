@@ -120,6 +120,9 @@ html.motion .mani-pin{position:sticky;top:0}
 .wi{position:relative;z-index:3;color:#fcfcfc;background:var(--ink);padding:90px var(--gut) 40px}
 html.motion .wi{background:transparent;height:350svh;margin-top:-100svh;padding:0}
 .wi-w{display:flex;flex-direction:column;align-items:flex-start;gap:24px}
+/* the track is taller than the section, so the texts stay pinned in the middle until they have faded out
+   (the original lets go only after the fade); the work section, later in the page, covers it from below */
+html.motion .wi-track{position:absolute;inset:0 0 auto;height:385svh;pointer-events:none}
 html.motion .wi-w{position:sticky;top:50svh;transform:translateY(-50%);padding:0 var(--gut)}
 .wi-l{position:relative;display:inline-flex;padding:9px 18px 11px;font:400 13.5px/1.2 var(--grot);white-space:nowrap;clip-path:inset(var(--p,0%) round 100vmax)}
 .wi-l::before{content:"";position:absolute;inset:0;border-radius:100vmax;background:#2b2b2b}
@@ -307,7 +310,7 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
   </section>
 
   <section class="wi" id="wi" aria-label="Wybrane realizacje">
-    <div class="wi-w"><span class="wi-l"><span class="wi-lt">Wybrane realizacje</span></span><h2 class="wi-t">Strony i produkty, w których ruch ma powód, a kod jest czysty</h2></div>
+    <div class="wi-track"><div class="wi-w"><span class="wi-l"><span class="wi-lt">Wybrane realizacje</span></span><h2 class="wi-t">Strony i produkty, w których ruch ma powód, a kod jest czysty</h2></div></div>
   </section>
 
   <section class="work" id="work">
@@ -428,6 +431,11 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
     const turns=coarse?22:28;
     const geo=new THREE.TubeGeometry(new Helix(1.22,.5,turns),turns*(coarse?22:36),.078,coarse?10:16,true);
     const mat=new THREE.MeshPhysicalMaterial({color:0xdedede,metalness:1,roughness:.2,clearcoat:.5,clearcoatRoughness:.25});
+    // shade from above: everything above height uY (±uW) goes dark by uAmt, like the light falling off at the top
+    const shadeU={uY:{value:3},uW:{value:.75},uAmt:{value:0}};
+    mat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,shadeU);
+      sh.vertexShader='varying float vWY;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\n  vWY=(modelMatrix*vec4(transformed,1.0)).y;');
+      sh.fragmentShader='uniform float uY;uniform float uW;uniform float uAmt;varying float vWY;\n'+sh.fragmentShader.replace('#include <dithering_fragment>','gl_FragColor.rgb*=1.0-uAmt*smoothstep(uY-uW,uY+uW,vWY);\n#include <dithering_fragment>')};
     const grp=new THREE.Group();grp.add(new THREE.Mesh(geo,mat));scene.add(grp);
     const key=new THREE.DirectionalLight(0xffffff,.9);key.position.set(-3,4,5);scene.add(key);
     let W=0,H=0;
@@ -444,9 +452,10 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
       renderer.render(scene,cam);
     }
     const full=geo.index.count;
-    let dark=0;
-    const setDark=v=>{dark=v;const k=Math.pow(1-v,2);mat.envMapIntensity=k;key.intensity=.9*k;grp.scale.setScalar(1-.22*v);canvas.style.opacity=v>=.999?0:1};
-    return {draw,size,canvas,setDark,kick:v=>{vel=Math.max(vel,Math.abs(v))},
+    const setShade=(amt,y)=>{shadeU.uAmt.value=amt;shadeU.uY.value=y};
+    // at the end the shadow line keeps sliding down until the whole coil is in the dark, while it recedes a little
+    const setDark=v=>{setShade(.9+.1*v,.35-2.8*v);grp.scale.setScalar(1-.15*v);canvas.style.opacity=v>=.999?0:1};
+    return {draw,size,canvas,setDark,setShade,kick:v=>{vel=Math.max(vel,Math.abs(v))},
       setProgress:v=>geo.setDrawRange(0,Math.floor(full*Math.min(1,Math.max(0,v))/6)*6)};   // the wire is drawn along its length
   }
   const orbCanvas=document.getElementById('orb1');
@@ -736,6 +745,9 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
        .fromTo(el,{scale:1},{scale:1.6,duration:d/2,ease:'sine.out'},a)
        .to(el,{scale:1,duration:d/2,ease:'sine.in'},a+d/2);
   });
+  // the top of the coil sinks into shadow while the thumbnails fall (in the original it is the scene's light falling off)
+  const topShade={a:0,y:1.8};
+  if(coils[0].setShade)mtl.fromTo(topShade,{a:0,y:1.8},{a:.9,y:.35,duration:du(.32),ease:'power1.inOut',onUpdate:()=>coils[0].setShade(topShade.a,topShade.y)},at(.155));
   mtl.to(ws,{rotationX:90,yPercent:-85,opacity:0,duration:du(.085),ease:'power1.in',stagger:{amount:du(fine?.135:.12)}},at(.60))
      // the row sinks below the edge, left side first; the coil keeps turning where it is
      .to('.thumb',{y:()=>innerHeight-thumbsEl.getBoundingClientRect().top+20,duration:du(.07),ease:'power2.in',stagger:du(.007)},at(.71));
