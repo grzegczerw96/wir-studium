@@ -270,7 +270,7 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
 .ab-fig:nth-child(2){width:100%;aspect-ratio:4/5;z-index:1}
 .ab-fig:not(:nth-child(2)){display:none}
 .ab-head{display:flex;flex-direction:column;align-items:center;gap:calc(var(--r)*2.5);text-align:center}
-.ab-title{margin:0;color:#000;font:900 calc(var(--r)*4)/.8 var(--grot);letter-spacing:-.04em;text-transform:uppercase}
+.ab-title{margin:0;color:#000;font:900 calc(var(--r)*4)/.9 var(--grot);letter-spacing:-.04em;text-transform:uppercase}
 .ab-ln{display:block;white-space:nowrap;width:max-content;margin:0 auto}
 .ab-title .ch{display:inline-block;transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em);backface-visibility:hidden}
 .ab-title .ab-ln{perspective:calc(var(--r)*31.25)}
@@ -436,7 +436,7 @@ html.motion .footer{height:350svh;margin-top:-160svh}
 html.motion .ft-wrap{position:sticky;top:0;height:100svh}
 .ft-head{position:relative;display:flex;flex-direction:column;gap:32px;align-items:flex-start;width:100%}
 @media (min-width:1025px){.ft-head{flex-direction:row;justify-content:space-between;gap:0}}
-.ft-title{margin:0;font:900 calc(var(--r)*3.125)/.8 var(--grot);letter-spacing:-.04em;text-transform:uppercase}
+.ft-title{margin:0;font:900 calc(var(--r)*3.125)/.9 var(--grot);letter-spacing:-.04em;text-transform:uppercase}
 .ft-title .ab-ln{display:block;white-space:nowrap;margin:0;perspective:calc(var(--r)*31.25)}   /* left-aligned, as in the original */
 .ft-title .ch{display:inline-block;transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em);backface-visibility:hidden}
 .ft-social{display:flex;flex-direction:column;gap:15px;width:calc(var(--r)*7.5);min-width:96px;font:400 15px/1.2 var(--grot)}
@@ -1134,7 +1134,8 @@ html:not(.motion) .stage3{display:none}
   gsap.to(shade,{v:1,ease:'power1.inOut',scrollTrigger:{trigger:'#wi',start:'top 95%',end:'top -320%',scrub:true}});
   // the coil reads both shadow amounts every frame (tween values stay right even when a refresh skips callbacks)
   const ts=window.__topShade;
-  if(coils[0].setShade)gsap.ticker.add(()=>{if(shade.v>0)coils[0].setDark(shade.v);else if(ts)coils[0].setShade(ts.a,ts.y)});
+  // (setDark(0) first: it also restores the canvas opacity and size after a fast jump back up from below)
+  if(coils[0].setShade)gsap.ticker.add(()=>{if(shade.v>0)coils[0].setDark(shade.v);else{coils[0].setDark(0);if(ts)coils[0].setShade(ts.a,ts.y)}});
   else if(coils[0].setDark)gsap.ticker.add(()=>coils[0].setDark(shade.v));
 
   /* ---- about ----
