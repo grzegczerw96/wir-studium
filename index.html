@@ -194,7 +194,7 @@ html.motion .wi-w{position:sticky;top:50svh;transform:translateY(-50%);padding:0
 .fl{display:inline-block;transform:translateZ(-1em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(1em);backface-visibility:hidden;transform-style:preserve-3d}
 
 /* ===== index ===== */
-.index{position:relative;z-index:3;background:var(--ink);color:#fcfcfc;padding:clamp(60px,9vw,140px) 0 120px;isolation:isolate}
+.index{position:relative;z-index:3;background:var(--ink);color:#fcfcfc;padding:clamp(60px,9vw,140px) 0 clamp(140px,16vw,220px);isolation:isolate}
 .plist{position:relative}
 .pr{position:relative;overflow:hidden;padding:0 var(--gut)}
 .pr-w{position:relative}
@@ -272,7 +272,7 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
 .ab-title{margin:0;color:#000;font:800 calc(var(--r)*4)/.8 var(--grot);font-stretch:115%;letter-spacing:-.04em;text-transform:uppercase}
 .ab-ln{display:block;white-space:nowrap;width:max-content;margin:0 auto}
 .ab-title .ch{display:inline-block;transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em);backface-visibility:hidden}
-.ab-title .ab-ln{perspective:600px}
+.ab-title .ab-ln{perspective:calc(var(--r)*31.25)}
 .ab-sub{margin:0;color:#141414;font:400 calc(var(--r)*2.25)/1 var(--serif);max-width:23.3em}
 .ab-content{display:flex;flex-direction:column;gap:var(--ms)}
 .ab-vid{position:relative;margin:0;width:100%;aspect-ratio:374/414;flex:none}
@@ -541,7 +541,9 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
     const full=geo.index.count;
     const setShade=(amt,y)=>{shadeU.uAmt.value=amt;shadeU.uY.value=y};
     // at the end the shadow line keeps sliding down until the whole coil is in the dark, while it recedes a little
-    const setDark=v=>{setShade(.9+.1*v,.35-2.8*v);grp.scale.setScalar(1-.15*v);canvas.style.opacity=v>=.999?0:1};
+    // the shadow line slides down slowly, so a faint lower rim is still there when the texts start to leave;
+    // the last 20% fades what is left together with the texts
+    const setDark=v=>{setShade(.9+.1*v,.35-1.5*v);grp.scale.setScalar(1-.15*v);canvas.style.opacity=v<.8?1:Math.max(0,(1-v)/.2)};
     return {draw,size,canvas,setDark,setShade,kick:v=>{vel=Math.max(vel,Math.abs(v))},
       setProgress:v=>geo.setDrawRange(0,Math.floor(full*Math.min(1,Math.max(0,v))/6)*6)};   // the wire is drawn along its length
   }
@@ -642,10 +644,16 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
     ['Herbaciarnia Liść','2023',['Sklep','CMS'],'Sklep z herbatą, w którym każda mieszanka ma własną paletę kolorów.']
   ];
   // pictures for the about section
-  const AB=[{tint:[40,40,40],bg:'#e4e1dc',turns:16,t:.9},{tint:[25,25,25],bg:'#d9d6cf',turns:30,t:2.6},{tint:[60,60,60],bg:'#eceae6',turns:22,t:4.2}].map(o=>still(640,800,o));
+  const AB=[{tint:[255,170,120],bg:'#c8340f',turns:16,t:.9},{tint:[235,235,235],bg:'#1b1b1b',turns:30,t:2.6},{tint:[230,230,230],bg:'#0a0a0a',turns:22,t:4.2}].map(o=>still(640,800,o));
   document.querySelectorAll('.ab-fig .img i').forEach((i,k)=>i.style.backgroundImage=AB[k]);
-  const AV=still(900,1000,{tint:[30,30,30],bg:'#dedad3',turns:44,t:1.7});
-  document.querySelector('#abVid .img i').style.backgroundImage=AV;
+  const AVO=[{tint:[40,30,35],bg:'#efd3e0',turns:30,t:.6},{tint:[30,30,30],bg:'#e4e4e4',turns:18,t:1.9},{tint:[220,220,220],bg:'#2a2a2a',turns:40,t:3.1},
+    {tint:[150,200,160],bg:'#15281b',turns:24,t:4.4},{tint:[235,235,235],bg:'#0b0b0b',turns:34,t:.2},{tint:[200,200,200],bg:'#5b5b58',turns:14,t:2.6},
+    {tint:[255,190,150],bg:'#2b1a12',turns:28,t:5.3},{tint:[160,180,230],bg:'#0c1220',turns:46,t:3.8}];
+  const avBox=document.querySelector('#abVid .img');
+  avBox.innerHTML=AVO.map((o,k)=>`<i style="background-image:${still(720,800,o)};visibility:${k?'hidden':'visible'}"></i>`).join('');
+  {const fr=[...avBox.children];let k=0,timer=null;
+   const play=on=>{clearInterval(timer);if(on&&!reduce)timer=setInterval(()=>{fr[k].style.visibility='hidden';k=(k+1)%fr.length;fr[k].style.visibility='visible'},217)};
+   new IntersectionObserver(es=>play(es[0].isIntersecting)).observe(avBox)}
   // the heavy title must never be wider than the page: shrink it only when a line would overflow (phones)
   function fitAbTitle(){const h=document.getElementById('abTitle');h.style.fontSize='';const avail=h.parentElement.clientWidth;
     const w=Math.max(...[...h.querySelectorAll('.ab-ln')].map(l=>l.scrollWidth));
@@ -860,7 +868,7 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
       c.textContent.split(/(\s+)/).forEach(w=>{if(!w)return;if(/^\s+$/.test(w))f.append(w);else{const s=document.createElement('span');s.className='fl';s.textContent=w;f.append(s)}});c.replaceWith(f)}
       else if(c.nodeType===1&&!c.classList.contains('fl'))walk(c)});walk(el)}
   function flip(el,delay=0){const ws=[...el.querySelectorAll('.fl')];const tops=[...new Set(ws.map(w=>w.offsetTop))].sort((a,b)=>a-b);
-    gsap.fromTo(ws,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',delay:i=>delay+tops.indexOf(ws[i].offsetTop)*.035})}
+    gsap.fromTo(ws,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut',delay:i=>delay+tops.indexOf(ws[i].offsetTop)*.1})}
   const flipOnView=(el,trigger,delay)=>{splitWords(el);gsap.set(el.querySelectorAll('.fl'),{'--rx':'-90deg','--sy':1.5});
     ScrollTrigger.create({trigger:trigger||el,start:'top 92%',once:true,onEnter:()=>flip(el,delay)})};
 
@@ -907,7 +915,8 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
     .to(wiL,{x:()=>-sx(),opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh)
     .to(wiT,{x:sx,opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh);
   const shade={v:0};
-  gsap.to(shade,{v:1,ease:'power1.inOut',scrollTrigger:{trigger:'#wi',start:'top 95%',end:'top -225%',scrub:true}});
+  // ends with the texts (S0+3.2 screens) instead of before them
+  gsap.to(shade,{v:1,ease:'power1.inOut',scrollTrigger:{trigger:'#wi',start:'top 95%',end:'top -320%',scrub:true}});
   // the coil reads both shadow amounts every frame (tween values stay right even when a refresh skips callbacks)
   const ts=window.__topShade;
   if(coils[0].setShade)gsap.ticker.add(()=>{if(shade.v>0)coils[0].setDark(shade.v);else if(ts)coils[0].setShade(ts.a,ts.y)});
@@ -921,7 +930,8 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
      title: letters flip up one after another (.9s quart out, .035s apart); the rest: lines flip up (1.1s quart in-out) */
   // the colour lives in a CSS variable tweened directly (no callbacks), so a ScrollTrigger refresh can never leave it stale
   gsap.fromTo(document.documentElement,{'--room':'rgb(5,5,5)'},{'--room':'rgb(252,252,252)',ease:'power1.inOut',immediateRender:false,
-    scrollTrigger:{trigger:'#about',start:'top bottom',end:()=>'top+='+innerHeight*.1+' top',scrub:true,invalidateOnRefresh:true}});
+    // starts later than the original (top at 55% instead of the bottom edge) so the list is never on a grey background
+    scrollTrigger:{trigger:'#about',start:'top 55%',end:'top -15%',scrub:true,invalidateOnRefresh:true}});
   const abF=[...document.querySelectorAll('.ab-fig')];
   const abFl=abF.map((f,k)=>fluidOK?Fluid(f,AB[k]):null);
   abFl.forEach(f=>f&&fluids.push(f));
@@ -941,13 +951,13 @@ html:not(.motion) .pr-w::before{width:100%}html:not(.motion) .pr:last-of-type::a
   const abTitle=document.getElementById('abTitle');
   abTitle.querySelectorAll('.ab-ln').forEach(l=>{l.innerHTML=[...l.textContent].map(c=>c===' '?' ':`<span class="ch">${c}</span>`).join('')});
   const abCh=abTitle.querySelectorAll('.ch');gsap.set(abCh,{'--rx':'-90deg','--sy':1.5});
-  ScrollTrigger.create({trigger:abTitle,start:'top 85%',once:true,onEnter:()=>gsap.to(abCh,{'--rx':'0deg','--sy':1,duration:.9,ease:'power4.out',stagger:.035})});
+  ScrollTrigger.create({trigger:abTitle,start:'top bottom',once:true,onEnter:()=>gsap.to(abCh,{'--rx':'0deg','--sy':1,duration:.9,ease:'power4.out',stagger:.035})});
   // lines of the subtitle and the texts flip up
   function splitLines(el){splitWords(el);const ws=[...el.querySelectorAll('.fl')];return ws}
-  const lineFlip=(el,delay=0)=>{const ws=splitLines(el);gsap.set(ws,{'--rx':'-90deg','--sy':1.5});
-    ScrollTrigger.create({trigger:el,start:'top 90%',once:true,onEnter:()=>{const tops=[...new Set(ws.map(w=>w.offsetTop))].sort((a,b)=>a-b);
-      gsap.to(ws,{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',delay:i=>delay+tops.indexOf(ws[i].offsetTop)*.035})}})};
-  lineFlip(document.getElementById('abSub'));
+  const lineFlip=(el,delay=0)=>{const ws=splitLines(el);gsap.set(ws,{'--rx':'-90deg','--sy':1.5});el.style.perspective=el.clientWidth+'px';
+    ScrollTrigger.create({trigger:el,start:'top bottom',once:true,onEnter:()=>{const tops=[...new Set(ws.map(w=>w.offsetTop))].sort((a,b)=>a-b);
+      gsap.to(ws,{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut',delay:i=>delay+tops.indexOf(ws[i].offsetTop)*.1})}})};
+  lineFlip(document.getElementById('abSub'),.35);
   document.querySelectorAll('.ab-art .ab-tx').forEach(el=>lineFlip(el));
   ScrollTrigger.create({trigger:'#abVid',start:'top 85%',once:true,onEnter:()=>document.getElementById('abVid').classList.add('in')});
 
