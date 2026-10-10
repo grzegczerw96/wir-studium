@@ -561,7 +561,8 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
         .to('.hd',{opacity:1,duration:.6,ease:'power1.out'},M+.6);
       if(D){flip(M+.5,.035);linesAfter(M+.9,M+.5,.035*(ch.length-1));bars(M+1)}
       // (Grzegorz 10.10: the note starts half-way through the title's appearance)
-      else{const t0=M+.45,te=titleIn(t0),ns=(t0+te)/2,ne=noteIn(ns);bars(ne-.3)}}
+      // (5 opens from the O, so it waits until the oval is in it: earlier, the travelling oval crossed letters already shown)
+      else{const t0=M+(FX==='5'?1.1:.45),te=titleIn(t0),ns=(t0+te)/2,ne=noteIn(ns);bars(ne-.3)}}
     enter.ran=true}
   document.querySelectorAll('.ctl [data-fx]').forEach(b=>b.onclick=()=>{FX=b.dataset.fx;IN='C';apply()});
   document.querySelectorAll('.ctl [data-nx]').forEach(b=>b.onclick=()=>{NX=b.dataset.nx;IN='C';apply()});
