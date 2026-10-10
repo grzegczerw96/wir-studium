@@ -451,6 +451,9 @@ html.motion .cl-box{height:calc(100svh - var(--gut)*3 - 55px);min-height:0}
    list: two columns of names that flip in pair by pair, small tags rise, hairlines grow; the whole list grows .7 → 1 */
 .awards{--r:inherit;color:#141414;display:flex;flex-direction:column;gap:calc(var(--r)*6.25)}
 .wi--light{color:#141414;background:transparent;padding:0}
+/* the names turn light at once when the page passes mid-grey on its way back to black, so they read in every frame
+   (a colour transition would pass through grey-on-grey) */
+.awards.inv,.awards.inv .wi--light{color:#fcfcfc}
 html.motion .wi--light{background:transparent}
 .wi--light .wi-l{color:#fcfcfc}
 @media (max-width:1024px){.awards{margin-top:calc(var(--r)*12.5)}}
@@ -475,12 +478,12 @@ html.motion .awards{padding-bottom:60svh}
 .aw-lwrap{display:flex;align-items:center}
 .aw-ul{list-style:none;margin:0;padding:0;width:100%;display:grid;grid-template-columns:1fr}
 .aw-item{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;gap:var(--gut);padding:calc(var(--r)*1.875) 0;font:400 calc(var(--r)*2.25)/1 var(--serif)}
-.aw-item:not(:last-child)::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:#141414;opacity:.2;transform-origin:0 50%;transform:scaleX(var(--w,1))}
+.aw-item:not(:last-child)::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:currentColor;opacity:.2;transform-origin:0 50%;transform:scaleX(var(--w,1))}
 .aw-name{margin:0;font:inherit}
 .aw-name .ch{display:inline-block;transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em);backface-visibility:hidden}
 .aw-name{perspective:calc(var(--r)*31.25)}
 .aw-tags{display:flex;flex-wrap:wrap;gap:10px;overflow:hidden;margin:-8px 0;padding:8px 0}
-.aw-tag{font:300 clamp(9px,.7vw,10px)/1.6 var(--mono);padding:.9em;letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(43,43,43,.2);border-radius:4px;color:#141414;transform:translateY(calc((101% + 8px)*var(--p,0)))}
+.aw-tag{font:300 clamp(9px,.7vw,10px)/1.6 var(--mono);padding:.9em;letter-spacing:.06em;text-transform:uppercase;border:1px solid color-mix(in srgb,currentColor 20%,transparent);border-radius:4px;color:inherit;transform:translateY(calc((101% + 8px)*var(--p,0)))}
 @media (min-width:600px){.aw-item{font-size:calc(var(--r)*2.875)}}
 @media (min-width:1025px){
   .aw-item{flex-direction:row;align-items:center;justify-content:space-between;gap:0}
@@ -1394,12 +1397,15 @@ html:not(.motion) .stage3{display:none}
   const roomEls=['projects','about','contact','footer'].map(id=>document.getElementById(id));
   // back to black measured in the original (Playwright, 1280x620): it starts when the contact section's top is 1.4 screens
   // below the top and is black when that top reaches the top, so the coil and the line arrive on near-black, never on grey
-  const contactTop=document.getElementById('contact');
+  const contactTop=document.getElementById('contact'),awardsEl=document.getElementById('awards'),lastAward=[...document.querySelectorAll('.aw-item')].pop();
   const roomP=(edge,from,to)=>roomEase(Math.min(1,Math.max(0,(from-edge)/(from-to))));
   gsap.ticker.add(()=>{const r=aboutEl.getBoundingClientRect(),H=innerHeight;
-    const ct=contactTop.getBoundingClientRect().top;
-    const v=Math.round(5+247*(roomP(r.top,.55*H,(isDesk()?-.15:-.3)*H)-roomP(ct,1.4*H,0)));const c=`rgb(${v},${v},${v})`;
-    if(c!==roomLast){roomLast=c;roomEls.forEach(e=>e.style.backgroundColor=c)}});
+    // back to black: from the last award name at 15% of the screen to the contact section's top at the top — so the
+    // list leaves on white and the change is short (phone ~.6, desktop ~.95 screen); linear in the scroll, then eased
+    const ct=contactTop.getBoundingClientRect().top,lb=lastAward.getBoundingClientRect().bottom,a=.15*H-lb;
+    const out=roomEase(Math.min(1,Math.max(0,a/Math.max(1,a+Math.max(0,ct)))))*(a>0?1:0);
+    const v=Math.round(5+247*(roomP(r.top,.55*H,(isDesk()?-.15:-.3)*H)-out));const c=`rgb(${v},${v},${v})`;
+    if(c!==roomLast){roomLast=c;roomEls.forEach(e=>e.style.backgroundColor=c);awardsEl.classList.toggle('inv',v<118)}});
   const abF=[...document.querySelectorAll('.ab-fig')];
   const abFl=abF.map((f,k)=>fluidOK?Fluid(f,AB[k]):null);
   abFl.forEach(f=>f&&fluids.push(f));
@@ -1541,7 +1547,8 @@ html:not(.motion) .stage3{display:none}
     return {x:p.offsetLeft+p.offsetWidth/2,y:p.offsetTop+p.offsetHeight/2}};
   const midEnd=()=>tkFormWrap.offsetTop+2.5*innerHeight;
   // (starts at 70% rather than the bottom edge: our coil layer sits above the white section, so it must not show over the list)
-  gsap.timeline({scrollTrigger:{trigger:'#contact',start:'top 70%',end:'top top',scrub:true,invalidateOnRefresh:true}})
+  // (from 45%: the coil comes out of the dark only once the page has turned dark grey, never pale on light grey)
+  gsap.timeline({scrollTrigger:{trigger:'#contact',start:'top 45%',end:'top top',scrub:true,invalidateOnRefresh:true}})
     .fromTo(P3,{o:0,d:1,t:Math.PI/10},{o:1,d:0,t:Math.PI/2.5,duration:1,ease:'power4.inOut'},0)
     .fromTo(P3,{x:()=>cX(),y:()=>cY()},{x:()=>cX(),y:()=>cY(),duration:1,ease:'none'},0)
     .fromTo(P3,{s:()=>isDesk()?.65:.35},{s:()=>isDesk()?1:.6,duration:.75,ease:'power1.inOut'},.25);
@@ -1570,8 +1577,7 @@ html:not(.motion) .stage3{display:none}
   // (the coil layer is cut at the contact section's top edge, so it never shows over the light end of "about")
   const stage3=document.getElementById('stage3'),contactEl=document.getElementById('contact');let s3clip='',s3op=-1;
   if(coil3)gsap.ticker.add(()=>{if(!visible.has(coil3))return;coil3.setPos(P3.x,P3.y);coil3.setPose(P3.t,P3.s*.62);coil3.setShade(P3.d,1.6-2.8*P3.d);
-    if(P3.o!==s3op){s3op=P3.o;stage3.style.opacity=s3op}const top=Math.round(contactEl.getBoundingClientRect().top),c=top>0?`inset(${top}px 0 0 0)`:'none';
-    if(c!==s3clip){s3clip=c;stage3.style.clipPath=c}});
+    if(P3.o!==s3op){s3op=P3.o;stage3.style.opacity=s3op}});
   window.__contactY=()=>tkIn.scrollTrigger.end;
   /* footer (the original's timeline, scrubbed from the footer's top at the top to its bottom at the bottom — so nothing
      of it shows until the form has nearly faded): the title letters flip up one after another (1.1 quart in-out, .035

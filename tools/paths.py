@@ -5,7 +5,7 @@ usage: py -I tools/paths.py [d|m] [--src file]
 Rules (add new ones to RULES):
   footer-over-form  a letter of the footer title visible (more than 10% turned in) while the form is still above 5% opacity
   title-over-form   phones: the contact line visible while a form box is in
-  low-contrast      the contact line or the footer title on a background with contrast below 3:1"""
+  low-contrast      the contact line, the footer title or an award name on a background with contrast below 3:1"""
 import os, sys, json, argparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _env
@@ -21,11 +21,17 @@ REC = r"""(()=>{const R=window.__rec=[];const form=document.getElementById('tkFo
   const fr=form.getBoundingClientRect(),fVis=fr.bottom>0&&fr.top<H;
   R.push({y:+(scrollY/H).toFixed(3),formOp:fVis?+getComputedStyle(form).opacity:0,letters:Math.max(...rx.map(v=>1-Math.abs(v)/90)),
    boxIn:lines.some(l=>{const r=l.getBoundingClientRect();return r.right>0&&r.left<W&&r.bottom>0&&r.top<H}),tVis,
-   tC:tVis?+contrast(title).toFixed(2):99,fC:+contrast(document.getElementById('ftTitle')).toFixed(2)});requestAnimationFrame(f)})()})()"""
+   tC:tVis?+contrast(title).toFixed(2):99,fC:+contrast(document.getElementById('ftTitle')).toFixed(2),
+   awC:(()=>{const v=[...document.querySelectorAll('.aw-name')].filter(n=>{const r=n.getBoundingClientRect();return r.bottom>0&&r.top<H&&r.height>4});return v.length?+Math.min(...v.map(contrast)).toFixed(2):99})(),
+   awGrey:(()=>{const v=[...document.querySelectorAll('.aw-name')].some(n=>{const r=n.getBoundingClientRect();return r.bottom>8&&r.top<H&&r.height>4});
+     const g=+(bgAt(document.querySelector('.aw-name')).match(/\d+/)||[252])[0];return v&&g>70&&g<200})(),
+   coilGrey:(()=>{const s=document.getElementById('stage3'),o=+(s.style.opacity||0),g=+(bgAt(document.getElementById('contact')).match(/\d+/)||[0])[0];return o>.25&&g>70})()});requestAnimationFrame(f)})()})()"""
 RULES = [
     ('footer-over-form', lambda s: s['letters'] > .1 and s['formOp'] > .05),
     ('title-over-form', lambda s: A.mode == 'm' and s['tVis'] and s['boxIn']),
-    ('low-contrast', lambda s: (s['tVis'] and s['tC'] < 3) or (s['letters'] > .1 and s['fC'] < 3)),
+    ('low-contrast', lambda s: (s['tVis'] and s['tC'] < 3) or (s['letters'] > .1 and s['fC'] < 3) or s.get('awC', 99) < 3),
+    ('list-on-grey', lambda s: s.get('awGrey')),     # Grzegorz 10.10.2026: the award list must not sit on the mid-grey of the change
+    ('coil-on-grey', lambda s: s.get('coilGrey')),   # the contact coil must not show (over 25%) on a light/mid-grey page
 ]
 VIEW = dict(viewport={'width': 1280, 'height': 620}) if A.mode == 'd' else dict(viewport={'width': 360, 'height': 649}, is_mobile=True, has_touch=True)
 with sync_playwright() as p:
@@ -38,8 +44,8 @@ with sync_playwright() as p:
     def wheel(dy, n, ms=35):
         pg.mouse.move(640 if A.mode == 'd' else 180, 300)
         for _ in range(n): pg.mouse.wheel(0, dy); pg.wait_for_timeout(ms)
-    go(ct - 1); pg.evaluate('window.__recOn=true;' + REC)
-    span = int((ft + 1.6 - ct + 1) * H / 100)          # from above the contact section to deep in the footer
+    go(ct - 2.5); pg.evaluate('window.__recOn=true;' + REC)   # from the award list on
+    span = int((ft + 1.6 - ct + 2.5) * H / 100)        # from the award list to deep in the footer
     wheel(100, span); pg.wait_for_timeout(1500)        # down (snapping may carry it)
     wheel(-100, int(1.8 * H / 100)); pg.wait_for_timeout(1500)   # back up to the form
     wheel(100, int(1.2 * H / 100), 60); pg.wait_for_timeout(2500)   # down again, slower

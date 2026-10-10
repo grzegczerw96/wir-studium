@@ -25,7 +25,8 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
   - lista projektów zostaje dłużej na czarnym tle (przejście w biel startuje, gdy góra „O nas” jest na 55% ekranu, a nie przy dolnej krawędzi);
   - w kartach realizacji nie ma wybrzuszania obrazu po najechaniu ani wypływającego tekstu, tylko płynięcie obrazu z tekstem przy przewijaniu;
   - formularz kontaktowy wjeżdża później niż w cappen, dopiero gdy wielki napis prawie zniknął;
-  - spirala przed kontaktem zaczyna się pojawiać od 70% wysokości ekranu (nasza warstwa spirali leży nad białą sekcją);
+  - spirala przed kontaktem zaczyna się pojawiać od 45% wysokości ekranu, a nie od dolnej krawędzi (najpierw tło ma być ciemne);
+  - powrót do czerni po nagrodach jest krótszy niż w oryginale: od ostatniej nazwy na 15% ekranu do góry kontaktu przy górze ekranu (telefon ok. 0,6 ekranu, desktop ok. 0,95), żeby lista schodziła na białym, a nie stała na szarym (10.10.2026);
   - brak kursora „DISCOVER” i brak dociągania w manifeście.
 - **Nasze dodatki, których oryginał nie ma** (zostawione celowo, do decyzji Grzegorza):
   - nagłówek chowa się przy przewijaniu w dół, bo inaczej tekst sekcji przejeżdża pod logo i przyciskiem;
