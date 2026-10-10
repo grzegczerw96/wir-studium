@@ -505,7 +505,7 @@ html.motion .wi--light{background:transparent}
 .tk-title{margin:0;font:900 calc(var(--r)*7.5)/.9 var(--grot);letter-spacing:-.02em;text-transform:uppercase;padding-right:.075em}
 html.motion .tk-title-wrap{height:500svh;margin-top:-30svh;padding:0}
 html.motion .tk-title-sticky{position:sticky;top:0;height:100svh;display:flex;align-items:center;padding-top:calc(var(--gut) + 37px)}
-html.motion .tk-title{white-space:nowrap;translate:calc(100vw - var(--gut) - (100vw + 100%)*var(--p,0)) 0}
+html.motion .tk-title{white-space:nowrap;translate:calc(100vw - var(--gut) - (100vw + 100%)*var(--p,0)) 0;will-change:translate}   /* own layer: the 1500px line is moved, not repainted, every frame */
 .tk-form-sticky{display:flex;align-items:center;padding:20px var(--gut)}
 html.motion .tk-form-wrap{height:300svh;margin-top:-250svh}
 @media (min-width:1025px){html.motion .tk-form-wrap{height:500svh}}
@@ -966,7 +966,7 @@ html:not(.motion) .stage3{display:none}
   const avBox=document.querySelector('#abVid .img');
   avBox.innerHTML=AVO.map((o,k)=>`<i style="background-image:${still(720,800,o)};visibility:${k?'hidden':'visible'}"></i>`).join('');
   {const fr=[...avBox.children];let k=0,timer=null;
-   const play=on=>{clearInterval(timer);if(on&&!reduce&&!window.__dbgNoFilm)timer=setInterval(()=>{fr[k].style.visibility='hidden';k=(k+1)%fr.length;fr[k].style.visibility='visible'},217)};
+   const play=on=>{clearInterval(timer);if(on&&!reduce)timer=setInterval(()=>{fr[k].style.visibility='hidden';k=(k+1)%fr.length;fr[k].style.visibility='visible'},217)};
    new IntersectionObserver(es=>play(es[0].isIntersecting)).observe(avBox)}
   // the heavy title must never be wider than the page: shrink it only when a line would overflow (phones)
   function fitAbTitle(){const h=document.getElementById('abTitle');h.style.fontSize='';const avail=h.parentElement.clientWidth;
@@ -1376,7 +1376,7 @@ html:not(.motion) .stage3{display:none}
   //  so each change restyled the whole page — on the phone that was up to .6 s of style work per pass)
   const roomEls=['projects','about','contact','footer'].map(id=>document.getElementById(id));
   const roomP=(edge,from,to)=>roomEase(Math.min(1,Math.max(0,(from-edge)/(from-to))));
-  gsap.ticker.add(()=>{if(window.__dbgNoRoom)return;const r=aboutEl.getBoundingClientRect(),H=innerHeight;
+  gsap.ticker.add(()=>{const r=aboutEl.getBoundingClientRect(),H=innerHeight;
     const v=Math.round(5+247*(roomP(r.top,.55*H,(isDesk()?-.15:-.3)*H)-roomP(r.bottom,1.15*H,-.45*H)));const c=`rgb(${v},${v},${v})`;
     if(c!==roomLast){roomLast=c;roomEls.forEach(e=>e.style.backgroundColor=c)}});
   const abF=[...document.querySelectorAll('.ab-fig')];
@@ -1581,7 +1581,7 @@ html:not(.motion) .stage3{display:none}
   // on phones and tablets the first row opens by itself once the list is in view
   // (only if the list is still on screen by then — a jump past it must not grow the page above you)
   if(!isDesk()){let used=false;const tryOpen=()=>setTimeout(()=>{const r=rowsEl.getBoundingClientRect();
-      if(used||openPr||window.__dbgNoOpen||r.bottom<0||r.top>innerHeight)return;used=true;openRow(prs[0])},600);
+      if(used||openPr||r.bottom<0||r.top>innerHeight)return;used=true;openRow(prs[0])},600);
     ScrollTrigger.create({trigger:rowsEl,start:'top 70%',end:'bottom top',onEnter:tryOpen,onEnterBack:tryOpen})}
 
 })();

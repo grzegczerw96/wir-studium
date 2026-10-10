@@ -53,6 +53,8 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
    - na telefonie 375×812 (`is_mobile`, `has_touch`);
    - brak przewijania w poziomie i brak błędów w konsoli.
    - **Pomiar oryginału bez panelu:** skrypt `probe.py` (Playwright z zainstalowanym Chrome) otwiera cappen albo naszą stronę, przewija do zadanych miejsc i wykonuje JS. W cappen przed pomiarem `window.main.scroller.stop()` (jego przyciąganie zwraca wtedy bieżącą pozycję), u nas `__autoScrolling` na stałe `true`. Litery oryginału mają `--rotateX` w `style`, nasze `--rx`. Liczby porównuje się w ekranach od początku sekcji.
+   - **Prawdziwy telefon (Samsung Galaxy M15 5G, Chrome, 360×649 z paskiem adresu, 705 bez niego, 90 Hz):** telefon podłączony kablem z debugowaniem USB, `adb` z `Google.PlatformTools`. `adb forward tcp:9222 localabstract:chrome_devtools_remote`, potem Playwright `connect_over_cdp`. Używaj tylko karty z naszą stroną, inne karty to prywatne karty Grzegorza. Skrypt `phone.py`: gest palca `Input.synthesizeScrollGesture` (prawdziwe przewijanie z chowaniem paska adresu), zrzut całego ekranu `adb exec-out screencap -p`, płynność klatek z `requestAnimationFrame`, koszt z `Performance.getMetrics`. Niewypchniętą wersję podaje telefonowi lokalny serwer (`py -m http.server 8765` w kopii z lokalnymi bibliotekami) i `adb reverse tcp:8765 tcp:8765`.
+   - **Jak szukać szarpnięć:** zwykła strona z samym tekstem daje na tym telefonie równe 11 ms, więc wszystko powyżej to nasz koszt. Mierz każdą sekcję osobno, zimny przejazd (zaraz po załadowaniu) i rozgrzany, a winowajcę zawężaj wyłączaniem: `ScrollTrigger.getAll()[i].disable()` grupami, ukrywanie elementów. Oryginał na tym telefonie: 40–175 ms na klatkę.
    - **Filmy Grzegorza** (`.mp4`): brak ffmpeg; klatki wyciąga zainstalowany Chrome przez Playwright (strona z `<video>` ładowana jako plik, przewijanie `currentTime`, zrzut), a kilka klatek składa się w jeden arkusz.
 5. **Commit** jako `grzegczerw96 <greg.wolwlod@gmail.com>`, z opisem po polsku. Push na `main`, GitHub Pages aktualizuje się po ok. 1 minucie. Przy sprawdzaniu dopisz do adresu `?v=<hash>`, żeby ominąć cache.
 6. **Sprawdź na żywo** wersję z Pages, potem zaktualizuj artefakt.
@@ -182,6 +184,10 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
 | Menu → Kontakt: szare tło i ciemna spirala | Skok na górę sekcji wypada w środku przejścia koloru strony | Skok do końca wjazdu formularza (`window.__contactY`) |
 | Spirala kontaktu wystaje nad sekcję | Warstwa spirali jest stała i pokazuje się od 70% ekranu | `clip-path` warstwy przycięty do górnej krawędzi sekcji kontaktu |
 | Menu na desktopie ucina „Kontakt” przy 620 px | Rozmiar liter tylko od szerokości | `min(9,5vw, (100svh − 230px)/4,7)` |
+| Telefon: 22 ms na klatkę przy przewijaniu kart i listy | Kreski wierszy rosły przez `width` (układ strony w każdej klatce), obraz karty z paralaksą nie był osobną warstwą (przerysowanie) | Kreski przez `transform: scaleX`, obraz z `will-change:transform` → 11 ms |
+| Telefon: kontakt 22 ms na klatkę | Napis 7,5rem (ok. 1500 px) przesuwany co klatkę bez własnej warstwy | `will-change:translate` → 11 ms |
+| Telefon: duże koszty stylów przy zmianie koloru strony | Zmienna `--room` na `<html>` dziedziczy się do każdego elementu | Kolor ustawiany na 4 sekcjach |
+| Telefon: szarpnięcie przy pierwszym pojawieniu się spirali | Kompilacja shaderów przy pierwszym rysowaniu; spirale rysowane także przy kryciu 0 | `renderer.compile` przy ładowaniu; rysowanie tylko widocznych (`coil.on`) |
 
 ## 8. Lista kontrolna przed oddaniem sekcji
 
