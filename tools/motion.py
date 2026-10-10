@@ -11,7 +11,9 @@
   spread (with --origin=SELECTOR, effect painted red by the debug mode) the effect must be born at that element and grow
          out of it: its first red pixels must lie inside the element (within its radius of its centre), and no later frame may
          add red pixels far beyond the farthest red of the frame before (60 px + 600 px/s) — smoke ahead of its front
-usage: py -I tools/motion.py [url] --fx=3,5,7,7b,7c,d1,d2,d3 [--dev=d|m|both] [--t=6.5] [--origin=#winIn]
+         --origin=SELECTOR@bottom (or @top/@left/@right): the effect must be born at that point of the element's edge,
+         within 60 % of its radius
+usage: py -I tools/motion.py [url] --fx=3,5,7,7b,7c,d1,d2,d3 [--dev=d|m|both] [--t=6.5] [--origin=#winIn[@bottom]]
 The lab's own controls (label, switch panel) are left out. Crops of every finding go to out/motion/."""
 import os, sys, time, base64, io
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -47,7 +49,10 @@ with sync_playwright() as p:
             pg.wait_for_function('window.gsap&&document.querySelector("#title .ch")&&document.getElementById("stage").style.clipPath', timeout=20000)
             t0 = time.time(); cdp.send('Page.startScreencast', {'format': 'png', 'everyNthFrame': 1})
             info = pg.evaluate(INFO); smoke = None
-            org = pg.evaluate(f"(()=>{{const e=document.querySelector({ORIGIN!r});if(!e)return null;const r=e.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2,Math.max(r.width,r.height)/2]}})()") if ORIGIN else None
+            sel, _, at = (ORIGIN or '').partition('@')
+            org = pg.evaluate(f"""(()=>{{const e=document.querySelector({sel!r});if(!e)return null;const r=e.getBoundingClientRect(),a={at!r};
+              const x=a==='left'?r.left:a==='right'?r.right:r.left+r.width/2,y=a==='top'?r.top:a==='bottom'?r.bottom:r.top+r.height/2;
+              return [x,y,Math.max(r.width,r.height)/2*(a?.6:1)]}})()""") if ORIGIN else None
             while time.time() - t0 < DUR:
                 if smoke is None and fx.startswith('d'):
                     smoke = pg.evaluate(INFO)['smoke']
@@ -120,7 +125,7 @@ with sync_playwright() as p:
                         dist = {q: math.hypot(q[0] * g4 - ox, q[1] * g4 - oy) for q in red}
                         if maxd is None:
                             near = min(dist.values())
-                            born = f'born {near / k:.0f}px from the centre at {t:.2f}s (radius {orad / k:.0f})'
+                            born = f'born {near / k:.0f}px from the origin point at {t:.2f}s (radius {orad / k:.0f})'
                             if near > orad: spread.append((round(t, 2), born))
                         else:
                             lim = maxd + (60 + 600 * (t - tprev)) * k

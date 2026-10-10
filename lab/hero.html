@@ -511,7 +511,8 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     title.querySelectorAll('.ln').forEach(ln=>{const m=document.createElement('i');m.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';ln.append(m);const by=m.getBoundingClientRect().top;m.remove();
       ln.querySelectorAll('.ch').forEach(e=>{const r=e.getBoundingClientRect();c.fillText(e.textContent.toUpperCase(),(r.left-pr.left-bx.l)*sc,(by-pr.top-bx.t)*sc)})});
     const gl=G.gl,U=G.U;gl.viewport(0,0,Wd,Hd);gl.bindTexture(gl.TEXTURE_2D,G.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,T);
-    const o=win().getBoundingClientRect(),ou=[(o.left+o.width/2-pr.left-bx.l)/bx.w,1-(o.top+o.height/2-pr.top-bx.t)/bx.h];
+    // (d3's smoke comes out from under the O — Grzegorz 10.10: born in its middle, it greyed the O out first)
+    const o=win().getBoundingClientRect(),oy=FX==='d3'?o.bottom-o.height*.06:o.top+o.height/2,ou=[(o.left+o.width/2-pr.left-bx.l)/bx.w,1-(oy-pr.top-bx.t)/bx.h];
     const ink=FX==='d2',mode=FX==='d3'?1:0,asp=bx.w/bx.h,tx=[(tb.left-pr.left-bx.l)/bx.w,(tb.right-pr.left-bx.l)/bx.w];
     const tc=[[tb.left,tb.top],[tb.right,tb.top],[tb.left,tb.bottom],[tb.right,tb.bottom]].map(([x,y])=>[(x-pr.left-bx.l)/bx.w,1-(y-pr.top-bx.t)/bx.h]);
     const dmax=Math.max(...tc.map(([x,y])=>Math.hypot((x-ou[0])*asp,y-ou[1])));

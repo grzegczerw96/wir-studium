@@ -54,7 +54,8 @@ Stan na 10.10.2026, ostatnie zmiany: start bez mignięcia innego układu (strona
   - „O” = obrys prawdziwego znaku O kroju (zmierzony z canvas: szerokość, pudełko farby), w środku **metalowa spirala 3D z głównej strony** (ok. 90% szerokości światła litery), **na wprost, bez kołysania i bez reakcji na mysz** (obrót wokół pionu i kołysanie robiły jedną stronę pierścienia grubszą i bryła wyglądała na przesuniętą; zmierzone: odchylenie środka ok. 1,5 px); biała spirala 2D rozciągnięta do światła była „za duża i płaska”; jeśli „O” nie zadziała, wracamy do układu 1 (jak w oryginale, `?v=1`);
   - paski na dole po wejściu zawsze wszystkie trzy, pełne;
   - desktop wg ustawienia Grzegorza (1536×742): tytuł 5,68rem w lewo i 1,07rem w górę od środka, notka na dole po prawej, 2,8rem nad paskami (`bottom: 7,8rem`, `right: gut + .38rem`); tytuł w układzie 2 większy: 9,75rem (tablet 8,4rem) zamiast 8,75rem;
-  - **tytuł: tylko d3** (Grzegorz 10.10): dym w zwolnionym tempie (WebGL) rodzi się w środku „O”, gdy elipsa już w nim jest, rozchodzi się pierścieniem, napis wyłania się za jego czołem; notka, gdy czoło minie środek tytułu; pozostałe wersje tylko przez `?fx=`;
+  - **tytuł: tylko d3** (Grzegorz 10.10): dym w zwolnionym tempie (WebGL) wypływa **spod litery „O”** (nie z jej środka: wtedy „O” szarzało), gdy elipsa już w nim jest, rozchodzi się pierścieniem, napis wyłania się za jego czołem; notka, gdy czoło minie środek tytułu; pozostałe wersje tylko przez `?fx=`;
+  - **wersja 5 (dym z „O”, maska) zachowana** w `lab/hero.html?fx=5`: może się przydać na telefony (lżejsza niż WebGL);
   - **wybrane wejście: C** (elipsa ładowania wskakuje w „O”); potem **tytuł pojawia się jak z dymu**; zostają 3 wersje (`?fx=3|5|7|7b|7c`): zawirowanie, dym z „O”, zbieranie się (a szept, b podmuch, c kłąb); **wspólny rytm**: powolny, bardzo jasny początek (połowa czasu), szybki rdzeń, w którym forma i czerń przychodzą razem (nie „szary napis zmieniający kolor”), końcówka spokojna; notka od środka na boki, nierówno, startuje z rdzeniem tytułu, kreski po niej, te same czasy w każdej wersji;
   - wejście hero do wyboru w `lab/hero.html` (`?w=A|B|C`): A jak w oryginale; B najpierw „O” (bryła się wkręca), litery falą od niego; C elipsa ładowania z bryłą na środku pustej strony (CSS od pierwszego malowania, 10 × 10,5rem), po gotowości przejeżdża w „O” (1,15 s quart in-out), litery wstają wokół; rekomendacja Claude: C;
   - `lab/hero.html` ma tryb „przesuń”: Grzegorz sam przesuwa tytuł i notkę, przesunięcia (w rem) są w adresie (`&t=x,y&n=x,y`) i do skopiowania.
@@ -86,6 +87,18 @@ Narzędzia są w `tools/` (Python 3.8, uruchamiane przez `py -I`). Biblioteki le
 Pobrany Chromium Playwrighta nie startuje na tym Windowsie (błąd „konfiguracja równoczesna”), więc narzędzia uruchamiają zainstalowany Chrome (`channel='chrome'`). Gdy brakuje `wir-tools`, odtwarza się go powyższymi poleceniami.
 
 **Zasada:** szukać błędów automatycznie i tanio, a oczami oglądać tylko to, co narzędzie zgłosi. Zrzuty ekranu są najdroższą częścią pracy, dlatego przegląd składa zgłoszone kadry w jeden arkusz (`out/audit_sheet_<urządzenie>.png`).
+
+**Które narzędzie przy czym** (nie wszystkie zawsze; dobierać do tego, co się zmienia):
+
+| Co budujemy albo zmieniamy | Narzędzia |
+|---|---|
+| Liczby z oryginału, porównanie naszej sekcji z cappen | `probe.py` |
+| Układ sekcji w spoczynku, różne ekrany, paski, przewijanie w poziomie, ucięty tekst | `audit.py` (`--section`) |
+| Przejścia przy przewijaniu między sekcjami, reguły „A zgasło, zanim weszło B”, zmiana kierunku | `paths.py` (+ `audit.py` w kilku pozycjach) |
+| Coś ma stać w czymś (bryła w „O”, okno na tekście) | `center.py` (z pikseli) |
+| Każdy ruch, w którym elementy mogą na siebie wejść (wejścia, przejścia) | `overlap.py` (pudełka co klatkę) |
+| Wejścia po załadowaniu, efekty z maską, filtrem lub WebGL (dym, mgła): przeskoki, krawędzie warstw, kolejność, skąd efekt rusza | `motion.py` (piksele co klatkę; `?dbg=` w stronie, `--origin`) |
+| Ciężkie efekty, płynność, pasek adresu | `phone.py` na prawdziwym telefonie |
 
 | Poziom | Kiedy | Co | Koszt |
 |---|---|---|---|
