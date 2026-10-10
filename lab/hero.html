@@ -155,26 +155,16 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
 </div></section>
 <section class="after">Tu zaczyna się manifest (czarna sala). Przewiń w górę, żeby wrócić do hero.</section>
 <div class="lbl" id="lbl"></div>
-<!-- filters for the title's smoke effects (3: turbulent displacement + blur; 4: noise used as a growing alpha mask; 6: horizontal blur) -->
+<!-- the filter of title version 3 (turbulent displacement + blur) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="fxSmoke" x="-15%" y="-25%" width="130%" height="150%" color-interpolation-filters="sRGB">
     <feTurbulence id="fxSmokeT" type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="2" seed="7" result="t"/>
     <feDisplacementMap id="fxSmokeD" in="SourceGraphic" in2="t" scale="0" xChannelSelector="R" yChannelSelector="G" result="d"/>
     <feGaussianBlur id="fxSmokeB" in="d" stdDeviation="0"/>
   </filter>
-  <filter id="fxGrain" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
-    <feTurbulence id="fxGrainT" type="fractalNoise" baseFrequency="0.055" numOctaves="2" seed="3" result="n"/>
-    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="na"/>
-    <feComponentTransfer in="na" result="m"><feFuncA id="fxGrainA" type="linear" slope="5" intercept="-4.5"/></feComponentTransfer>
-    <feGaussianBlur in="m" stdDeviation="1.5" result="mb"/>
-    <feComposite in="SourceGraphic" in2="mb" operator="in"/>
-  </filter>
-  <filter id="fxStreak" x="-30%" y="-10%" width="160%" height="120%"><feGaussianBlur id="fxStreakB" stdDeviation="0 0"/></filter>
 </svg>
 <nav class="ctl" aria-label="Warianty">
-  <span class="cap">tytuł</span><button data-fx="1">1</button><button data-fx="2">2</button><button data-fx="3">3</button><button data-fx="4">4</button><button data-fx="5">5</button><button data-fx="6">6</button><button data-fx="7">7</button><button data-fx="8">8</button><button data-fx="9">9</button>
-  <span class="sep"></span>
-  <span class="cap">notka</span><button data-nx="a">a</button><button data-nx="b">b</button><button data-nx="c">c</button>
+  <span class="cap">tytuł</span><button data-fx="3">3</button><button data-fx="5">5</button><button data-fx="7">7a</button><button data-fx="7b">7b</button><button data-fx="7c">7c</button>
   <span class="sep"></span>
   <button id="replay" title="Odtwórz wejście">↻</button>
   <span class="sep"></span>
@@ -191,9 +181,8 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
   const FN={1:'Inter Tight Black (jak Helvetica Now)',2:'Archivo Black, normalna szerokość',3:'Archivo Black 125% (obecny)',4:'Schibsted Grotesk Black'};
   const XN={0:'gaśnie (jak cappen)',1:'rozmycie',2:'rozsunięcie od O',3:'rozsunięcie i rozmycie'};
   // chosen 10.10: layout 2 with face A (the others stay reachable with ?v=&f=); the switch now compares the title's exit
-  const q=new URLSearchParams(location.search);let V=q.get('v')||'2',F=q.get('f')||'1',X=q.get('x')||'1',IN=(q.get('w')||'C').toUpperCase(),FX=q.get('fx')||'1',NX=q.get('nx')||'a';
-  const FXN={1:'mgła',2:'dym w górę',3:'zawirowanie (dym)',4:'rozpraszanie (szum)',5:'dym z „O”',6:'smugi wiru',7:'zbieranie się (dym, czerń na końcu)',8:'oddech',9:'zawirowanie, czerń na końcu'};
-  const NXN={a:'od środka, nierówno (słowa)',b:'od środka, miękka maska',c:'od środka, pył (litery)'};
+  const q=new URLSearchParams(location.search);let V=q.get('v')||'2',F=q.get('f')||'1',X=q.get('x')||'1',IN=(q.get('w')||'C').toUpperCase(),FX=q.get('fx')||'7',NX='a';
+  const FXN={3:'zawirowanie',5:'dym z „O”',7:'zbieranie a · szept','7b':'zbieranie b · podmuch','7c':'zbieranie c · kłąb'};
   const WN={A:'jak w oryginale',B:'najpierw O, litery falą od niego',C:'elipsa ładowania wskakuje w O',D:'nawijanie drutu, potem w O',
     E:'z wnętrza O: czerń się kurczy, napis wyostrza',F:'nawijanie w czerni, potem z wnętrza O',G:'wir wyrzuca litery po spirali'};
   const probe=document.createElement('i');probe.style.cssText='position:absolute;width:calc(var(--r)*1);visibility:hidden';document.body.append(probe);
@@ -235,7 +224,7 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     document.querySelectorAll('.ctl [data-fx]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.fx===FX));
     document.querySelectorAll('.ctl [data-nx]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.nx===NX));
     history.replaceState(null,'',query());
-    lbl.textContent=IN==='C'?'Tytuł '+FX+' · '+FXN[FX]+'  /  notka '+NX+' · '+NXN[NX]:'Wejście '+IN+' · '+WN[IN];lbl.classList.remove('off');clearTimeout(apply.t);apply.t=setTimeout(()=>lbl.classList.add('off'),3500);
+    lbl.textContent=IN==='C'?'Tytuł '+(FXN[FX]||FX)+'  /  notka od środka, nierówno':'Wejście '+IN+' · '+WN[IN];lbl.classList.remove('off');clearTimeout(apply.t);apply.t=setTimeout(()=>lbl.classList.add('off'),3500);
     build();fit();if(V==='4')placeWin4();splitNote();applyOff();alignNote();cacheCh();scrollTo(0,0);enter()}
   /* ---- offsets set by hand (in rem, so they hold at every width) ---- */
   const num=v=>(v||'0,0').split(',').map(Number);const OFF={t:num(q.get('t')),n:num(q.get('n'))};
@@ -430,12 +419,6 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
          the header, the note and the stripes follow. On the first load the oval is already there (CSS); ↻ replays it. */
   // (as the original, the page always starts at the top: a reload in the middle restored the scroll and the entrance
   //  played on a window that was already growing over the letters)
-  /* ---- the title's appearance after entrance C (Grzegorz 10.10: "as from smoke, a dispersion out of the blur, subtle")
-     1 mist · 2 rising smoke · 3 swirl (SVG turbulence displaces the edges) · 4 dispersion (SVG noise fills the letters)
-     5 smoke from the O (a soft circle opening from the O) · 6 whirl streaks (horizontal blur, lines from alternate sides)
-     7 gathering (scattered letters drift into place) · 8 breath (the whole title out of a light haze)
-     then the note from its middle to the sides (a: words, unevenly · b: a soft mask · c: letters like dust), then the
-     stripes as in C. Every random number comes from a fixed seed, so a replay is the same. ---- */
   const seeded=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
   const setFx=(el,v)=>{if('o' in v)el.style.opacity=v.o.toFixed(3);if('b' in v)el.style.filter=v.b>.05?'blur('+v.b.toFixed(2)+'px)':'';
     if('x' in v||'y' in v)el.style.translate=(v.x||0).toFixed(1)+'px '+(v.y||0).toFixed(1)+'px';
@@ -444,54 +427,54 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
   // one element from → to: hidden at its start values at once, then tweened, then cleared
   const fxTo=(el,from,to,dur,ease,at)=>{const v={...from};setFx(el,v);tl.to(v,{...to,duration:dur,ease,onUpdate:()=>setFx(el,v),onComplete:()=>clearFx(el)},at)};
   const svgFx=id=>document.getElementById(id);
-  // (Grzegorz 10.10: "the black only at the very end" — a light smoke at once, then it thickens into black in the last part)
-  const lateBlack=t=>.35*Math.min(1,t/.2)+.65*Math.pow(t,3);
-  function titleIn(at){const ch=[...title.querySelectorAll('.ch')],rnd=seeded(17+ +FX),k=R()/14,fs=FS,lns=[...title.querySelectorAll('.ln')];
+  /* ---- the title's appearance after entrance C: three versions, one rhythm (Grzegorz 10.10)
+     a slow, very light opening that does not stir things up (the first half), a fast core in which the form gathers and
+     darkens together — never a long grey title that only changes its colour — and the settling end as before.
+     3  swirl: the letters' edges are loose smoke (SVG turbulence displaces them, blur softens) that pulls into shape
+     5  smoke from the O: a soft circle opens from the O; its feather closes at the very end, so nothing jumps
+     7  gathering, three ways: a · whisper (faint letters drift with a little sway, then fly home), b · gust (a larger
+        sway, then a fast swoop stretched by its speed), c · puff (each letter a large soft puff condensing in place)
+     The note and the stripes keep the same times in all of them (those of 7). ---- */
+  const DUR=2.3,C0=.5,C1=.8;   // every title: [0, .5] slow · [.5, .8] core · [.8, 1] end (of its own time)
+  const sIO=x=>.5-.5*Math.cos(Math.PI*x),p3IO=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,p2O=x=>1-(1-x)*(1-x);
+  const ph=t=>({s:clamp(t/C0),c:clamp((t-C0)/(C1-C0)),e:clamp((t-C1)/(1-C1))});
+  // form: 0 smoke → 1 shape; ink: the opacity (light during the slow part, most of it gained in the core)
+  const form=t=>{const q=ph(t);return .2*sIO(q.s)+.72*p3IO(q.c)+.08*p2O(q.e)};
+  const ink=t=>{const q=ph(t);return .12*sIO(q.s)+.68*p3IO(q.c)+.2*p2O(q.e)};
+  function titleIn(at){const ch=[...title.querySelectorAll('.ch')],k=R()/14,fs=FS;
     gsap.set(ch,{'--rx':'0deg','--sy':1});
-    if(FX==='1'){ch.forEach(c=>fxTo(c,{o:0,b:14*k,s:1.06},{o:1,b:0,s:1},1.6,'power2.out',at+rnd()*.7));return at+2.3}
-    if(FX==='2'){ch.forEach(c=>{const li=lns.length-1-lns.indexOf(c.closest('.ln'));c.style.transformOrigin='50% 100%';
-      fxTo(c,{o:0,b:12*k,y:.18*fs,sy:1.15},{o:1,b:0,y:0,sy:1},1.8,'power3.out',at+li*.18+rnd()*.25)});return at+2.6}
-    if(FX==='3'||FX==='9'){const late=FX==='9',d=svgFx('fxSmokeD'),b=svgFx('fxSmokeB'),t=svgFx('fxSmokeT'),v={d:45*k,b:9*k,o:0,f:0};title.style.filter='url(#fxSmoke)';
-      const put=()=>{d.setAttribute('scale',v.d.toFixed(1));b.setAttribute('stdDeviation',v.b.toFixed(2));t.setAttribute('baseFrequency',(.012/k).toFixed(4)+' '+((.03-.012*v.f)/k).toFixed(4));ch.forEach(c=>c.style.opacity=v.o.toFixed(3))};put();
-      // (9: the same swirl, but the smoke stays light and the letters turn black only at the end; the swirl settles slower)
-      if(late){const q={t:0};tl.to(q,{t:1,duration:2.4,ease:'none',onUpdate:()=>{const e=1-Math.pow(1-q.t,1.8);v.d=45*k*(1-e);v.b=9*k*(1-Math.pow(q.t,1.4));v.f=e;v.o=lateBlack(q.t);put()},
-        onComplete:()=>{title.style.filter='';ch.forEach(clearFx)}},at);return at+2.4}
-      tl.to(v,{d:0,b:0,f:1,duration:2.1,ease:'power2.out',onUpdate:put,onComplete:()=>{title.style.filter='';ch.forEach(clearFx)}},at).to(v,{o:1,duration:1,ease:'power1.out',onUpdate:put},at);return at+2.1}
-    if(FX==='4'){const a=svgFx('fxGrainA'),t=svgFx('fxGrainT'),v={p:0},S=5;t.setAttribute('baseFrequency',(.035/k).toFixed(4));title.style.filter='url(#fxGrain)';
-      // (data-vis: how much of the title shows — the filter hides it, not opacity; read by tools/overlap.py)
-      const put=()=>{a.setAttribute('intercept',(-S*.9+(1+S*.8)*v.p).toFixed(3));title.dataset.vis=v.p.toFixed(3)};put();
-      tl.to(v,{p:1,duration:1.9,ease:'power1.inOut',onUpdate:put,onComplete:()=>{title.style.filter='';delete title.dataset.vis}},at);return at+1.9}
+    if(FX==='3'){const d=svgFx('fxSmokeD'),b=svgFx('fxSmokeB'),t=svgFx('fxSmokeT'),q={t:0};title.style.filter='url(#fxSmoke)';
+      const put=()=>{const tt=q.t,u=1-form(tt);d.setAttribute('scale',(70*k*u).toFixed(1));b.setAttribute('stdDeviation',(12*k*Math.pow(u,1.1)).toFixed(2));
+        // (the smoke keeps moving while it is loose)
+        t.setAttribute('baseFrequency',((.011+.004*Math.sin(tt*5))/k).toFixed(4)+' '+((.028-.01*(1-u))/k).toFixed(4));
+        ch.forEach(c=>c.style.opacity=ink(tt).toFixed(3))};put();
+      tl.to(q,{t:1,duration:DUR,ease:'none',onUpdate:put,onComplete:()=>{title.style.filter='';ch.forEach(clearFx)}},at);return at+DUR}
     if(FX==='5'){const o=win().getBoundingClientRect(),tb=title.getBoundingClientRect(),mx=o.left+o.width/2-tb.left,my=o.top+o.height/2-tb.top;
-      const far=Math.max(...[[0,0],[tb.width,0],[0,tb.height],[tb.width,tb.height]].map(([x,y])=>Math.hypot(x-mx,y-my)))*1.3,v={r:0,b:10*k};
+      const far=Math.max(...[[0,0],[tb.width,0],[0,tb.height],[tb.width,tb.height]].map(([x,y])=>Math.hypot(x-mx,y-my)))+2,v={r:0,b:10*k};
       const dist=ch.map(c=>{const r=c.getBoundingClientRect();return Math.hypot(r.left+r.width/2-tb.left-mx,r.top+r.height/2-tb.top-my)});
-      const put=()=>{const m='radial-gradient(circle at '+mx.toFixed(0)+'px '+my.toFixed(0)+'px, #000 '+(v.r*.5).toFixed(0)+'px, transparent '+v.r.toFixed(0)+'px)';
+      // (the solid part catches up with the edge as the circle reaches the farthest corner: removing the mask at the end
+      //  then changes nothing — before, the last letters at the right edge were still half-faded and jumped to black)
+      const put=()=>{const g=v.r/far,inner=v.r*(.5+.5*Math.pow(g,3)),m='radial-gradient(circle at '+mx.toFixed(0)+'px '+my.toFixed(0)+'px, #000 '+inner.toFixed(1)+'px, transparent '+v.r.toFixed(1)+'px)';
         title.style.maskImage=title.style.webkitMaskImage=m;title.style.filter=v.b>.05?'blur('+v.b.toFixed(2)+'px)':'';
-        ch.forEach((c,i)=>c.dataset.vis=clamp((v.r-dist[i])/Math.max(1,v.r*.5)).toFixed(3))};put();
+        ch.forEach((c,i)=>c.dataset.vis=clamp((v.r-dist[i])/Math.max(1,v.r-inner)).toFixed(3))};put();
       tl.to(v,{r:far,b:0,duration:2.1,ease:'power2.out',onUpdate:put,onComplete:()=>{title.style.maskImage=title.style.webkitMaskImage=title.style.filter='';ch.forEach(c=>delete c.dataset.vis)}},at);return at+2.1}
-    if(FX==='6'){const b=svgFx('fxStreakB'),v={sx:36*k,x:1,o:0};title.style.filter='url(#fxStreak)';
-      // (each line moves at most as far as there is room to the screen's edge: on a tablet the title is nearly full width)
-      const Wc=document.documentElement.clientWidth,gut=R()*1.25,off=lns.map((l,i)=>{const rg=document.createRange();rg.selectNodeContents(l);const r=rg.getBoundingClientRect(),d=i%2?-1:1;
-        return d*Math.max(0,Math.min(.35*fs,d>0?Wc-gut-r.right:r.left-gut))});
-      const put=()=>{b.setAttribute('stdDeviation',v.sx.toFixed(2)+' 0');lns.forEach((l,i)=>l.style.translate=(off[i]*v.x).toFixed(1)+'px 0');ch.forEach(c=>c.style.opacity=v.o.toFixed(3))};put();
-      tl.to(v,{sx:0,x:0,duration:1.8,ease:'power3.out',onUpdate:put,onComplete:()=>{title.style.filter='';lns.forEach(l=>l.style.translate='');ch.forEach(clearFx)}},at).to(v,{o:1,duration:.9,ease:'power1.out',onUpdate:put},at);return at+1.8}
-    if(FX==='7'){const tb=title.getBoundingClientRect(),tcx=tb.left+tb.width/2;
-      const Wc=document.documentElement.clientWidth,gut=R()*1.25;
-      // (Grzegorz 10.10: the letters were too far from home and too sharp too soon — now about half as far, a thicker smoke
-      //  (blur 22px·k, a little larger) at first, the position settling early and the black only at the end)
-      ch.forEach(c=>{const r=c.getBoundingClientRect(),dx=Math.min(Wc-gut-r.right,Math.max(gut-r.left,(r.left+r.width/2-tcx)*.1+(rnd()-.5)*.12*fs)),dy=(rnd()-.5)*.14*fs;
-        const q={t:0},v={o:0,b:22*k,x:dx,y:dy,s:1.08},put=()=>{const t=q.t,e=1-Math.pow(1-t,2.2);
-          v.x=dx*(1-e);v.y=dy*(1-e);v.s=1+.08*(1-e);v.b=22*k*(1-Math.pow(t,1.6));v.o=lateBlack(t);setFx(c,v)};setFx(c,v);
-        tl.to(q,{t:1,duration:2.1,ease:'none',onUpdate:put,onComplete:()=>clearFx(c)},at+rnd()*.45)});return at+2.55}
-    /* 8 */const v={o:0,b:6*k,s:1.035};const put=()=>{ch.forEach(c=>c.style.opacity=v.o.toFixed(3));title.style.filter=v.b>.05?'blur('+v.b.toFixed(2)+'px)':'';title.style.scale=v.s.toFixed(4)};put();
-    tl.to(v,{o:1,b:0,s:1,duration:2.4,ease:'power1.out',onUpdate:put,onComplete:()=>{ch.forEach(clearFx);title.style.filter=title.style.scale=''}},at);return at+2.4}
+    // 7 a/b/c
+    const kind=FX==='7b'?'b':FX==='7c'?'c':'a',rnd=seeded(77),tb=title.getBoundingClientRect(),tcx=tb.left+tb.width/2,Wc=document.documentElement.clientWidth,gut=R()*1.25;
+    ch.forEach(c=>{const r=c.getBoundingClientRect(),near=kind==='c';
+      let dx=(r.left+r.width/2-tcx)*(near?.04:.14)+(rnd()-.5)*(near?.06:.16)*fs;dx=Math.min(Wc-gut-r.right,Math.max(gut-r.left,dx));
+      const dy=(rnd()-.5)*(near?.08:.2)*fs,phi=rnd()*6.283,sw=(kind==='b'?.07:kind==='a'?.035:0)*fs,q={t:0};
+      const put=()=>{const t=q.t,u=1-form(t),core=ph(t).c,w=sw*(1-core);
+        const x=dx*u+Math.sin(phi+t*7)*w,y=dy*u+Math.cos(phi*1.3+t*5)*w*.7,s=1+(near?.55:.12)*u,sx=kind==='b'?1+.35*Math.sin(Math.PI*core):1;
+        c.style.opacity=ink(t).toFixed(3);const bl=(near?30:24)*k*Math.pow(u,1.2);c.style.filter=bl>.05?'blur('+bl.toFixed(2)+'px)':'';
+        c.style.translate=x.toFixed(1)+'px '+y.toFixed(1)+'px';c.style.scale=(s*sx).toFixed(4)+' '+s.toFixed(4)};put();
+      tl.to(q,{t:1,duration:DUR,ease:'none',onUpdate:put,onComplete:()=>clearFx(c)},at+rnd()*.25)});
+    return at+DUR+.25}
+  /* the note: its words appear from its middle out to the sides, unevenly (a little random), out of a light blur */
   function noteIn(at){const k=R()/14,nb=note.getBoundingClientRect(),ncx=nb.left+nb.width/2,half=nb.width/2,rnd=seeded(5);
     note.querySelectorAll('.w').forEach(w=>{w.style.setProperty('--rx','0deg');w.style.setProperty('--sy','1')});
-    if(NX==='b'){const v={w:0};const put=()=>{const hw=v.w*64,fz=Math.min(14,hw),a=50-hw,b=50+hw,m='linear-gradient(90deg, transparent '+a.toFixed(1)+'%, #000 '+(a+fz).toFixed(1)+'%, #000 '+(b-fz).toFixed(1)+'%, transparent '+b.toFixed(1)+'%)';note.style.maskImage=note.style.webkitMaskImage=m;note.dataset.vis=v.w.toFixed(3)};put();
-      tl.to(v,{w:1,duration:1.5,ease:'power2.inOut',onUpdate:put,onComplete:()=>{note.style.maskImage=note.style.webkitMaskImage='';delete note.dataset.vis}},at);return at+1.5}
-    const parts=NX==='c'?[...note.querySelectorAll('.nl')]:[...note.querySelectorAll('.w')];
-    parts.forEach(el=>{const r=el.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-ncx)/half;
-      fxTo(el,{o:0,b:(NX==='c'?2:3)*k},{o:1,b:0},NX==='c'?.6:.9,'power1.out',at+d*(NX==='c'?.8:.7)+rnd()*(NX==='c'?.45:.3))});
-    return at+(NX==='c'?1.85:1.9)}
+    note.querySelectorAll('.w').forEach(el=>{const r=el.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-ncx)/half;
+      fxTo(el,{o:0,b:3*k},{o:1,b:0},.9,'power1.out',at+d*.7+rnd()*.3)});
+    return at+1.9}
   if('scrollRestoration' in history)history.scrollRestoration='manual';
   function enter(){
     tl&&tl.kill();(enter.g||[]).forEach(t=>t.kill());enter.g=[];scrollTo(0,0);title.querySelectorAll('.ch').forEach(c=>{c.style.translate=c.style.rotate=c.style.scale=c.style.opacity=c.style.filter=c.style.transformOrigin=''});
@@ -562,7 +545,8 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
       if(D){flip(M+.5,.035);linesAfter(M+.9,M+.5,.035*(ch.length-1));bars(M+1)}
       // (Grzegorz 10.10: the note starts half-way through the title's appearance)
       // (5 opens from the O, so it waits until the oval is in it: earlier, the travelling oval crossed letters already shown)
-      else{const t0=M+(FX==='5'?1.1:.45),te=titleIn(t0),ns=(t0+te)/2,ne=noteIn(ns);bars(ne-.3)}}
+      // (the note starts with the core of 7 and the stripes after it — the same times for every version, as Grzegorz asked)
+      else{const t0=M+.45;titleIn(FX==='5'?M+1.1:t0);const ne=noteIn(t0+DUR*C0);bars(ne-.3)}}
     enter.ran=true}
   document.querySelectorAll('.ctl [data-fx]').forEach(b=>b.onclick=()=>{FX=b.dataset.fx;IN='C';apply()});
   document.querySelectorAll('.ctl [data-nx]').forEach(b=>b.onclick=()=>{NX=b.dataset.nx;IN='C';apply()});
@@ -572,7 +556,7 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     if(on){tl&&tl.progress(1);lbl.textContent=offText();lbl.classList.remove('off')}else apply()};
   document.getElementById('copy').onclick=()=>{const t=offText()+'\n'+location.href;navigator.clipboard?navigator.clipboard.writeText(t).then(()=>{lbl.textContent='Skopiowano: '+offText()},()=>{lbl.textContent=t}):lbl.textContent=t};
   document.getElementById('zero').onclick=()=>{OFF.t=[0,0];OFF.n=[0,0];applyOff();history.replaceState(null,'',query());alignNote();cacheCh();lbl.textContent=offText()};
-  addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(/^[1-9]$/.test(k)){FX=k;IN='C';apply()}else if('abc'.indexOf(k)>-1&&k.length===1){NX=k;IN='C';apply()}});
+  addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='3'||k==='5'||k==='7'){FX=k;IN='C';apply()}});
   let lastW=innerWidth;addEventListener('resize',()=>{size();if(innerWidth!==lastW){lastW=innerWidth;fit();if(V==='4')placeWin4();applyOff();alignNote();cacheCh()}});
   size();
   // every face is loaded before the first measure, so switching never fits a line in a fallback font

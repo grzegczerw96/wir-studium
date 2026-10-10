@@ -27,7 +27,8 @@ Słownik, z którego Claude dobiera ruch. Każda pozycja: co robi, kiedy pasuje,
 | 9 | Zawirowanie, czerń na końcu | jak 3, ale dym jasny i czerń dopiero na końcu, zawirowanie uspokaja się wolniej | 2,4 s; krycie jak w 7 |
 
 k = rem/14 (rozmycie rośnie z wielkością liter). Notka po tytule: a) słowa od środka na boki z losowym opóźnieniem, b) miękka maska od środka, c) litery jak pył. Wersje 3 i 4 pierwotnie za mocne (zniekształcone litery, ostre plamy), złagodzone.
-**Uwagi Grzegorza (10.10):** na razie 3, podoba się też 7; „czerń dopiero na samym końcu” (lekki dym od razu, gęstnienie w czerń w ostatniej części); notka a rusza w połowie pojawiania się tytułu.
+**Zostają 3, 5 i 7 (a, b, c); reszta odrzucona (10.10).** Wspólny rytm (`form`, `ink` w `lab/hero.html`): [0–.5] wolno i bardzo jasno (krycie do .12, forma do .2, lekkie kołysanie), [.5–.8] szybki rdzeń (forma i krycie razem, cubic in-out), [.8–1] spokojne domknięcie. 5: wypełnienie koła dogania jego brzeg na końcu, więc zdjęcie maski nic nie zmienia (wcześniej skok przy prawej krawędzi). Grzegorz: „nie lubię, jak tekst tylko zmienia kolor z jednego w drugi – to ma być cała forma”.
+**Uwagi Grzegorza (10.10, wcześniej):** na razie 3, podoba się też 7; „czerń dopiero na samym końcu” (lekki dym od razu, gęstnienie w czerń w ostatniej części); notka a rusza w połowie pojawiania się tytułu.
 
 ## Okna i bryła
 
