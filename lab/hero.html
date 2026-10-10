@@ -143,6 +143,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   <button id="edit" title="Przesuwanie elementów">przesuń</button><button class="ed" id="copy">kopiuj</button><button class="ed" id="zero">zeruj</button>
 </nav>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 <script>
 (function(){
   const H=document.documentElement,title=document.getElementById('title'),pin=document.getElementById('pin'),stage=document.getElementById('stage'),
@@ -262,14 +263,81 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
       const s=(X==='2'||X==='3')?quadOut(clamp(P/.55)):0;
       CHS.forEach(([c,dx,dy])=>{c.style.translate=s?(dx*s*1.3).toFixed(1)+'px '+(dy*s*1.3).toFixed(1)+'px':'';c.style.scale=s?String(1+.35*s):''})}
     // coil: from the window's middle and size to the screen's, half a turn and tilting flat (the original's scene)
-    const m1=Math.min(W,Hh)*.95;let m0=Math.min(w0,h0)*1.05,ccx=cx,ccy=cy,sq0=1;
-    if(oval){const cw=OC.w*FS*e;m0=cw/.74;ccx=cx+OC.dx*FS;ccy=cy+OC.dy*FS;sq0=OC.h/OC.w}   // (the coil's outer ring = the counter's width; squashed to its height)
-    drawCoil(now/1000,ccx+(W/2-ccx)*k,ccy+(Hh/2-ccy)*k,m0+(m1-m0)*quartOut(clamp(P)),quartOut(clamp(P/.75)),1+(sq0-1)*(1-k),oval?1-k:0);
+    let ccx=cx,ccy=cy;if(oval){ccx=cx+OC.dx*FS;ccy=cy+OC.dy*FS}
+    const PX=ccx+(W/2-ccx)*k,PY=ccy+(Hh/2-ccy)*k,turn=quartOut(clamp(P/.75));
+    window.__o={cx,cy,ccx,ccy,OC,FS,r:[r.left,r.top,r.width,r.height]};
+    if(GL){
+      // in the O: turned about its upright axis (yaw .5), so the ring is a tall oval like the O's counter, ~90% of the
+      // counter's width; growing: to .75 of the screen (the original's scale), tipping to the main page's 60° and half a turn
+      const YAW=oval?.5:0,u=3.6*cv.clientHeight/4.823;
+      const D0=oval?OC.w*FS*e*.9/Math.cos(YAW):Math.min(w0,h0)*.8,D1=Math.min(W,Hh)*.75,D=D0+(D1-D0)*quartOut(clamp(P));
+      GL.setPos(PX,PY);GL.setPose((oval?0:.35)+((oval?1.05:.7))*turn,Math.max(D,.01)/u,-Math.PI*turn,.3+.7*turn,YAW*(1-turn));GL.draw(now/1000)}
+    else{const m1=Math.min(W,Hh)*.95;let m0=Math.min(w0,h0)*1.05,sq0=1;if(oval){m0=OC.w*FS*e/.74;sq0=OC.h/OC.w}
+      drawCoil(now/1000,PX,PY,m0+(m1-m0)*quartOut(clamp(P)),turn,1+(sq0-1)*(1-k),oval?1-k:0)}
     requestAnimationFrame(frame)}
 
-  /* the coil (2D: a helix wound round a torus, as the main page's fallback renderer) */
-  const g=cv.getContext('2d');let dpr=1,CW=0,CH=0;
-  function size(){dpr=Math.min(devicePixelRatio||1,1.75);CW=cv.clientWidth;CH=cv.clientHeight;cv.width=CW*dpr;cv.height=CH*dpr}
+  /* the coil: the main page's metal one (Three.js, same geometry, material and studio light); the 2D drawing only
+     if WebGL is missing */
+  const coarse=matchMedia('(pointer: coarse)').matches;
+  function GLCoil(canvas,opt={}){
+    const mk=opt.mouse||1;
+    if(!window.THREE)return null;
+    let renderer;
+    try{renderer=new THREE.WebGLRenderer({canvas,antialias:!coarse,alpha:true,powerPreference:'high-performance'})}catch(e){return null}
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1,coarse?1.5:2));
+    renderer.outputEncoding=THREE.sRGBEncoding;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+    renderer.setClearColor(0x000000,0);
+    const scene=new THREE.Scene();
+    const cam=new THREE.PerspectiveCamera(30,1,.1,100);cam.position.set(0,0,9);
+    // a dark studio with a few softbox strips, baked once into an environment map for the reflections
+    const studio=new THREE.Scene();studio.background=new THREE.Color(0x000000);
+    const box=(w,h,x,y,z,v)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(v,v,v),side:THREE.DoubleSide}));m.position.set(x,y,z);m.lookAt(0,0,0);studio.add(m)};
+    box(7,1.1,0,5,2,4.2);box(.9,8,-6,0,1.5,2.6);box(.9,8,6,1,-2,1.4);box(9,.5,0,-5,3,.7);box(2.5,2.5,3,3,6,1.1);
+    const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(studio,.03).texture;pm.dispose();
+    class Helix extends THREE.Curve{constructor(R,r,n){super();this.R=R;this.r=r;this.n=n}
+      getPoint(t,o=new THREE.Vector3()){const p=t*Math.PI*2,th=p*this.n,rr=this.R+this.r*Math.cos(th);return o.set(rr*Math.cos(p),rr*Math.sin(p),this.r*Math.sin(th))}}
+    const turns=coarse?22:28;
+    const geo=new THREE.TubeGeometry(new Helix(1.22,.5,turns),turns*(coarse?22:36),.078,coarse?10:16,true);
+    const mat=new THREE.MeshPhysicalMaterial({color:0xdedede,metalness:1,roughness:.2,clearcoat:.5,clearcoatRoughness:.25});
+    // shade from above: everything above height uY (±uW) goes dark by uAmt, like the light falling off at the top
+    const shadeU={uY:{value:3},uW:{value:.75},uAmt:{value:0}};
+    mat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,shadeU);
+      sh.vertexShader='varying float vWY;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\n  vWY=(modelMatrix*vec4(transformed,1.0)).y;');
+      sh.fragmentShader='uniform float uY;uniform float uW;uniform float uAmt;varying float vWY;\n'+sh.fragmentShader.replace('#include <dithering_fragment>','gl_FragColor.rgb*=1.0-uAmt*smoothstep(uY-uW,uY+uW,vWY);\n#include <dithering_fragment>')};
+    const grp=new THREE.Group();grp.add(new THREE.Mesh(geo,mat));scene.add(grp);
+    const key=new THREE.DirectionalLight(0xffffff,.9);key.position.set(-3,4,5);scene.add(key);
+    let W=0,H=0;
+    function size(){W=canvas.clientWidth;H=canvas.clientHeight;if(!W||!H)return;renderer.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix()}
+    size();
+    // compile the metal's shaders now, while the page loads (on a phone the first draw otherwise froze the scroll for ~.2 s)
+    try{renderer.compile(scene,cam)}catch(e){}
+    let spin=0,last=0,vel=0,mx=0,my=0,tmx=0,tmy=0,tilt=1.05,pscale=1,dark=0;
+    if(!coarse)addEventListener('pointermove',e=>{tmx=e.clientX/innerWidth-.5;tmy=e.clientY/innerHeight-.5},{passive:true});
+    function draw(t){
+      if(!W)size();if(!W)return;
+      const dt=Math.min(.05,Math.max(0,t-last));last=t;
+      spin+=dt*(.32+Math.min(vel,4)*.8);vel*=.93;            // scroll speed spins it faster, then it calms down
+      mx+=(tmx-mx)*.05;my+=(tmy-my)*.05;                       // the cursor tilts it slightly
+      grp.rotation.set(tilt+(Math.sin(t*.37)*.1+my*.3*mk)*sway,yaw+(Math.sin(t*.23)*.2+mx*.4*mk)*sway,spin+zr);grp.scale.setScalar(pscale*(1-.15*dark));
+      renderer.render(scene,cam);
+    }
+    const full=geo.index.count;
+    const setShade=(amt,y)=>{shadeU.uAmt.value=amt;shadeU.uY.value=y};
+    // at the end the shadow line keeps sliding down until the whole coil is in the dark, while it recedes a little
+    // the shadow line slides down slowly, so a faint lower rim is still there when the texts start to leave;
+    // the last 20% fades what is left together with the texts
+    let lastOp=-1;   // (styles are written only when they change: a write every frame keeps the page restyling)
+    const setDark=v=>{dark=v;setShade(.9+.1*v,.35-1.5*v);const o=v<.8?1:Math.max(0,(1-v)/.2);if(o!==lastOp){lastOp=o;canvas.style.opacity=o}};
+    let zr=0,sway=1,yaw=0;const setPose=(tl,sc,z=0,sw=1,y=0)=>{tilt=tl;pscale=sc;zr=z;sway=sw;yaw=y};
+    // place the coil centre at screen pixel (px,py) of its canvas (camera at z 9, 30° fov → 4.823 units of height)
+    const setPos=(px,py)=>{if(!W)size();if(!H)return;const k=2*9*Math.tan(Math.PI/12)/H;grp.position.set((px-W/2)*k,-(py-H/2)*k,0)};
+    return {draw,size,canvas,setDark,setShade,setPose,setPos,dpr:v=>{renderer.setPixelRatio(v);size()},kick:v=>{vel=Math.max(vel,Math.abs(v))},
+      setProgress:v=>geo.setDrawRange(0,Math.floor(full*Math.min(1,Math.max(0,v))/6)*6)};   // the wire is drawn along its length
+  }
+  const GL=GLCoil(cv);
+  const g=GL?null:cv.getContext('2d');let dpr=1,CW=0,CH=0;
+  function size(){if(GL){GL.size();return}dpr=Math.min(devicePixelRatio||1,1.75);CW=cv.clientWidth;CH=cv.clientHeight;cv.width=CW*dpr;cv.height=CH*dpr}
   const SEG=900,TURNS=26,Pt=new Float32Array((SEG+1)*4),order=[...Array(SEG).keys()],Lt=[-.45,-.62,.64];{const n=Math.hypot(...Lt);Lt.forEach((v,i)=>Lt[i]=v/n)}
   function drawCoil(t,X,Y,m,turn,sq=1,wt=0){
     g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,CW,CH);if(m<4)return;

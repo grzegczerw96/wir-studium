@@ -50,7 +50,7 @@ Stan na 10.10.2026, ostatnie zmiany: start bez mignięcia innego układu (strona
   - spirala w „O” mniejsza (ok. 72% wysokości litery) i na wprost, dziura na środku; przechyla się dopiero, gdy okno rośnie;
   - notka na desktopie: pierwsza linia na równi z górą wersalików tytułu (liczone z linii bazowej i `actualBoundingBoxAscent`);
   - gasnący szary napis przy rośnięciu okna rozprasza; **wybrane wyjście 1: rozmycie** (litery w miejscu, rozmywają się i gasną; nie prześwitują przez rosnącą ramkę);
-  - „O” = obrys prawdziwego znaku O kroju (zmierzony z canvas: szerokość, pudełko farby), a **biała spirala wypełnia jego wnętrze** (rozmiar i owal światła litery, dokładnie na środku); przy rośnięciu okna robi się metalowa; jeśli to nie zadziała, wracamy do układu jak w oryginale;
+  - „O” = obrys prawdziwego znaku O kroju (zmierzony z canvas: szerokość, pudełko farby), w środku **metalowa spirala 3D z głównej strony** (ok. 90% szerokości światła litery, obrócona o 0,5 rad wokół pionu, żeby była wysokim owalem jak światło O); biała spirala 2D rozciągnięta do światła była „za duża i płaska”; jeśli „O” nie zadziała, wracamy do układu 1 (jak w oryginale, `?v=1`);
   - paski na dole po wejściu zawsze wszystkie trzy, pełne;
   - `lab/hero.html` ma tryb „przesuń”: Grzegorz sam przesuwa tytuł i notkę, przesunięcia (w rem) są w adresie (`&t=x,y&n=x,y`) i do skopiowania.
 - **Fonty jak w oryginale:**
@@ -268,6 +268,7 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 | Telefon: kontakt 22 ms na klatkę | Napis 7,5rem (ok. 1500 px) przesuwany co klatkę bez własnej warstwy | `will-change:translate` → 11 ms |
 | Telefon: duże koszty stylów przy zmianie koloru strony | Zmienna `--room` na `<html>` dziedziczy się do każdego elementu | Kolor ustawiany na 4 sekcjach |
 | Po załadowaniu przez kilka sekund inny układ (czarny prostokąt na środku, grube paski, tekst w zastępczym foncie), potem przeskok | Klasa `motion` (od niej zależy układ) dodawana dopiero przez skrypt na końcu strony, który czeka na GSAP i Three z CDN; wejście startowało niezależnie od tego, czy coś widać | Mały skrypt w `<head>` ustala `motion` i `wait` przed pierwszym malowaniem; `html.wait .hd, main` ukryte; główny skrypt czeka na fonty pierwszego ekranu (max 2,5 s), mierzy, odsłania i dopiero wtedy gra oś `enter`. Awaryjnie CSS odsłania po 15 s. Sprawdzać nagraniem ładowania z wolną siecią (screencast CDP + `Network.emulateNetworkConditions`) |
+| Spirala „nie na środku” litery O, choć liczby się zgadzały | Ocena na oko: światło z lewej góry przesuwa jasną masę, a rozciągnięty pierścień 2D wygląda płasko | Mierzyć pikselami w obrębie elipsy (jasne piksele kontra obrys, wynik w px, `window.__o` w `lab/hero.html`); do oceny używać prawdziwej spirali 3D, nie uproszczonej |
 | Telefon: szarpnięcie przy pierwszym pojawieniu się spirali | Kompilacja shaderów przy pierwszym rysowaniu; spirale rysowane także przy kryciu 0 | `renderer.compile` przy ładowaniu; rysowanie tylko widocznych (`coil.on`) |
 
 ## 8. Lista kontrolna przed oddaniem sekcji
