@@ -24,7 +24,7 @@ with sync_playwright() as p:
         ctx = b.new_context(viewport={'width': W, 'height': H}, device_scale_factor=dpr, is_mobile=mobile, has_touch=mobile)
         pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)[:100]))
-        pg.goto(url + ('&' if '?' in url else '?') + 'v=2&f=1&x=1'); pg.wait_for_timeout(2800)
+        pg.goto(url + ('&' if '?' in url else '?') + 'v=2&f=1&x=1&w=A'); pg.wait_for_timeout(2800)
         if not mobile: pg.mouse.move(W - 40, H - 20)
         pg.wait_for_timeout(1200)
         r = pg.evaluate("(()=>{const r=document.getElementById('winIn').getBoundingClientRect();return [r.left,r.top,r.width,r.height]})()")

@@ -6,9 +6,11 @@ Every ~40 ms of an entrance and at 21 scroll positions it reads the live boxes a
   header         the logo or the menu button over a visible letter or note line
   window-note    the window over the note
   off-screen     a visible letter or note line past the left/right edge
+  letter-letter  two visible letters over each other (more than a quarter of the narrower one's width and a third of its
+                 height: neighbours touch by the -.04em tracking, lines by the .84 leading — that is not an overlap)
 'visible' = turned less than 75° (the flip), opacity of its block above .3. The O's own window next to its letters is
 not an overlap (tolerance 3 px), nor the window over letters that are already fading (scroll: by design, they blur away).
-usage: py -I tools/overlap.py [url] [--shots]   (phones and desktops, real scrollbar)"""
+usage: py -I tools/overlap.py [url] [--shots] [--w=CDEFG]   (phones and desktops, real scrollbar)"""
 import os, sys, json, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _env
@@ -16,6 +18,7 @@ from playwright.sync_api import sync_playwright
 args = [a for a in sys.argv[1:] if not a.startswith('--')]
 url = args[0] if args else 'file:///' + os.path.join(_env.REPO, 'lab', 'hero.html').replace('\\', '/')
 SHOTS = '--shots' in sys.argv
+WS = next((a[4:] for a in sys.argv if a.startswith('--w=')), 'CDEFG')
 out = os.path.join(_env.OUT, 'overlap'); os.makedirs(out, exist_ok=True)
 READ = r"""()=>{
  const deg=el=>{const v=el.style.getPropertyValue('--rx');return v?Math.abs(parseFloat(v)):0};
@@ -53,7 +56,8 @@ def check(s, scrolling):
     win, ob = s['win'], s['ob']
     near_o = win and ob and abs(win['b'][0] - ob[0]) < 4 and abs(win['b'][2] - ob[2]) < 4   # the window is the O itself
     for L in s['letters']:
-        if win and in_window(win, L['b']) and not (scrolling and L['o'] < .95):
+        # (a letter that is still fading in or out — the blur exit, entrances E/F, letters leaving the O in G — is let off)
+        if win and in_window(win, L['b']) and L['o'] >= .95:
             if near_o:
                 # the O's neighbours: only if a letter reaches into the oval by more than the tolerance
                 shrink = {'b': [win['b'][0] + TOL, win['b'][1] + TOL, win['b'][2] - TOL, win['b'][3] - TOL], 'rx': win['rx'], 'ry': win['ry']}
@@ -66,6 +70,13 @@ def check(s, scrolling):
             if inter(st, L['b'], 0): bad.append(('stripes', L['t']))
         for h in s['head']:
             if inter(h, L['b']): bad.append(('header', L['t']))
+    Ls = s['letters']
+    for i in range(len(Ls)):
+        for j in range(i + 1, len(Ls)):
+            a, c = Ls[i]['b'], Ls[j]['b']
+            ow, oh = min(a[2], c[2]) - max(a[0], c[0]), min(a[3], c[3]) - max(a[1], c[1])
+            if ow > .25 * min(a[2] - a[0], c[2] - c[0]) and oh > .34 * min(a[3] - a[1], c[3] - c[1]):
+                bad.append(('letter-letter', Ls[i]['t'] + Ls[j]['t']))
     for n in s['lines']:
         if win and in_window(win, n) and not scrolling: bad.append(('window-note', ''))
         if n[0] < -1 or n[2] > s['W'] + 1: bad.append(('off-screen', 'note'))
@@ -86,12 +97,12 @@ with sync_playwright() as p:
     for dev, opts in DEV.items():
         ctx = b.new_context(**opts); pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e)[:100]))
-        for w in 'ABC':
+        for w in WS:
             pg.evaluate('scrollTo(0,0)')   # (a reload keeps the scroll position: start every entrance at the top)
             pg.goto(url + ('&' if '?' in url else '?') + 'w=' + w)
             pg.wait_for_function('window.gsap&&document.querySelector("#title .ch")&&document.getElementById("stage").style.clipPath', timeout=20000)
             t0 = time.time(); found = {}
-            while time.time() - t0 < 3.6:
+            while time.time() - t0 < 4.8:
                 s = pg.evaluate(READ); t = round(time.time() - t0, 2)
                 for kind, what in check(s, False):
                     found.setdefault(kind, []).append((t, what))
