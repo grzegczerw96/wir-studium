@@ -94,6 +94,7 @@ Pobrany Chromium Playwrighta nie startuje na tym Windowsie (błąd „konfigurac
 |---|---|
 | Liczby z oryginału, porównanie naszej sekcji z cappen | `probe.py` |
 | Układ sekcji w spoczynku, różne ekrany, paski, przewijanie w poziomie, ucięty tekst | `audit.py` (`--section`) |
+| Czy układ trzyma się na każdym rozmiarze okna (grupy elementów nie wchodzą na siebie, nic nie wychodzi za ekran) | `sizes.py` (178 rozmiarów 320–1920 × 500–1080; grupy w `--groups`; lab: `?still=1`) |
 | Przejścia przy przewijaniu między sekcjami, reguły „A zgasło, zanim weszło B”, zmiana kierunku | `paths.py` (+ `audit.py` w kilku pozycjach) |
 | Coś ma stać w czymś (bryła w „O”, okno na tekście) | `center.py` (z pikseli) |
 | Każdy ruch, w którym elementy mogą na siebie wejść (wejścia, przejścia) | `overlap.py` (pudełka co klatkę) |
@@ -305,6 +306,8 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 | Dym w ramce z widocznymi granicami; tekst czasem przed dymem | Warstwa WebGL bez wygaszenia przy krawędziach; brzeg odsłaniania i dym liczone z różnych miejsc (gdzie szum rzadki, tekst wychodził przed dym) | Dym rzednie ku krawędziom warstwy (winieta), warstwa większa i przycięta tak, by nie wchodziła na notkę; dym budowany wokół tego samego brzegu, który odsłania tekst |
 | Przy przejściu z napisu rysowanego na tekst strony szary „dołek” albo cień | Przenikanie obu warstw naraz | Tekst strony wchodzi na wierzch identycznego rysunku, potem warstwa znika |
 | „Elipsa dolatuje, przerwa, kłąb dymu, przerwa, dym” | Dym startował po wylądowaniu elipsy, czoło z wolnym startem (sine in-out), kłąb i pierścień jako osobne fazy | Start dymu w trakcie lądowania elipsy, czoło sine out, źródło dymi aż do pierścienia; mierzyć `motion.py` (stall) |
+| Notka wchodzi na paski na niskim oknie szerokości tabletu (zrzut Grzegorza ~1000×700) | Tytuł dobierany tylko do szerokości; narzędzia sprawdzały 6 stałych rozmiarów | Tytuł mieści się też w wysokości; `tools/sizes.py` przechodzi przez 178 rozmiarów (na starej wersji: 20 złych) |
+| Na końcu dymu cały napis „wyostrza się” (telefon) albo krawędzie liter drgają | Rysowany napis w warstwie (75% rozdzielczości na telefonie, ułamkowa pozycja) różnił się od tekstu strony i był podmieniany naraz | Warstwa na pełnych pikselach i pod tekstem; litera strony wchodzi, gdy dym ją minie, a rysowana pod nią znika z warstwy |
 | Szarpnięcia 50–100 ms w chwili pojawiania się notki | Rozmycie (`filter: blur`) na ~20 słowach naraz | Same zanikanie słów; ciężkie filtry tylko na jednym elemencie albo w WebGL |
 | Spirala 7 px na prawo od środka „O” u Grzegorza, a w narzędziach na środku; „O” o 13 px węższe | Wycięcie okna liczone od `innerWidth`, który zawiera pasek przewijania (15 px), a warstwa z `clip-path` go nie zawiera; narzędzia ukrywały pasek, więc tego nie widziały | Wszystko w układzie warstwy (`stage.getBoundingClientRect()`), środek ekranu z `clientWidth`; testy z prawdziwym paskiem i gęstością 1,25 (`tools/center.py`) |
 | Spirala „nie na środku” litery O, choć liczby się zgadzały | Ocena na oko: światło z lewej góry przesuwa jasną masę, a rozciągnięty pierścień 2D wygląda płasko | Mierzyć pikselami w obrębie elipsy (jasne piksele kontra obrys, wynik w px, `window.__o` w `lab/hero.html`); do oceny używać prawdziwej spirali 3D, nie uproszczonej |
