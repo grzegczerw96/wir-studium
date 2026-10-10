@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wir Studio: próby hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Inter+Tight:wght@400;500;900&family=Schibsted+Grotesk:wght@400..900&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Lab page: four hero layouts × four title faces, switchable (1–4 / A–D, also ?v=&f= in the address).
+   Scroll down to see how the window grows to the full screen (the original's curve: edges quad out over 75 %,
+   corners after; title, note and stripes fade over the first half). Units follow the original's rem (--r). */
+:root{--paper:#fcfcfc;--ink:#050505;--r:3.8647vw;--gut:calc(var(--r)*1.25);
+  --face:"Inter Tight";--wdth:100;--ls:-.04em;--fw:900}
+@media (min-width:600px){:root{--r:2.0833vw}}
+@media (min-width:1025px){:root{--r:min(1.1111vw,2.5556vh)}}
+html[data-f="2"]{--face:"Archivo";--wdth:100}
+html[data-f="3"]{--face:"Archivo";--wdth:125;--ls:-.045em}
+html[data-f="4"]{--face:"Schibsted Grotesk";--ls:-.045em}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.45 "Inter Tight",Arial,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+
+.hd{position:fixed;inset:0 0 auto;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:var(--gut) var(--gut) calc(var(--r)*1.125);color:#fff;mix-blend-mode:difference;pointer-events:none}
+.hd::after{content:"";position:absolute;left:var(--gut);right:var(--gut);bottom:0;height:1px;background:currentColor;opacity:.2;transform-origin:0 50%;transform:scaleX(var(--p,1))}
+.logo{font:var(--fw) 22px/1 var(--face),Arial,sans-serif;font-stretch:calc(var(--wdth)*1%);letter-spacing:-.02em;text-transform:uppercase}
+.dots{width:calc(var(--r)*2.5);height:calc(var(--r)*2.5);min-width:36px;min-height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:grid;place-items:center}
+.dots i{width:4px;height:4px;border-radius:50%;background:currentColor;box-shadow:-8px 0 0 currentColor,8px 0 0 currentColor}
+
+.hero{position:relative;height:230svh}
+.pin{position:sticky;top:0;height:100svh;overflow:clip;background:var(--paper);display:flex;flex-direction:column;padding:calc(var(--gut) + var(--r)*3.625) var(--gut) calc(var(--r)*7.6875 + 1px)}
+/* the black stage: fixed, cut to the window's rectangle (set every frame from the placeholder .win) */
+.stage{position:fixed;inset:0;height:100lvh;background:var(--ink);z-index:1;pointer-events:none;clip-path:inset(50% 50% 50% 50%)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fade{position:relative;z-index:2}
+.title{margin:0;font-family:var(--face),Arial,sans-serif;font-weight:var(--fw);font-stretch:calc(var(--wdth)*1%);letter-spacing:var(--ls);line-height:.84;text-transform:uppercase;font-size:var(--fs,4rem);white-space:nowrap}
+.title .ln{display:block;perspective:calc(var(--r)*31.25)}
+.title .ch{display:inline-block;transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em);backface-visibility:hidden}
+.title .gap{display:inline-block}
+.title .sp{display:inline-block;width:.26em}
+.win{display:block;flex:none}
+.note{margin:0;width:calc(var(--r)*16.25);font:400 calc(var(--r)*.9375)/1.2 "Inter Tight",Arial,sans-serif;text-align:justify;text-align-last:left;text-indent:4.75em}
+.note .w{display:inline-block;text-indent:0;transform:translateZ(-1em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(1em);backface-visibility:hidden}
+.note .w:first-child{margin-right:1.35em}
+.stripes{position:absolute;left:0;right:0;bottom:0;display:grid;z-index:2}
+.stripes i{display:block;overflow:hidden}
+.stripes i::before{content:"";display:block;height:100%;background:var(--ink);transform:translateY(var(--y,0%))}
+.stripes i:nth-child(1){height:1px}
+.stripes i:nth-child(2){height:calc(var(--r)*.25);margin-top:calc(var(--r)*1.1875)}
+.stripes i:nth-child(3){height:calc(var(--r)*.5);margin-top:var(--r)}
+.stripes i:nth-child(4){height:calc(var(--r)*2.5);margin-top:calc(var(--r)*.75)}
+@media (min-width:1025px){.pin{padding-top:calc(var(--gut) + 55px);padding-bottom:calc(var(--r)*9)}}
+
+/* ---- 1 · staircase (closest to the original): left-aligned lines stepping in, the window in a gap of the last line;
+   phones: centred, the window under the title (the original's base layout) ---- */
+[data-v="1"] .pin{justify-content:center;align-items:center}
+[data-v="1"] .title{text-align:center}
+[data-v="1"] .gap{display:none}
+[data-v="1"] .win{width:calc(var(--r)*15);aspect-ratio:260/160;margin:2.44svh auto 4.61svh}
+[data-v="1"] .note{align-self:center}
+@media (min-width:600px){[data-v="1"] .win{width:calc(var(--r)*20)}}
+@media (min-width:1025px){
+  [data-v="1"] .pin{justify-content:flex-start;align-items:flex-start;padding-left:max(var(--gut),calc(50vw - var(--r)*41.8125))}
+  [data-v="1"] .title{text-align:left;margin-top:max(calc(var(--r)*-1.875),-4vh)}
+  [data-v="1"] .ln:nth-child(2){margin-left:1.94em}
+  [data-v="1"] .ln:nth-child(3){margin-left:1.93em;display:flex;align-items:flex-start}
+  [data-v="1"] .gap{display:inline-block;width:1.8571em;margin-right:.11em;flex:none}
+  [data-v="1"] .gap .win{width:100%;margin:.05em 0 0}
+  [data-v="1"] .win.solo{display:none}
+  [data-v="1"] .note{position:absolute;top:calc(var(--gut) + 55px);right:var(--gut)}
+}
+
+/* ---- 2 · the window is the O: "T▢ NASZ", an oval the height of the capitals, centred lines; scrolling grows the
+   letter itself into the screen (the original's FOR uses a drawn glyph for its O) ---- */
+[data-v="2"] .pin{justify-content:center;align-items:center;gap:calc(var(--r)*3)}
+[data-v="2"] .title{text-align:center}
+[data-v="2"] .win.solo{display:none}
+[data-v="2"] .gap{width:.78em;height:.74em;vertical-align:baseline;position:relative}
+[data-v="2"] .gap .win{position:absolute;inset:0}
+@media (min-width:1025px){[data-v="2"] .note{position:absolute;top:calc(var(--gut) + 55px);right:var(--gut)}}
+
+/* ---- 3 · frame: the first line across the top, the window wide in the middle, the last word across the bottom;
+   each line set to the full width, so the type frames the picture ---- */
+[data-v="3"] .pin{justify-content:space-between;gap:calc(var(--r)*1.5)}
+[data-v="3"] .gap{display:none}
+[data-v="3"] .title{display:contents}
+[data-v="3"] .ln{font-size:var(--lfs)}
+[data-v="3"] .win{flex:1;min-height:0;width:100%;border-radius:4px}
+[data-v="3"] .note{align-self:flex-end;margin-top:calc(var(--r)*-.5)}
+@media (min-width:1025px){
+  /* (desktop: both lines at one size, the first to the left edge and the last to the right, so the window keeps its height) */
+  [data-v="3"] .ln:last-of-type{align-self:flex-end}
+  [data-v="3"] .win{width:62%;align-self:center}
+  [data-v="3"] .note{position:absolute;left:var(--gut);top:50%;translate:0 -50%;margin:0;width:calc(var(--r)*14)}
+}
+
+/* ---- 4 · overlap: three full-width lines, the window behind the middle of them; the title is drawn in difference,
+   so it is black on white and white on the black window ---- */
+[data-v="4"] .pin{justify-content:center;align-items:center;gap:calc(var(--r)*2.5)}
+[data-v="4"] .gap{display:none}
+[data-v="4"] .title{text-align:center;color:#fff;mix-blend-mode:difference}
+[data-v="4"] .win{position:absolute;left:50%;top:var(--wy,50%);translate:-50% -50%;width:calc(var(--r)*15);aspect-ratio:260/160}
+@media (min-width:600px){[data-v="4"] .win{width:calc(var(--r)*24)}}
+@media (min-width:1025px){[data-v="4"] .win{width:calc(var(--r)*30)}[data-v="4"] .note{position:absolute;right:var(--gut);bottom:calc(var(--r)*9)}}
+
+.after{position:relative;z-index:3;background:var(--ink);color:#f2f2f2;min-height:60svh;padding:20svh var(--gut);font:400 calc(var(--r)*2.25)/1 Georgia,serif}
+
+/* switcher */
+.ctl{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));translate:-50% 0;z-index:30;display:flex;align-items:center;gap:4px;padding:5px;background:#fff;border:1px solid #d6d6d6;border-radius:999px;box-shadow:0 4px 18px rgba(0,0,0,.12);font:400 11px/1 "JetBrains Mono",monospace;white-space:nowrap}
+.ctl button{min-width:30px;height:30px;padding:0 8px;border-radius:999px;color:#333}
+.ctl button[aria-pressed="true"]{background:#050505;color:#fff}
+.ctl .sep{width:1px;height:18px;background:#d6d6d6;margin:0 3px}
+.lbl{position:fixed;left:50%;bottom:calc(52px + env(safe-area-inset-bottom,0px));translate:-50% 0;z-index:30;background:#050505;color:#fff;padding:6px 10px;border-radius:999px;font:400 10px/1 "JetBrains Mono",monospace;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;transition:opacity .4s}
+.lbl.off{opacity:0}
+</style>
+</head>
+<body>
+<header class="hd"><span class="logo">Wir</span><span class="dots"><i></i></span></header>
+<section class="hero"><div class="pin" id="pin">
+  <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+  <h1 class="title fade" id="title"></h1>
+  <div class="win solo" id="winSolo"></div>
+  <p class="note fade" id="note">Małe, niezależne studio, które od 2014 roku projektuje i koduje strony z ruchem dla marek, które nie chcą wyglądać jak wszyscy.</p>
+  <div class="stripes fade" id="stripes"><i></i><i></i><i></i><i></i></div>
+</div></section>
+<section class="after">Tu zaczyna się manifest (czarna sala). Przewiń w górę, żeby wrócić do hero.</section>
+<div class="lbl" id="lbl"></div>
+<nav class="ctl" aria-label="Warianty">
+  <button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button>
+  <span class="sep"></span>
+  <button data-f="1">A</button><button data-f="2">B</button><button data-f="3">C</button><button data-f="4">D</button>
+  <span class="sep"></span>
+  <button id="replay" title="Odtwórz wejście">↻</button>
+</nav>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+(function(){
+  const H=document.documentElement,title=document.getElementById('title'),pin=document.getElementById('pin'),stage=document.getElementById('stage'),
+    cv=document.getElementById('cv'),note=document.getElementById('note'),lbl=document.getElementById('lbl'),winSolo=document.getElementById('winSolo');
+  const VN={1:'schodki (jak cappen)',2:'okno jako litera O',3:'rama: napis wokół okna',4:'napis na oknie (różnica)'};
+  const FN={1:'Inter Tight Black (jak Helvetica Now)',2:'Archivo Black, normalna szerokość',3:'Archivo Black 125% (obecny)',4:'Schibsted Grotesk Black'};
+  const q=new URLSearchParams(location.search);let V=q.get('v')||'1',F=q.get('f')||'1';
+  const probe=document.createElement('i');probe.style.cssText='position:absolute;width:calc(var(--r)*1);visibility:hidden';document.body.append(probe);
+  const R=()=>probe.getBoundingClientRect().width;
+  const desk=()=>innerWidth>=1025;
+
+  /* title lines per layout ({o} = the window as a letter, {w} = the window in a gap) */
+  const LINES={1:['Ruch','To nasz','{w}Materiał'],2:['Ruch','T{o} nasz','Materiał'],3:['Ruch to nasz','Materiał'],4:['Ruch','to nasz','materiał']};
+  // (a word space of its own: at -.04em tracking a plain space let "TO NASZ" read as one word)
+  const chars=s=>[...s].map(c=>c===' '?'<span class="sp"> </span>':`<span class="ch">${c}</span>`).join('');
+  function build(){
+    title.innerHTML=LINES[V].map(l=>`<span class="ln">${l.replace(/\{w\}|\{o\}|[^{}]+/g,m=>m==='{w}'?'<span class="gap"><span class="win" id="winIn"></span></span>':m==='{o}'?'<span class="gap"><span class="win" id="winIn"></span></span>':`<span class="tx">${chars(m)}</span>`)}</span>`).join('');
+    // layout 3: the window sits between the two lines
+    if(V==='3'){title.children[0].after(winSolo)}else title.after(winSolo);
+  }
+  /* sizes: 1 and 2 use the original's 4 / 7.5 / 8.75rem, shrunk only if a line would not fit; 3 sets every line to the
+     full width; 4 sets all three to the width of the widest, capped by the height */
+  function fit(){
+    const avail=pin.clientWidth-2*parseFloat(getComputedStyle(pin).paddingRight);
+    const lns=[...title.querySelectorAll('.ln')];
+    title.style.setProperty('--fs','100px');lns.forEach(l=>l.style.removeProperty('--lfs'));
+    // the width of the line's contents (a range, not the line's box: in a flex column the box is always full width), plus its indent
+    const wid=l=>{const r=document.createRange();r.selectNodeContents(l);return r.getBoundingClientRect().width+(parseFloat(getComputedStyle(l).marginLeft)||0)};
+    if(V==='3'){lns.forEach(l=>l.style.setProperty('--lfs','100px'));
+      if(desk()){const fs=Math.min(100*avail/Math.max(...lns.map(wid))*.97,R()*7);lns.forEach(l=>l.style.setProperty('--lfs',Math.floor(fs)+'px'))}
+      else lns.forEach(l=>l.style.setProperty('--lfs',Math.floor(100*avail/wid(l)*.97)+'px'));return}
+    const widest=Math.max(...lns.map(wid));let fs=100*avail/widest*.97;
+    const base=R()*(innerWidth>=1025?8.75:innerWidth>=600?7.5:4);
+    if(V==='1'||V==='2')fs=Math.min(fs,V==='2'&&!desk()?fs:base);
+    // (4: the three lines fill the height left between the header and the stripes; on desktop also above the note)
+    if(V==='4'){const ps=getComputedStyle(pin),inner=pin.clientHeight-parseFloat(ps.paddingTop)-parseFloat(ps.paddingBottom);
+      const room=inner-(desk()?note.offsetHeight+R()*2:note.offsetHeight+R()*2.5);fs=Math.min(fs,room/(3*.84));
+      title.style.marginBottom=desk()?(note.offsetHeight+R()*2)+'px':''}   // (desktop: the centred title keeps clear of the note below it)
+    else title.style.marginBottom='';
+    title.style.setProperty('--fs',Math.floor(fs)+'px');
+  }
+  function apply(){H.dataset.v=V;H.dataset.f=F;
+    document.querySelectorAll('.ctl [data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===V));
+    document.querySelectorAll('.ctl [data-f]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===F));
+    history.replaceState(null,'','?v='+V+'&f='+F);
+    lbl.textContent=V+' · '+VN[V]+'  /  '+'ABCD'[F-1]+' · '+FN[F];lbl.classList.remove('off');clearTimeout(apply.t);apply.t=setTimeout(()=>lbl.classList.add('off'),3500);
+    build();fit();if(V==='4')placeWin4();splitNote();scrollTo(0,0);enter()}
+  function placeWin4(){const ls=title.querySelectorAll('.ln');if(ls.length<3)return;const p=pin.getBoundingClientRect(),a=ls[1].getBoundingClientRect(),b=ls[2].getBoundingClientRect();
+    winSolo.style.setProperty('--wy',((a.top+b.bottom)/2-p.top)+'px')}
+  /* note: words, grouped into lines for the flip-in (the original's text-anim, line mode) */
+  const NOTE=note.textContent;
+  function splitNote(){note.innerHTML=NOTE.split(' ').map(w=>`<span class="w">${w}</span>`).join(' ')}
+  const noteLines=()=>{const ws=[...note.querySelectorAll('.w')],tops=[...new Set(ws.map(w=>w.offsetTop))].sort((a,b)=>a-b);return tops.map(t=>ws.filter(w=>w.offsetTop===t))};
+
+  /* the window: a placeholder's rectangle → the stage's clip; scroll p 0..1 grows it to the screen */
+  const win=()=>document.getElementById('winIn')&&getComputedStyle(document.getElementById('winIn').parentNode).display!=='none'?document.getElementById('winIn'):winSolo;
+  const E={win:0};   // entrance of the window (0 → 1: grows from its middle)
+  const quadOut=t=>1-(1-t)*(1-t),quartOut=t=>1-Math.pow(1-t,4),clamp=v=>Math.min(1,Math.max(0,v));
+  let P=0;
+  function frame(now){
+    const el=win(),r=el.getBoundingClientRect(),W=innerWidth,Hh=innerHeight;
+    const hero=document.querySelector('.hero');P=clamp(-hero.getBoundingClientRect().top/(hero.offsetHeight-Hh));
+    const e=E.win,cx=r.left+r.width/2,cy=r.top+r.height/2,w0=r.width*e,h0=r.height*e;
+    const k=quadOut(clamp(P/.75));
+    const L=(cx-w0/2)*(1-k),T=(cy-h0/2)*(1-k),Rt=(W-(cx+w0/2))*(1-k),B=(Hh-(cy+h0/2))*(1-k);
+    // corners: 4px, squared off over the last quarter; layout 2's oval opens into the rectangle over the first 60 %
+    const oval=V==='2',j=clamp(k/.6),cr=1-quadOut(clamp((P-.75)/.25));
+    const rx=(oval?w0/2*(1-j)+4*j:4)*cr,ry=(oval?h0/2*(1-j)+4*j:4)*cr;
+    stage.style.clipPath=`inset(${T}px ${Rt}px ${B}px ${L}px round ${rx}px / ${ry}px)`;
+    // title, note and stripes fade over the first half (the original's --o, quad out)
+    const o=1-quadOut(clamp(P/.5));document.querySelectorAll('.fade,#title .ln').forEach(f=>f.style.opacity=o);   // (layout 3's title is display:contents: its lines fade themselves)
+    // coil: from the window's middle and size to the screen's, half a turn and tilting flat (the original's scene)
+    const m0=Math.min(w0,h0)*(oval?1.25:1.05),m1=Math.min(W,Hh)*.95;
+    drawCoil(now/1000,cx+(W/2-cx)*k,cy+(Hh/2-cy)*k,m0+(m1-m0)*quartOut(clamp(P)),quartOut(clamp(P/.75)));
+    requestAnimationFrame(frame)}
+
+  /* the coil (2D: a helix wound round a torus, as the main page's fallback renderer) */
+  const g=cv.getContext('2d');let dpr=1,CW=0,CH=0;
+  function size(){dpr=Math.min(devicePixelRatio||1,1.75);CW=cv.clientWidth;CH=cv.clientHeight;cv.width=CW*dpr;cv.height=CH*dpr}
+  const SEG=900,TURNS=26,Pt=new Float32Array((SEG+1)*4),order=[...Array(SEG).keys()],Lt=[-.45,-.62,.64];{const n=Math.hypot(...Lt);Lt.forEach((v,i)=>Lt[i]=v/n)}
+  function drawCoil(t,X,Y,m,turn){
+    g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,CW,CH);if(m<4)return;
+    const Rr=m*.27,rr=m*.1,f=m*1.6;
+    const ax=1.05-.8*(1-turn)+Math.sin(t*.37)*.1,az=t*.3-Math.PI*turn,ay=Math.sin(t*.23)*.2;
+    const cx=Math.cos(ax),sx=Math.sin(ax),cz=Math.cos(az),sz=Math.sin(az),cy=Math.cos(ay),sy=Math.sin(ay);
+    const rot=(x,y,z)=>{const x1=x*cz-y*sz,y1=x*sz+y*cz,y2=y1*cx-z*sx,z2=y1*sx+z*cx;return [x1*cy+z2*sy,y2,-x1*sy+z2*cy]};
+    for(let i=0;i<=SEG;i++){const ph=i/SEG*Math.PI*2,th=ph*TURNS+t*1.2,q=Rr+rr*Math.cos(th);
+      const p=rot(q*Math.cos(ph),q*Math.sin(ph),rr*Math.sin(th)),n=rot(Math.cos(th)*Math.cos(ph),Math.cos(th)*Math.sin(ph),Math.sin(th)),k=f/(f+p[2]);
+      Pt[i*4]=X+p[0]*k;Pt[i*4+1]=Y+p[1]*k;Pt[i*4+2]=p[2];const d=Math.max(0,n[0]*Lt[0]+n[1]*Lt[1]-n[2]*Lt[2]);Pt[i*4+3]=.06+.75*d*d+.55*Math.pow(d,24)}
+    order.sort((a,b)=>Pt[b*4+2]-Pt[a*4+2]);g.lineCap='round';const lw=rr*.36;
+    for(const i of order){const b=Math.min(1,Pt[i*4+3]),k=f/(f+Pt[i*4+2]);g.lineWidth=lw*k;const c=225*b|0;g.strokeStyle=`rgb(${c},${c},${c})`;
+      g.beginPath();g.moveTo(Pt[i*4],Pt[i*4+1]);g.lineTo(Pt[i*4+4],Pt[i*4+5]);g.stroke()}}
+
+  /* entrance, as the original (no random scatter): letters flip up one after another (1.1 s quart in-out, .035 s apart),
+     the note's lines flip up from .35 s (.5 s quad in-out, .1 s apart), the window opens from its middle,
+     the stripes rise from the lowest, the header's hairline draws in */
+  let tl=null;
+  function enter(){
+    tl&&tl.kill();const ch=title.querySelectorAll('.ch'),nl=noteLines(),st=[...document.querySelectorAll('.stripes i')].reverse();
+    tl=gsap.timeline()
+      .fromTo(ch,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',stagger:.035},0)
+      .fromTo(E,{win:0},{win:1,duration:1.1,ease:'power4.inOut'},.45)
+      .fromTo('.hd',{'--p':0},{'--p':1,duration:innerWidth>=600?1.5:1,ease:'power1.inOut'},.5);
+    nl.forEach((l,i)=>tl.fromTo(l,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.35+i*.1));
+    st.forEach((s,i)=>tl.fromTo(s,{'--y':'100%'},{'--y':'0%',duration:.75,ease:'power4.out'},.6+i*.15));
+  }
+  document.querySelectorAll('.ctl [data-v]').forEach(b=>b.onclick=()=>{V=b.dataset.v;apply()});
+  document.querySelectorAll('.ctl [data-f]').forEach(b=>b.onclick=()=>{F=b.dataset.f;apply()});
+  document.getElementById('replay').onclick=()=>{scrollTo(0,0);enter()};
+  addEventListener('keydown',e=>{if(/^[1-4]$/.test(e.key)){V=e.key;apply()}const f='abcd'.indexOf(e.key.toLowerCase());if(f>-1){F=String(f+1);apply()}});
+  let lastW=innerWidth;addEventListener('resize',()=>{size();if(innerWidth!==lastW){lastW=innerWidth;fit();if(V==='4')placeWin4()}});
+  size();
+  // every face is loaded before the first measure, so switching never fits a line in a fallback font
+  const FACES=['900 100px "Inter Tight"','400 15px "Inter Tight"','900 100px Archivo','900 100px "Schibsted Grotesk"'];
+  Promise.race([document.fonts?Promise.all(FACES.map(f=>document.fonts.load(f))).catch(()=>{}):0,new Promise(r=>setTimeout(r,3000))]).then(()=>{apply();requestAnimationFrame(frame)});
+})();
+</script>
+</body>
+</html>

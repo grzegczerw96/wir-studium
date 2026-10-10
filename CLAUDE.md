@@ -1,7 +1,7 @@
 # Wir Studio: studium animacji i przewodnik budowania stron z ruchem
 
 Ten plik czyta Claude na początku każdej sesji w tym repozytorium. Jest też notatką dla Grzegorza: jak budujemy takie strony i co sprawia, że wyglądają profesjonalnie.
-Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375×812) i przeniesiona sekcja po sekcji, menu na telefon jak w oryginale, wspólna jednostka `--r`.
+Stan na 10.10.2026, ostatnie zmiany: start bez mignięcia innego układu (strona pusta do gotowości, jak `root.hide` w oryginale); próby nowego hero w `lab/hero.html`.
 
 ---
 
@@ -12,7 +12,9 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
 - **Bez prawdziwych marek, logo i tekstów** z oryginału. Formularz kontaktowy niczego nie wysyła.
 - **Wierność:** piksel w piksel nie jest wymagany, ale **czasy, kolejność i styl ruchu** mają się zgadzać z oryginałem.
 - **Repo** jest publiczne i ma GitHub Pages (`https://grzegczerw96.github.io/wir-studium/`). Usunie je Grzegorz, Claude nigdy tego nie robi.
-- **Wersja w czacie** to artefakt „Wir Studio”: https://claude.ai/artifact/4yg4BkHAu3zKmq4fjC6dWC (ta sama strona bez nagłówka `<head>`).
+- **Wersja w czacie** to artefakt „Wir Studio”: https://claude.ai/artifact/4yg4BkHAu3zKmq4fjC6dWC (ta sama strona bez nagłówka `<head>`: usunąć linie 1–5, `</head>`, `<body>`, `</body>`, `</html>`).
+- **Słowniczek (żeby się nie mylić):** *preloader* = ekran ładowania oryginału („HUMAN THINKERS / DIGITAL MAKERS”, zmieniające się obrazki, potem odlatują); *hero* = pierwszy ekran z wielkim tytułem, oknem i notką; *wejście hero* = animacja pojawienia się po załadowaniu; *przewijanie intro* = okno rośnie do pełnego ekranu (200svh). Grzegorz mówi „intro” o całym początku do pojawienia się hero, więc dopytać, o którą część chodzi.
+- **Strony próbne** (warianty do wyboru, przełącznik 1–4 / A–D) leżą w `lab/` i są na Pages, np. `https://grzegczerw96.github.io/wir-studium/lab/hero.html`.
 
 ## 2. Jak Grzegorz lubi pracować
 
@@ -37,6 +39,12 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
   - paski w intro na telefonie przylegają do dolnej krawędzi (w oryginale jest pod nimi 3,5rem bieli);
   - na ekranach dotykowych strona sama nie przewija (bez dociągania w intro i u klientów, bez przyciągania formularza i stopki), bo walczy to z palcem i pędem;
   - „Kontakt” w menu prowadzi do gotowego formularza, a nie na górę sekcji (tam jest szare przejście koloru).
+- **Uwagi Grzegorza z 10.10.2026 (hero, w trakcie):**
+  - obecny układ hero mu się nie podoba; szukamy nowego (jeden wariant podobny do cappen, inne, w których obraz współpracuje z napisem);
+  - notka hero tylko bezszeryfowa (bez kursywy szeryfowej), ostatnia linia nie rozciągnięta (`text-align-last:left`);
+  - wejście bez losowego rozrzutu liter; punkt wyjścia to wejście oryginału (litery i linie przewracają się w 3D po kolei);
+  - krój tytułu do wyboru: obecny Archivo 125% to nie krój oryginału (ten ma normalną szerokość);
+  - kolejność: najpierw wygląd hero, potem wejście i przewijanie intro.
 - **Fonty jak w oryginale:**
   - Inter Tight w roli Helvetica Now Display;
   - Instrument Serif w roli kroju szeryfowego;
@@ -126,6 +134,8 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 
 | Sekcja | Długość | Co się dzieje (zmierzone w oryginale) |
 |---|---|---|
+| Preloader (oryginał) | – | Treść w `.root.hide` (`display:none`), tło i tekst `#fcfcfc`; preloader czeka na fonty i zasoby, potem `finishIntro()`: słowa gasną (.35/1.25/1.55 s), obrazki odlatują, po 1,5 s treść odsłonięta. U nas: bez preloadera, strona pusta do gotowości |
+| Hero (oryginał) | – | Tytuł Helvetica Now Display Black 900, normalna szerokość, −.04em, interlinia .8, 4rem / 7,5rem / 8,75rem; desktop: wiersze od lewej, 2. i 3. wcięte o 1,94/1,93em, okno 1,8571em (260/160) w przerwie 1,97em ostatniego wiersza („FOR ▢ TODAY”), „O” w FOR to znak-ikona; telefon: wiersze wyśrodkowane, okno pod tytułem. Wejście: litery `rotateX −90→0`, `scaleY 1.5→1`, 1,1 s quart in-out co .035 s; notka liniami od .35 s. Przewijanie: okno quad out przez 75%, rogi w ostatnich 25%, spirala obraca się (X −45°→0, Z 9°→−180°, quart out) i skaluje do .75 (tablet .5), tytuł, notka i paski gasną w pierwszej połowie (`--o` 1→0, quad out) |
 | Intro | 200svh | Litery nagłówka wstają, okno ze spiralą rośnie do pełnego ekranu |
 | Manifest | 647svh (telefon 501) | Oś 0→1: miniatury spadają kaskadą (.15–.50), słowa wstają w 3D (.25–.48), pauza (.48–.58), słowa się przewracają (.60–.80), miniatury zsuwają się (.72–.80); spirala w środku, przyciemniana od góry |
 | Przejście „Wybrane realizacje” | 350svh + tor 385svh | Etykieta z prawej, tytuł z lewej (do +1,15 H, quad out), postój do +2,2 H, rozjazd i wygaszenie do +3,2 H; spirala gaśnie w cień od S0−0,95 do S0+2,25 H |
@@ -249,6 +259,7 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 | Telefon: 22 ms na klatkę przy przewijaniu kart i listy | Kreski wierszy rosły przez `width` (układ strony w każdej klatce), obraz karty z paralaksą nie był osobną warstwą (przerysowanie) | Kreski przez `transform: scaleX`, obraz z `will-change:transform` → 11 ms |
 | Telefon: kontakt 22 ms na klatkę | Napis 7,5rem (ok. 1500 px) przesuwany co klatkę bez własnej warstwy | `will-change:translate` → 11 ms |
 | Telefon: duże koszty stylów przy zmianie koloru strony | Zmienna `--room` na `<html>` dziedziczy się do każdego elementu | Kolor ustawiany na 4 sekcjach |
+| Po załadowaniu przez kilka sekund inny układ (czarny prostokąt na środku, grube paski, tekst w zastępczym foncie), potem przeskok | Klasa `motion` (od niej zależy układ) dodawana dopiero przez skrypt na końcu strony, który czeka na GSAP i Three z CDN; wejście startowało niezależnie od tego, czy coś widać | Mały skrypt w `<head>` ustala `motion` i `wait` przed pierwszym malowaniem; `html.wait .hd, main` ukryte; główny skrypt czeka na fonty pierwszego ekranu (max 2,5 s), mierzy, odsłania i dopiero wtedy gra oś `enter`. Awaryjnie CSS odsłania po 15 s. Sprawdzać nagraniem ładowania z wolną siecią (screencast CDP + `Network.emulateNetworkConditions`) |
 | Telefon: szarpnięcie przy pierwszym pojawieniu się spirali | Kompilacja shaderów przy pierwszym rysowaniu; spirale rysowane także przy kryciu 0 | `renderer.compile` przy ładowaniu; rysowanie tylko widocznych (`coil.on`) |
 
 ## 8. Lista kontrolna przed oddaniem sekcji
