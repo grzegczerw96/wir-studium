@@ -78,8 +78,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 [data-v="2"] .pin{justify-content:center;align-items:center;gap:calc(var(--r)*3)}
 [data-v="2"] .title{text-align:center}
 [data-v="2"] .win.solo{display:none}
-[data-v="2"] .gap{width:.78em;height:.74em;vertical-align:baseline;position:relative}
-[data-v="2"] .gap .win{position:absolute;inset:0}
+/* the O is the glyph's own outline, measured from the face (advance, ink box): an empty inline-block on the baseline
+   with the window hung from it; the white coil fills the O's counter */
+[data-v="2"] .gap{width:var(--ow,.78em);height:0;vertical-align:baseline;position:relative}
+[data-v="2"] .gap .win{position:absolute;left:var(--ol,0em);bottom:var(--od,0em);width:var(--obw,.78em);height:var(--obh,.74em)}
 @media (min-width:1025px){[data-v="2"] .note{position:absolute;top:calc(var(--gut) + 55px);right:var(--gut)}}
 
 /* ---- 3 · frame: the first line across the top, the window wide in the middle, the last word across the bottom;
@@ -116,6 +118,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .ctl .sep{width:1px;height:18px;background:#d6d6d6;margin:0 3px}
 .lbl{position:fixed;left:50%;bottom:calc(52px + env(safe-area-inset-bottom,0px));translate:-50% 0;z-index:30;background:#050505;color:#fff;padding:6px 10px;border-radius:999px;font:400 10px/1 "JetBrains Mono",monospace;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;transition:opacity .4s}
 .lbl.off{opacity:0}
+/* edit mode: drag the title and the note (finger or mouse); the offsets are kept in the address and can be copied */
+.edit .title,.edit .note{outline:1px dashed #e3261b;outline-offset:6px;cursor:grab;touch-action:none}
+.edit .lbl{opacity:1!important;white-space:normal;max-width:calc(100vw - 24px);text-align:center;line-height:1.5}
+.ctl .ed{display:none}.edit .ctl .ed{display:inline-block}
 </style>
 </head>
 <body>
@@ -133,6 +139,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   <span class="cap">wyjście</span><button data-x="0">0</button><button data-x="1">1</button><button data-x="2">2</button><button data-x="3">3</button>
   <span class="sep"></span>
   <button id="replay" title="Odtwórz wejście">↻</button>
+  <span class="sep"></span>
+  <button id="edit" title="Przesuwanie elementów">przesuń</button><button class="ed" id="copy">kopiuj</button><button class="ed" id="zero">zeruj</button>
 </nav>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
@@ -143,7 +151,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   const FN={1:'Inter Tight Black (jak Helvetica Now)',2:'Archivo Black, normalna szerokość',3:'Archivo Black 125% (obecny)',4:'Schibsted Grotesk Black'};
   const XN={0:'gaśnie (jak cappen)',1:'rozmycie',2:'rozsunięcie od O',3:'rozsunięcie i rozmycie'};
   // chosen 10.10: layout 2 with face A (the others stay reachable with ?v=&f=); the switch now compares the title's exit
-  const q=new URLSearchParams(location.search);let V=q.get('v')||'2',F=q.get('f')||'1',X=q.get('x')||'2';
+  const q=new URLSearchParams(location.search);let V=q.get('v')||'2',F=q.get('f')||'1',X=q.get('x')||'1';
   const probe=document.createElement('i');probe.style.cssText='position:absolute;width:calc(var(--r)*1);visibility:hidden';document.body.append(probe);
   const R=()=>probe.getBoundingClientRect().width;
   const desk=()=>innerWidth>=1025;
@@ -160,6 +168,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   /* sizes: 1 and 2 use the original's 4 / 7.5 / 8.75rem, shrunk only if a line would not fit; 3 sets every line to the
      full width; 4 sets all three to the width of the widest, capped by the height */
   function fit(){
+    if(V==='2')measureO();
     const avail=pin.clientWidth-2*parseFloat(getComputedStyle(pin).paddingRight);
     const lns=[...title.querySelectorAll('.ln')];
     title.style.setProperty('--fs','100px');lns.forEach(l=>l.style.removeProperty('--lfs'));
@@ -176,23 +185,48 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
       const room=inner-(desk()?note.offsetHeight+R()*2:note.offsetHeight+R()*2.5);fs=Math.min(fs,room/(3*.84));
       title.style.marginBottom=desk()?(note.offsetHeight+R()*2)+'px':''}   // (desktop: the centred title keeps clear of the note below it)
     else title.style.marginBottom='';
-    title.style.setProperty('--fs',Math.floor(fs)+'px');
+    title.style.setProperty('--fs',Math.floor(fs)+'px');FS=Math.floor(fs);
   }
   function apply(){H.dataset.v=V;H.dataset.f=F;
     document.querySelectorAll('.ctl [data-x]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.x===X));
-    history.replaceState(null,'','?v='+V+'&f='+F+'&x='+X);
+    history.replaceState(null,'',query());
     lbl.textContent='Wyjście '+X+' · '+XN[X]+'  /  układ '+V+' · '+'ABCD'[F-1];lbl.classList.remove('off');clearTimeout(apply.t);apply.t=setTimeout(()=>lbl.classList.add('off'),3500);
-    build();fit();if(V==='4')placeWin4();splitNote();alignNote();cacheCh();scrollTo(0,0);enter()}
+    build();fit();if(V==='4')placeWin4();splitNote();applyOff();alignNote();cacheCh();scrollTo(0,0);enter()}
+  /* ---- offsets set by hand (in rem, so they hold at every width) ---- */
+  const num=v=>(v||'0,0').split(',').map(Number);const OFF={t:num(q.get('t')),n:num(q.get('n'))};
+  const query=()=>'?v='+V+'&f='+F+'&x='+X+(OFF.t[0]||OFF.t[1]?'&t='+OFF.t.join(','):'')+(OFF.n[0]||OFF.n[1]?'&n='+OFF.n.join(','):'');
+  function applyOff(){title.style.translate=OFF.t[0]||OFF.t[1]?(OFF.t[0]*R())+'px '+(OFF.t[1]*R())+'px':'';
+    note.style.translate=OFF.n[0]||OFF.n[1]?(OFF.n[0]*R())+'px '+(OFF.n[1]*R())+'px':''}
+  const offText=()=>'tytuł x '+OFF.t[0]+' y '+OFF.t[1]+' · notka x '+OFF.n[0]+' y '+OFF.n[1]+' (rem; '+innerWidth+'×'+innerHeight+')';
+  function drag(el,key){let sx=0,sy=0,o0=null;
+    el.addEventListener('pointerdown',e=>{if(!H.classList.contains('edit'))return;e.preventDefault();el.setPointerCapture(e.pointerId);sx=e.clientX;sy=e.clientY;o0=OFF[key].slice()});
+    el.addEventListener('pointermove',e=>{if(!o0)return;const r=R();OFF[key]=[+(o0[0]+(e.clientX-sx)/r).toFixed(2),+(o0[1]+(e.clientY-sy)/r).toFixed(2)];applyOff();lbl.textContent=offText()});
+    const end=()=>{if(!o0)return;o0=null;history.replaceState(null,'',query());alignNote();cacheCh()};
+    el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end)}
+  drag(title,'t');drag(note,'n');
   /* the note's first line level with the top of the title's capitals: the baseline of the first line (an empty
      inline-block on it) minus the cap height, and the same for the note's own first line */
   const capH=font=>{const c=capH.c||(capH.c=document.createElement('canvas').getContext('2d'));c.font=font;return c.measureText('H').actualBoundingBoxAscent};
   const baseMark=()=>{const b=document.createElement('i');b.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';return b};
   function alignNote(){H.style.removeProperty('--nt');if(!desk()||!(V==='1'||V==='2'))return;
+    const nt=note.style.translate;note.style.translate='';
     const ln=title.querySelector('.ln'),b=baseMark();ln.append(b);const base=b.getBoundingClientRect().top;b.remove();
     const tcap=base-capH('900 '+parseFloat(getComputedStyle(title).fontSize)+'px "Inter Tight"');
     const nb=baseMark();note.prepend(nb);
     const noff=nb.getBoundingClientRect().top-note.getBoundingClientRect().top-capH('400 '+parseFloat(getComputedStyle(note).fontSize)+'px "Inter Tight"');nb.remove();
-    H.style.setProperty('--nt',(tcap-pin.getBoundingClientRect().top-noff)+'px')}
+    H.style.setProperty('--nt',(tcap-pin.getBoundingClientRect().top-noff)+'px');note.style.translate=nt}
+  /* the O of the face: advance, ink box and counter (the white inside), in em, from a canvas rendering */
+  let OC={w:.3,h:.45,dx:0,dy:0},FS=100;
+  function measureO(){const fam=getComputedStyle(title).fontFamily,Z=200,c=document.createElement('canvas'),g2=c.getContext('2d');
+    g2.font='900 '+Z+'px '+fam;const m=g2.measureText('O'),l=m.actualBoundingBoxLeft,r=m.actualBoundingBoxRight,a=m.actualBoundingBoxAscent,d=m.actualBoundingBoxDescent;
+    const set=(k,v)=>title.style.setProperty(k,(v/Z).toFixed(4)+'em');
+    set('--ow',m.width);set('--ol',-l);set('--od',-d);set('--obw',l+r);set('--obh',a+d);
+    c.width=Math.ceil(l+r+20);c.height=Math.ceil(a+d+20);g2.font='900 '+Z+'px '+fam;g2.fillStyle='#000';g2.fillText('O',10+l,10+a);
+    const D=g2.getImageData(0,0,c.width,c.height).data,ink=(x,y)=>D[(y*c.width+x)*4+3]>128;
+    const cx=Math.round(10+(l+r)/2),cy=Math.round(10+(a+d)/2);   // the middle of the ink box
+    let x0=cx,x1=cx,y0=cy,y1=cy;while(x0>0&&!ink(x0-1,cy))x0--;while(x1<c.width-1&&!ink(x1+1,cy))x1++;
+    const mx=Math.round((x0+x1)/2);while(y0>0&&!ink(mx,y0-1))y0--;while(y1<c.height-1&&!ink(mx,y1+1))y1++;
+    OC={w:(x1-x0+1)/Z,h:(y1-y0+1)/Z,dx:((x0+x1)/2-(10+(l+r)/2))/Z,dy:((y0+y1)/2-(10+(a+d)/2))/Z}}
   /* exit 2/3: every letter is pushed away from the O's middle (and grows a little) while the O becomes the screen */
   let CHS=[];
   function cacheCh(){const o=win().getBoundingClientRect(),ox=o.left+o.width/2,oy=o.top+o.height/2;
@@ -228,26 +262,28 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
       const s=(X==='2'||X==='3')?quadOut(clamp(P/.55)):0;
       CHS.forEach(([c,dx,dy])=>{c.style.translate=s?(dx*s*1.3).toFixed(1)+'px '+(dy*s*1.3).toFixed(1)+'px':'';c.style.scale=s?String(1+.35*s):''})}
     // coil: from the window's middle and size to the screen's, half a turn and tilting flat (the original's scene)
-    const m0=Math.min(w0,h0)*(oval?.97:1.05),m1=Math.min(W,Hh)*.95;   // (in the O: the coil is ~72% of its height)
-    drawCoil(now/1000,cx+(W/2-cx)*k,cy+(Hh/2-cy)*k,m0+(m1-m0)*quartOut(clamp(P)),quartOut(clamp(P/.75)));
+    const m1=Math.min(W,Hh)*.95;let m0=Math.min(w0,h0)*1.05,ccx=cx,ccy=cy,sq0=1;
+    if(oval){const cw=OC.w*FS*e;m0=cw/.74;ccx=cx+OC.dx*FS;ccy=cy+OC.dy*FS;sq0=OC.h/OC.w}   // (the coil's outer ring = the counter's width; squashed to its height)
+    drawCoil(now/1000,ccx+(W/2-ccx)*k,ccy+(Hh/2-ccy)*k,m0+(m1-m0)*quartOut(clamp(P)),quartOut(clamp(P/.75)),1+(sq0-1)*(1-k),oval?1-k:0);
     requestAnimationFrame(frame)}
 
   /* the coil (2D: a helix wound round a torus, as the main page's fallback renderer) */
   const g=cv.getContext('2d');let dpr=1,CW=0,CH=0;
   function size(){dpr=Math.min(devicePixelRatio||1,1.75);CW=cv.clientWidth;CH=cv.clientHeight;cv.width=CW*dpr;cv.height=CH*dpr}
   const SEG=900,TURNS=26,Pt=new Float32Array((SEG+1)*4),order=[...Array(SEG).keys()],Lt=[-.45,-.62,.64];{const n=Math.hypot(...Lt);Lt.forEach((v,i)=>Lt[i]=v/n)}
-  function drawCoil(t,X,Y,m,turn){
+  function drawCoil(t,X,Y,m,turn,sq=1,wt=0){
     g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,CW,CH);if(m<4)return;
     const Rr=m*.27,rr=m*.1,f=m*1.6;
     // at rest face-on (the hole in the middle, a small sway), tipping to the side view as the window grows
-    const sw=.25+.75*turn,ax=1.05*turn+Math.sin(t*.37)*.1*sw,az=t*.3-Math.PI*turn,ay=Math.sin(t*.23)*.2*sw;
+    const sw=turn,ax=1.05*turn+Math.sin(t*.37)*.1*sw,az=t*.3-Math.PI*turn,ay=Math.sin(t*.23)*.2*sw;
     const cx=Math.cos(ax),sx=Math.sin(ax),cz=Math.cos(az),sz=Math.sin(az),cy=Math.cos(ay),sy=Math.sin(ay);
     const rot=(x,y,z)=>{const x1=x*cz-y*sz,y1=x*sz+y*cz,y2=y1*cx-z*sx,z2=y1*sx+z*cx;return [x1*cy+z2*sy,y2,-x1*sy+z2*cy]};
     for(let i=0;i<=SEG;i++){const ph=i/SEG*Math.PI*2,th=ph*TURNS+t*1.2,q=Rr+rr*Math.cos(th);
       const p=rot(q*Math.cos(ph),q*Math.sin(ph),rr*Math.sin(th)),n=rot(Math.cos(th)*Math.cos(ph),Math.cos(th)*Math.sin(ph),Math.sin(th)),k=f/(f+p[2]);
-      Pt[i*4]=X+p[0]*k;Pt[i*4+1]=Y+p[1]*k;Pt[i*4+2]=p[2];const d=Math.max(0,n[0]*Lt[0]+n[1]*Lt[1]-n[2]*Lt[2]);Pt[i*4+3]=.06+.75*d*d+.55*Math.pow(d,24)}
+      Pt[i*4]=X+p[0]*k;Pt[i*4+1]=Y+p[1]*k*sq;Pt[i*4+2]=p[2];const d=Math.max(0,n[0]*Lt[0]+n[1]*Lt[1]-n[2]*Lt[2]);Pt[i*4+3]=.06+.75*d*d+.55*Math.pow(d,24)}
+    // (colour: white in the O, metal once the window has grown)
     order.sort((a,b)=>Pt[b*4+2]-Pt[a*4+2]);g.lineCap='round';const lw=rr*.36;
-    for(const i of order){const b=Math.min(1,Pt[i*4+3]),k=f/(f+Pt[i*4+2]);g.lineWidth=lw*k;const c=225*b|0;g.strokeStyle=`rgb(${c},${c},${c})`;
+    for(const i of order){const b=Math.min(1,Pt[i*4+3]),k=f/(f+Pt[i*4+2]);g.lineWidth=lw*k;const c=(wt*(175+80*b)+(1-wt)*225*b)|0;g.strokeStyle=`rgb(${c},${c},${c})`;
       g.beginPath();g.moveTo(Pt[i*4],Pt[i*4+1]);g.lineTo(Pt[i*4+4],Pt[i*4+5]);g.stroke()}}
 
   /* entrance, as the original (no random scatter): letters flip up one after another (1.1 s quart in-out, .035 s apart),
@@ -260,12 +296,17 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
       .fromTo(ch,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',stagger:.035},0)
       .fromTo(E,{win:0},{win:1,duration:1.1,ease:'power4.inOut'},.45);
     nl.forEach((l,i)=>tl.fromTo(l,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.35+i*.1));
-    st.forEach((s,i)=>tl.fromTo(s,{'--y':'100%',opacity:0},{'--y':'0%',duration:.75,ease:'power4.out'},.6+i*.15).set(s,{opacity:1},.6+i*.15));
+    gsap.set(st,{opacity:0,'--y':'100%'});
+    st.forEach((s,i)=>tl.set(s,{opacity:1},.6+i*.15).fromTo(s,{'--y':'100%'},{'--y':'0%',duration:.75,ease:'power4.out',immediateRender:false},.6+i*.15));
   }
   document.querySelectorAll('.ctl [data-x]').forEach(b=>b.onclick=()=>{X=b.dataset.x;apply()});
   document.getElementById('replay').onclick=()=>{scrollTo(0,0);enter()};
+  document.getElementById('edit').onclick=e=>{const on=H.classList.toggle('edit');e.currentTarget.setAttribute('aria-pressed',on);scrollTo(0,0);
+    if(on){tl&&tl.progress(1);lbl.textContent=offText();lbl.classList.remove('off')}else apply()};
+  document.getElementById('copy').onclick=()=>{const t=offText()+'\n'+location.href;navigator.clipboard?navigator.clipboard.writeText(t).then(()=>{lbl.textContent='Skopiowano: '+offText()},()=>{lbl.textContent=t}):lbl.textContent=t};
+  document.getElementById('zero').onclick=()=>{OFF.t=[0,0];OFF.n=[0,0];applyOff();history.replaceState(null,'',query());alignNote();cacheCh();lbl.textContent=offText()};
   addEventListener('keydown',e=>{if(/^[0-3]$/.test(e.key)){X=e.key;apply()}});
-  let lastW=innerWidth;addEventListener('resize',()=>{size();if(innerWidth!==lastW){lastW=innerWidth;fit();if(V==='4')placeWin4();alignNote();cacheCh()}});
+  let lastW=innerWidth;addEventListener('resize',()=>{size();if(innerWidth!==lastW){lastW=innerWidth;fit();if(V==='4')placeWin4();applyOff();alignNote();cacheCh()}});
   size();
   // every face is loaded before the first measure, so switching never fits a line in a fallback font
   const FACES=['900 100px "Inter Tight"','400 15px "Inter Tight"','900 100px Archivo','900 100px "Schibsted Grotesk"'];

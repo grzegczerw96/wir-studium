@@ -49,7 +49,10 @@ Stan na 10.10.2026, ostatnie zmiany: start bez mignięcia innego układu (strona
   - bez kreski pod nagłówkiem i bez najwyższego (1 px) paska na dole; paski wchodzą od najniższego, wyższe niewidoczne do swojej kolejki;
   - spirala w „O” mniejsza (ok. 72% wysokości litery) i na wprost, dziura na środku; przechyla się dopiero, gdy okno rośnie;
   - notka na desktopie: pierwsza linia na równi z górą wersalików tytułu (liczone z linii bazowej i `actualBoundingBoxAscent`);
-  - gasnący szary napis przy rośnięciu okna rozprasza: do wyboru gaśnięcie, rozmycie, rozsunięcie od „O” albo oba (`?x=0..3`).
+  - gasnący szary napis przy rośnięciu okna rozprasza; **wybrane wyjście 1: rozmycie** (litery w miejscu, rozmywają się i gasną; nie prześwitują przez rosnącą ramkę);
+  - „O” = obrys prawdziwego znaku O kroju (zmierzony z canvas: szerokość, pudełko farby), a **biała spirala wypełnia jego wnętrze** (rozmiar i owal światła litery, dokładnie na środku); przy rośnięciu okna robi się metalowa; jeśli to nie zadziała, wracamy do układu jak w oryginale;
+  - paski na dole po wejściu zawsze wszystkie trzy, pełne;
+  - `lab/hero.html` ma tryb „przesuń”: Grzegorz sam przesuwa tytuł i notkę, przesunięcia (w rem) są w adresie (`&t=x,y&n=x,y`) i do skopiowania.
 - **Fonty jak w oryginale:**
   - Inter Tight w roli Helvetica Now Display;
   - Instrument Serif w roli kroju szeryfowego;
