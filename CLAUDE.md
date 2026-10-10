@@ -291,6 +291,7 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 - [ ] Liczby (długość sekcji, progi, czasy, krzywe) wzięte z kodu oryginału albo zmierzone, nie zgadnięte.
 - [ ] Przewinięte prawdziwym kółkiem: wolno, szybko, z zatrzymaniem w połowie przejścia, w górę i z powrotem.
 - [ ] Nic nie nachodzi na tekst; kontrast w każdej klatce przejścia kolorów.
+- [ ] **Każdą animację i każde przewijanie, które Claude tworzy, sprawdza narzędzie co klatkę** (wzór: `tools/overlap.py`), na telefonach, tablecie i desktopach z paskiem przewijania; w spoczynku to za mało (Grzegorz, 10.10.2026).
 - [ ] Telefon 375×812: brak przewijania w poziomie, proporcje z oryginału dla <1025 px, brak nakładania warstw.
 - [ ] 60 kl./s (średnio ok. 16,7 ms na klatkę), zero błędów w konsoli.
 - [ ] Zatwierdzone odstępstwa (§2) nienaruszone.
