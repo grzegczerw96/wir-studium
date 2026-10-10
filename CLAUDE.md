@@ -15,6 +15,7 @@ Stan na 10.10.2026, ostatnie zmiany: start bez mignięcia innego układu (strona
 - **Wersja w czacie** to artefakt „Wir Studio”: https://claude.ai/artifact/4yg4BkHAu3zKmq4fjC6dWC (ta sama strona bez nagłówka `<head>`: usunąć linie 1–5, `</head>`, `<body>`, `</body>`, `</html>`).
 - **Słowniczek (żeby się nie mylić):** *preloader* = ekran ładowania oryginału („HUMAN THINKERS / DIGITAL MAKERS”, zmieniające się obrazki, potem odlatują); *hero* = pierwszy ekran z wielkim tytułem, oknem i notką; *wejście hero* = animacja pojawienia się po załadowaniu; *przewijanie intro* = okno rośnie do pełnego ekranu (200svh). Grzegorz mówi „intro” o całym początku do pojawienia się hero, więc dopytać, o którą część chodzi.
 - **Strony próbne** (warianty do wyboru, przełącznik 1–4 / A–D) leżą w `lab/` i są na Pages, np. `https://grzegczerw96.github.io/wir-studium/lab/hero.html`.
+- **Baza wiedzy `wiedza/`** (od 10.10.2026): `marka.md` (historia i ton), `inspiracje.md` (strony, które się podobają, z pomiarami), `katalog-ruchu.md` (słownik ruchów z liczbami, ryzykami i statusem). **Czytać przed propozycjami dla każdej sekcji** i dopisywać do katalogu po każdej decyzji. Nagrania i zrzuty cudzych stron w `wiedza/media/` (poza repo, `.gitignore`).
 
 ## 2. Jak Grzegorz lubi pracować
 
