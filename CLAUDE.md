@@ -45,7 +45,7 @@ Stan na 10.10.2026: plik odchudzony do zasad i pętli; pomiary, lekcje, hero i s
   - powrót do czerni po nagrodach jest krótszy niż w oryginale: od ostatniej nazwy na 15% ekranu do góry kontaktu przy górze ekranu (telefon ok. 0,6 ekranu, desktop ok. 0,95), żeby lista schodziła na białym, a nie stała na szarym (10.10.2026);
   - brak kursora „DISCOVER” i brak dociągania w manifeście;
   - paski w intro na telefonie przylegają do dolnej krawędzi (w oryginale jest pod nimi 3,5rem bieli; 9.10.2026);
-  - na ekranach dotykowych strona sama nie przewija (bez dociągania w intro i u klientów, bez przyciągania formularza i stopki), bo walczy to z palcem i pędem (9.10.2026);
+  - na ekranach dotykowych strona sama nie przewija (bez dociągania u klientów, bez przyciągania formularza i stopki), bo walczy to z palcem i pędem (9.10.2026); **wyjątek: intro** (10.10.2026, prośba Grzegorza): po zdjęciu palca i 0,25 s bez ruchu okno samo dojeżdża do pełnego ekranu (ok. 0,9 s), bez blokady, dotknięcie od razu przerywa;
   - „Kontakt” w menu prowadzi do gotowego formularza, a nie na górę sekcji (tam jest szare przejście koloru; 9.10.2026);
   - nowe hero (układ, krój, wejście z dymem): świadomie inne niż w oryginale, szczegóły w `wiedza/hero.md`.
 - **Nasze dodatki, których oryginał nie ma** (zostawione celowo, do decyzji Grzegorza):
@@ -116,7 +116,7 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 | Sekcja | Stan | Co zostało |
 |---|---|---|
 | Nagłówek i menu | zbudowane wg pomiarów | etap końcowy |
-| Hero / intro | **przeniesione** z `lab/hero.html` (10.10): układ 2, krój A, wejście C, d3, wyjście przez rozmycie | pomiar na telefonie (`phone.py tools/phone-hero.json`) i ocena Grzegorza; wersja 5 ma przerwy (stall) 1,8–2,0 i 3,4–4,1 s, do poprawy, jeśli wejdzie na telefony |
+| Hero / intro | **przeniesione** z `lab/hero.html` (10.10): układ 2, krój A, wejście C, d3, wyjście przez rozmycie | ocena Grzegorza. Zmierzone na telefonie (10.10): d3 po odsłonięciu średnio 11,3 ms; wersja 5 klatki do 311 ms, więc na telefonach zostaje d3. `motion.py` czasem (ok. 1 na 3 przebiegi) zgłasza skok na krawędziach liter przy przekazywaniu z dymu (ok. 3,4 s), do zbadania |
 | Manifest | zbudowany wg pomiarów | pierwszy przejazd na telefonie ok. 45 kl./s |
 | Wybrane realizacje (przejście) | zbudowane | etap końcowy |
 | Karty realizacji | zbudowane | etap końcowy |
@@ -131,7 +131,7 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 
 **Zadania po kolei:**
 1. **Hero na stronie głównej: dokończenie.** Zrobione 10.10: przeniesienie (jedna `GLCoil`, start zawsze na górze, `?fx=5` i `?dbg=smoke` działają), narzędzia przepięte na stronę główną, kontrola: `center` 18/18, `overlap` czysty na 6 ekranach, `motion` d3 czysty (dym rodzi się 0–1 px od punktu pod „O”), `sizes` bez nachodzenia na 178 rozmiarach. Zostało:
-   - **przed oddaniem hero: pomiar d3 na prawdziwym telefonie** (`phone.py`) po ostatniej zmianie (przekazanie liter z dymu stronie po kolei); telefon się wtedy rozłączył. Ten pomiar decyduje, czy na telefonach zostaje d3, czy wchodzi wersja 5;
+   - zrobione też 10.10 po uwagach z telefonu: paski rozmywają się jak tytuł i na telefonie stoją przy prawdziwej dolnej krawędzi; dociąganie intro palcem; elipsa ładowania widoczna po 0,33 s zamiast pustej strony przez 2 s (główny skrypt po pierwszej klatce, obrazy sekcji w wątku pobocznym po wejściu); `tools/phone_load.py` nagrywa ładowanie na telefonie;
    - hero to nasz własny pomysł, nie odtworzenie cappen: **nie porównujemy go z oryginałem**; wzorcem jest `lab/hero.html` (wygląd, czasy, kolejność).
 2. **Przegląd `innerWidth`/`innerHeight` w `index.html`** (42 użycia: 17 szerokość, 25 wysokość) według §6.3: szerokość liczona z paskiem przewijania to błąd, wysokość bywa w porządku. Przejrzeć, a nie zamieniać hurtem.
 3. **`audit.py` i `paths.py` z prawdziwym paskiem przewijania** (`scrollbars=True`).

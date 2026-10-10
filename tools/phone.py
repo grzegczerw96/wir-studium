@@ -40,7 +40,12 @@ with sync_playwright() as p:
         # open: load the page with a query (e.g. "fx=5") and count frames from its first moment (the entrance), up to
         # the next {"fps":"stop"}
         elif 'open' in s:
+            # (the page marks the moment it is revealed: performance.mark('wir-reveal'), so long frames can be told from
+            #  the loading)
             if not getattr(pg, '_fps_init', False): pg.add_init_script(FPS); pg._fps_init = True
+            # (through about:blank, as a first visit: reloading from the same site, Chrome keeps the old picture until
+            #  the new page paints text or an image — "paint holding" — and the first paint is measured late)
+            pg.goto('about:blank')
             pg.goto(BASE + '?' + '&'.join(x for x in (s['open'], 'v=%d' % int(time.time())) if x), wait_until='commit')
             base = metrics()
         elif 'js' in s: print(i, 'js', json.dumps(pg.evaluate(s['js']), ensure_ascii=False))

@@ -166,7 +166,11 @@ html.motion .intro-pin{position:sticky;top:0}
 .stripes i:nth-child(2){height:calc(var(--r)*.5);margin-top:var(--r)}
 .stripes i:nth-child(3){height:calc(var(--r)*2.5);margin-top:calc(var(--r)*.75)}
 /* phones: flush with the real bottom edge, also when the address bar has gone */
-@media (max-width:1024px){.stripes{bottom:min(0px,100svh - 100dvh)}}
+/* (with the motion: fixed to the real bottom edge of the screen — anchored to the pinned screen they hung ~56px above
+   it on a phone whenever the address bar had gone and dvh was not yet updated; they are gone by half the intro) */
+/* (phones and tablets only: on desktops the pinned screen is at least 600px tall, and on a lower window the stripes
+   fixed to its bottom edge ran onto the note — measured by tools/sizes.py) */
+@media (max-width:1024px){html.motion .stripes{position:fixed}}
 /* desktop, as Grzegorz placed them (10.10, 1536×742): the title 5.68rem left of the middle and 1.07rem up, the note
    at the bottom right, 2.8rem above the stripes */
 @media (min-width:1025px){
@@ -749,7 +753,13 @@ html:not(.motion) .stage3{display:none}
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 <script>
-(function(){
+/* the main script runs once the document is parsed and a frame with the loader's oval is on the screen (two frames
+   later), so the oval shows at once — run straight away, it held the first paint for ~2 s on a phone (measured with
+   tools/phone_load.py). If no frame comes (a hidden tab), it runs anyway .5 s later */
+{let ran=false;const run=()=>{if(ran)return;ran=true;main()};
+ const start=()=>{requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(run,0)));setTimeout(run,500)};
+ if(document.readyState==='loading')addEventListener('DOMContentLoaded',start);else start()}
+function main(){
   /* ================= motion preference ================= */
   const sysReduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let forced=false;try{forced=localStorage.getItem('wir-motion')==='on'}catch(e){}
@@ -890,8 +900,49 @@ html:not(.motion) .stage3{display:none}
   if(reduce)setTimeout(()=>coils.forEach(c=>c.draw(2.2)),60);
 
   /* ================= generated imagery ================= */
-  function still(w,h,opt){const c=document.createElement('canvas');c.width=w;c.height=h;c.style.width=w+'px';c.style.height=h+'px';
-    document.body.appendChild(c);const k=Coil(c,opt);k.size();k.draw(opt.t||1.3);const url=c.toDataURL('image/jpeg',.85);c.remove();predecode(url);return `url(${url})`}
+  /* the pictures of the sections further down (15 of them, a 2D coil each, encoded as JPEG): ~1.5 s of work on a phone,
+     which used to run before the first paint, so the page stayed blank for ~3 s (measured on Grzegorz's phone, 10.10).
+     They are drawn in a worker now (OffscreenCanvas, the same drawing code and size), and still() hands back a
+     placeholder — var(--st-N) — that is swapped for the picture on its elements once it arrives. Without a worker:
+     drawn here, as before */
+  const stillDraw=(w,h,opt)=>{const c=document.createElement('canvas');c.width=w;c.height=h;c.style.width=w+'px';c.style.height=h+'px';
+    document.body.appendChild(c);const k=Coil(c,opt);k.size();k.draw(opt.t||1.3);const url=c.toDataURL('image/jpeg',.85);c.remove();predecode(url);return `url(${url})`};
+  const STILL=new Map();let stillW=null;
+  if(window.Worker&&window.OffscreenCanvas&&'convertToBlob' in OffscreenCanvas.prototype){
+    try{
+      const src='self.devicePixelRatio='+(devicePixelRatio||1)+';const coarse=false;'+Coil.toString()
+        // (willReadFrequently: drawn by the CPU, so it does not take the GPU from the hero's smoke and coil)
+        +';onmessage=e=>{const {id,w,h,opt}=e.data,oc=new OffscreenCanvas(w,h);'
+        +'const cv={clientWidth:w,clientHeight:h,style:{},getContext:t=>oc.getContext(t,{willReadFrequently:true}),get width(){return oc.width},set width(v){oc.width=v},get height(){return oc.height},set height(v){oc.height=v}};'
+        +'const k=Coil(cv,opt);k.size();k.draw(opt.t||1.3);oc.convertToBlob({type:"image/jpeg",quality:.85}).then(blob=>postMessage({id,blob}))}';
+      stillW=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));
+      stillW.onmessage=e=>{stillQ.push([e.data.id,URL.createObjectURL(e.data.blob)]);stillApply()};
+      stillW.onerror=()=>{stillW=null};
+    }catch(e){stillW=null}
+  }
+  // (the pictures are put in place only once the hero's entrance is over or the page is being scrolled, one per idle
+  //  moment: arriving in the middle of the smoke, each one cost a long frame — measured, the letters' hand-over jumped)
+  const stillQ=[];let stillOn=false;
+  function stillApply(){
+    if(!stillOn||!stillQ.length)return;
+    const [id,url]=stillQ.shift();
+    document.querySelectorAll(`[style*="var(--st-${id})"]`).forEach(el=>el.style.backgroundImage=`url(${url})`);
+    predecode(url);STILL.get(id).done(url);
+    if(stillQ.length)(window.requestIdleCallback||setTimeout)(stillApply);
+  }
+  // (the drawing itself waits too: done next to the hero's smoke, even on another thread, it cost frames — measured,
+  //  tools/motion.py found jumps in the letters' hand-over in 2 of 4 runs, none in 3 runs without it)
+  const stillJobs=[];
+  function stillGo(){if(stillOn)return;stillOn=true;stillJobs.forEach(j=>stillW.postMessage(j));stillJobs.length=0;stillApply()}
+  setTimeout(stillGo,12000);
+  function still(w,h,opt){
+    if(!stillW)return stillDraw(w,h,opt);
+    const id=STILL.size,job={};job.p=new Promise(r=>job.done=r);STILL.set(id,job);
+    if(stillOn)stillW.postMessage({id,w,h,opt});else stillJobs.push({id,w,h,opt});
+    return `var(--st-${id})`;
+  }
+  // the picture's address for a WebGL texture: a placeholder waits for its picture
+  const stillSrc=v=>{const m=/var\(--st-(\d+)\)/.exec(v);return m?STILL.get(+m[1]).p:Promise.resolve(v.replace(/^url\(|\)$/g,''))};
   // decode every generated picture while the page is idle, so its first appearance does not cost a frame
   const DECODED=[];
   function predecode(url){const im=new Image();im.src=url;DECODED.push(im);(window.requestIdleCallback||setTimeout)(()=>{im.decode&&im.decode().catch(()=>{})})}
@@ -952,7 +1003,7 @@ html:not(.motion) .stage3{display:none}
     const st={hover:0,start:0,ready:false,visible:false,v:[0,0],dv:[0,0],t:[0,0]};
     const img=new Image();img.onload=()=>{gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
       gl.uniform2f(U.uTextureResolution,img.naturalWidth,img.naturalHeight);st.ready=true;pic.classList.add('gl');size();draw()};
-    img.src=url.replace(/^url\(|\)$/g,'');
+    stillSrc(url).then(u=>{img.src=u});
     function size(){const d=Math.min(devicePixelRatio||1,1.5),w=pic.clientWidth,h=pic.clientHeight;cv.width=Math.max(1,w*d|0);cv.height=Math.max(1,h*d|0);gl.viewport(0,0,cv.width,cv.height);gl.uniform2f(U.uResolution,w,h)}
     function draw(){if(!st.ready)return;
       // spring toward the mouse target, in -1..1 space around the frame centre (the original's tracker)
@@ -1272,8 +1323,12 @@ html:not(.motion) .stage3{display:none}
   const E=G?{win:1,go:0,coil:0,spin:0}:{win:1,go:1,coil:1,spin:0};
   const IP={p:0};
   const quadOut=t=>1-(1-t)*(1-t),quartOut=t=>1-Math.pow(1-t,4),clamp=v=>Math.min(1,Math.max(0,v));
-  let lastClip='',lastTr='',lastP=-1,sepOn=false;
+  let lastClip='',lastTr='',lastP=-1,sepOn=false,lastKey='';
   function place(P){
+    // (only when something moved: the scroll or the entrance; measuring every frame forced layouts while the page loaded)
+    const key=P+'|'+E.win+'|'+E.go+'|'+E.coil+'|'+E.spin;
+    if(key===lastKey)return;
+    lastKey=key;
     // (every position is taken in the black layer's own box, where the clip-path insets live: innerWidth counts the
     //  scrollbar and the layer does not — the O lost 15px and the coil sat 7px off its middle that way in the lab)
     const r=winIn.getBoundingClientRect(),sr=box.getBoundingClientRect(),W=document.documentElement.clientWidth,Hh=innerHeight;
@@ -1293,6 +1348,7 @@ html:not(.motion) .stage3{display:none}
     if(P!==lastP){lastP=P;
       const o=1-quadOut(clamp(P/.5)),stripes=document.getElementById('stripes');
       heroT.style.opacity=stripes.style.opacity=o<1?o.toFixed(3):'';
+      stripes.style.visibility=o>0?'':'hidden';
       const pr=pin.getBoundingClientRect(),wr=[sr.left+L-pr.left,sr.top+T-pr.top,sr.right-Rt-pr.left,sr.bottom-B-pr.top],gap=R()*1.5;
       const sep=b=>Math.max(b[0]-wr[2],wr[0]-b[2],b[1]-wr[3],wr[1]-b[3]);
       if(P>0){
@@ -1300,7 +1356,8 @@ html:not(.motion) .stage3{display:none}
         heroNote.style.opacity=(o*clamp(sep(NB)/gap)).toFixed(3);sepOn=true}
       else if(sepOn){CHS.forEach(([c])=>{c.style.opacity=''});heroNote.style.opacity='';sepOn=false}
       const bl=18*quadOut(clamp(P/.5))*R()/14;
-      heroT.style.filter=heroNote.style.filter=bl>.05?'blur('+bl.toFixed(2)+'px)':'';
+      // (the stripes too, as the title and the note: Grzegorz 10.10 — they only greyed out)
+      heroT.style.filter=heroNote.style.filter=stripes.style.filter=bl>.05?'blur('+bl.toFixed(2)+'px)':'';
     }
     // the coil: in the O face-on and still, ~90 % of the counter's width; growing, it travels to the middle, turns half a
     // turn and tips to 60°, the sway coming back with it, and ends at the size the manifesto takes over (scale 1).
@@ -1320,7 +1377,7 @@ html:not(.motion) .stage3{display:none}
 
   // fonts change the title's width, which moves the O: measure again once they arrive, on resize and when the title or
   // the note change size
-  const relayout=()=>{fitHero();cacheCh();lastP=-1;place(IP.p);coils.forEach(c=>{c.size();if(reduce)c.draw(2.2)});if(window.ScrollTrigger)ScrollTrigger.refresh()};
+  const relayout=()=>{fitHero();cacheCh();lastP=-1;lastKey='';place(IP.p);coils.forEach(c=>{c.size();if(reduce)c.draw(2.2)});if(window.ScrollTrigger)ScrollTrigger.refresh()};
   if(document.fonts)document.fonts.ready.then(relayout);
   addEventListener('load',relayout);
   // (touch screens: the address bar sliding in and out fires resize with only the height changed — a full refresh then,
@@ -1330,9 +1387,9 @@ html:not(.motion) .stage3{display:none}
    ro.observe(heroT);ro.observe(heroNote)}
   // reveal: measured with the real fonts first, then the page shows (the loader's oval is taken over at its own place)
   // and the entrance starts
-  const show=f=>fontsIn.then(()=>requestAnimationFrame(()=>{relayout();document.documentElement.classList.remove('wait','pre');f&&f()}));
+  const show=f=>fontsIn.then(()=>requestAnimationFrame(()=>{relayout();document.documentElement.classList.remove('wait','pre');performance.mark('wir-reveal');f&&f()}));
 
-  if(!G){show();return}
+  if(!G){show(stillGo);return}
   /* ================= GSAP ================= */
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ignoreMobileResize:true});   // the iOS address bar must not re-measure the pinned sections
@@ -1542,6 +1599,10 @@ html:not(.motion) .stage3{display:none}
   lenis&&gsap.ticker.lagSmoothing(0);
   buildScroll();
   // (the entrance's start states are set when the page is shown, after the measuring, so the letters' boxes are cached flat)
+  enter.eventCallback('onComplete',stillGo);
+  // (the smoke's shaders are compiled now, while the loader's oval stands still: at the start of the entrance the
+  //  compile cost a 56 ms frame on the phone)
+  if(FX==='d3')smokeGL();
   show(()=>{heroEnter(enter);enter.play()});
 
   function buildScroll(){
@@ -1551,13 +1612,35 @@ html:not(.motion) .stage3{display:none}
   const quadIO=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
   // (one number, scrubbed; the window, the coil and the fades are computed from it every frame in place(), so a refresh
   //  that skips callbacks never leaves them behind)
-  gsap.to(IP,{p:1,ease:'none',scrollTrigger:{trigger:'#intro',start:'top top',end:'bottom bottom',scrub:.6,invalidateOnRefresh:true,
+  const introST=gsap.to(IP,{p:1,ease:'none',scrollTrigger:{trigger:'#intro',start:'top top',end:'bottom bottom',scrub:.6,invalidateOnRefresh:true,
     onUpdate:st=>{const L=window.__lenis,p=st.progress;
+      if(p>0)stillGo();
       if(!L||!carry||menuOpen||window.__autoScrolling||st.direction<=0||p<=.1||p>=.95||Math.abs(L.velocity)>=50)return;
       const v=Math.abs(L.velocity),dur=Math.min(.25+Math.abs(v/50-1)+Math.abs(p-1),1.25)*(isDesk()?1:.75);
       window.__autoScrolling=true;
       L.scrollTo(st.end,{duration:dur,lock:true,force:true,easing:v<25?quadIO:quadOut,onComplete:()=>{window.__autoScrolling=false}});
-      setTimeout(()=>{window.__autoScrolling=false},dur*1000+400)}}});
+      setTimeout(()=>{window.__autoScrolling=false},dur*1000+400)}}}).scrollTrigger;
+  /* touch screens (Grzegorz 10.10, on his phone: "so the visitor does not have to toil — after a moment the window with
+     the coil should jump in by itself"; the original does it on every device): once the finger is off and the page
+     has stood still for .25 s, a window left part-way down is carried to the full screen (the original's phone time,
+     ~.9 s, quad in-out). Never while the finger is down and without the scroll lock — a programmatic scroll fighting
+     the finger was felt as stutter (9.10) — and a touch takes over at once */
+  // (the direction is that of the whole gesture, from where the finger came down: the last scroll events of a swipe
+  //  can step back by a fraction of a pixel on a 3× screen)
+  if(coarse&&lenis){let down=false,idle=0,y0=scrollY,dir=0;
+    const go=()=>{const p=introST.progress;
+      window.__carry={p:+p.toFixed(3),dir,down,auto:!!window.__autoScrolling};   // (for tools/phone.py)
+      if(down||menuOpen||window.__autoScrolling||dir<=0||p<=.05||p>=.995)return;
+      const dur=Math.min(1.25+Math.abs(p-1),1.25)*.75;
+      window.__autoScrolling=true;
+      lenis.scrollTo(introST.end,{duration:dur,force:true,easing:quadIO,onComplete:()=>{window.__autoScrolling=false}});
+      setTimeout(()=>{window.__autoScrolling=false},dur*1000+400)};
+    const wait=()=>{clearTimeout(idle);if(!down)idle=setTimeout(go,250)};
+    addEventListener('touchstart',()=>{down=true;y0=scrollY;clearTimeout(idle);
+      if(window.__autoScrolling){lenis.scrollTo(scrollY,{immediate:true,force:true});window.__autoScrolling=false}},{passive:true});
+    const up=()=>{down=false;wait()};
+    addEventListener('touchend',up,{passive:true});addEventListener('touchcancel',up,{passive:true});
+    addEventListener('scroll',()=>{const d=scrollY-y0;if(Math.abs(d)>2)dir=Math.sign(d);if(!window.__autoScrolling)wait()},{passive:true})}
   // (past the intro, nothing to do once the window is the whole screen and the entrance is over)
   gsap.ticker.add(()=>{if(IP.p>=1&&lastP>=1&&!enter.isActive())return;place(IP.p)});
 
@@ -1909,7 +1992,7 @@ html:not(.motion) .stage3{display:none}
       if(used||openPr||r.bottom<0||r.top>innerHeight)return;used=true;openRow(prs[0])},600);
     ScrollTrigger.create({trigger:rowsEl,start:'top 70%',end:'bottom top',onEnter:tryOpen,onEnterBack:tryOpen})}
 
-})();
+}
 </script>
 
 </body>
