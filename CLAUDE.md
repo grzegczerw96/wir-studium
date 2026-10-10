@@ -50,8 +50,9 @@ Stan na 10.10.2026, ostatnie zmiany: start bez mignięcia innego układu (strona
   - spirala w „O” mniejsza (ok. 72% wysokości litery) i na wprost, dziura na środku; przechyla się dopiero, gdy okno rośnie;
   - notka na desktopie: pierwsza linia na równi z górą wersalików tytułu (liczone z linii bazowej i `actualBoundingBoxAscent`);
   - gasnący szary napis przy rośnięciu okna rozprasza; **wybrane wyjście 1: rozmycie** (litery w miejscu, rozmywają się i gasną; nie prześwitują przez rosnącą ramkę);
-  - „O” = obrys prawdziwego znaku O kroju (zmierzony z canvas: szerokość, pudełko farby), w środku **metalowa spirala 3D z głównej strony** (ok. 90% szerokości światła litery, obrócona o 0,5 rad wokół pionu, żeby była wysokim owalem jak światło O); biała spirala 2D rozciągnięta do światła była „za duża i płaska”; jeśli „O” nie zadziała, wracamy do układu 1 (jak w oryginale, `?v=1`);
+  - „O” = obrys prawdziwego znaku O kroju (zmierzony z canvas: szerokość, pudełko farby), w środku **metalowa spirala 3D z głównej strony** (ok. 90% szerokości światła litery), **na wprost, bez kołysania i bez reakcji na mysz** (obrót wokół pionu i kołysanie robiły jedną stronę pierścienia grubszą i bryła wyglądała na przesuniętą; zmierzone: odchylenie środka ok. 1,5 px); biała spirala 2D rozciągnięta do światła była „za duża i płaska”; jeśli „O” nie zadziała, wracamy do układu 1 (jak w oryginale, `?v=1`);
   - paski na dole po wejściu zawsze wszystkie trzy, pełne;
+  - desktop wg ustawienia Grzegorza (1536×742): tytuł 5,68rem w lewo i 1,07rem w górę od środka, notka na dole po prawej, 2,8rem nad paskami (`bottom: 7,8rem`, `right: gut + .38rem`); tytuł w układzie 2 większy: 9,75rem (tablet 8,4rem) zamiast 8,75rem;
   - `lab/hero.html` ma tryb „przesuń”: Grzegorz sam przesuwa tytuł i notkę, przesunięcia (w rem) są w adresie (`&t=x,y&n=x,y`) i do skopiowania.
 - **Fonty jak w oryginale:**
   - Inter Tight w roli Helvetica Now Display;

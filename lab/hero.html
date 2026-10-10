@@ -52,7 +52,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .pin{padding-bottom:calc(var(--r)*6.5)}
 @media (min-width:1025px){.pin{padding-top:calc(var(--gut) + 55px);padding-bottom:calc(var(--r)*7.8)}}
 /* desktop, layouts 1 and 2: the note's first line stands level with the top of the title's capitals (set in JS) */
-@media (min-width:1025px){[data-v="1"] .note,[data-v="2"] .note{top:var(--nt,calc(var(--gut) + 55px))!important}}
+@media (min-width:1025px){[data-v="1"] .note{top:var(--nt,calc(var(--gut) + 55px))!important}}
 
 /* ---- 1 · staircase (closest to the original): left-aligned lines stepping in, the window in a gap of the last line;
    phones: centred, the window under the title (the original's base layout) ---- */
@@ -82,7 +82,12 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
    with the window hung from it; the white coil fills the O's counter */
 [data-v="2"] .gap{width:var(--ow,.78em);height:0;vertical-align:baseline;position:relative}
 [data-v="2"] .gap .win{position:absolute;left:var(--ol,0em);bottom:var(--od,0em);width:var(--obw,.78em);height:var(--obh,.74em)}
-@media (min-width:1025px){[data-v="2"] .note{position:absolute;top:calc(var(--gut) + 55px);right:var(--gut)}}
+/* desktop, as Grzegorz placed them (10.10, 1536×742): the title 5.68rem left of the middle and 1.07rem up, the note at
+   the bottom right, 2.8rem above the stripes (5rem of stripes + 2.8) */
+@media (min-width:1025px){
+  [data-v="2"] .title{position:relative;left:calc(var(--r)*-5.68);top:calc(var(--r)*-1.07)}
+  [data-v="2"] .note{position:absolute;bottom:calc(var(--r)*7.8);right:calc(var(--gut) + var(--r)*.38)}
+}
 
 /* ---- 3 · frame: the first line across the top, the window wide in the middle, the last word across the bottom;
    each line set to the full width, so the type frames the picture ---- */
@@ -179,7 +184,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
       if(desk()){const fs=Math.min(100*avail/Math.max(...lns.map(wid))*.97,R()*7);lns.forEach(l=>l.style.setProperty('--lfs',Math.floor(fs)+'px'))}
       else lns.forEach(l=>l.style.setProperty('--lfs',Math.floor(100*avail/wid(l)*.97)+'px'));return}
     const widest=Math.max(...lns.map(wid));let fs=100*avail/widest*.97;
-    const base=R()*(innerWidth>=1025?8.75:innerWidth>=600?7.5:4);
+    const base=R()*(V==='2'?(innerWidth>=1025?9.75:innerWidth>=600?8.4:4):(innerWidth>=1025?8.75:innerWidth>=600?7.5:4));
     if(V==='1'||V==='2')fs=Math.min(fs,V==='2'&&!desk()?fs:base);
     // (4: the three lines fill the height left between the header and the stripes; on desktop also above the note)
     if(V==='4'){const ps=getComputedStyle(pin),inner=pin.clientHeight-parseFloat(ps.paddingTop)-parseFloat(ps.paddingBottom);
@@ -209,7 +214,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
      inline-block on it) minus the cap height, and the same for the note's own first line */
   const capH=font=>{const c=capH.c||(capH.c=document.createElement('canvas').getContext('2d'));c.font=font;return c.measureText('H').actualBoundingBoxAscent};
   const baseMark=()=>{const b=document.createElement('i');b.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';return b};
-  function alignNote(){H.style.removeProperty('--nt');if(!desk()||!(V==='1'||V==='2'))return;
+  function alignNote(){H.style.removeProperty('--nt');if(!desk()||V!=='1')return;
     const nt=note.style.translate;note.style.translate='';
     const ln=title.querySelector('.ln'),b=baseMark();ln.append(b);const base=b.getBoundingClientRect().top;b.remove();
     const tcap=base-capH('900 '+parseFloat(getComputedStyle(title).fontSize)+'px "Inter Tight"');
@@ -267,11 +272,12 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     const PX=ccx+(W/2-ccx)*k,PY=ccy+(Hh/2-ccy)*k,turn=quartOut(clamp(P/.75));
     window.__o={cx,cy,ccx,ccy,OC,FS,r:[r.left,r.top,r.width,r.height]};
     if(GL){
-      // in the O: turned about its upright axis (yaw .5), so the ring is a tall oval like the O's counter, ~90% of the
-      // counter's width; growing: to .75 of the screen (the original's scale), tipping to the main page's 60° and half a turn
-      const YAW=oval?.5:0,u=3.6*cv.clientHeight/4.823;
-      const D0=oval?OC.w*FS*e*.9/Math.cos(YAW):Math.min(w0,h0)*.8,D1=Math.min(W,Hh)*.75,D=D0+(D1-D0)*quartOut(clamp(P));
-      GL.setPos(PX,PY);GL.setPose((oval?0:.35)+((oval?1.05:.7))*turn,Math.max(D,.01)/u,-Math.PI*turn,.3+.7*turn,YAW*(1-turn));GL.draw(now/1000)}
+      // in the O: face-on and still (no sway, no mouse: a turned ring has one thick and one thin side and reads off-centre),
+      // ~90% of the counter's width, turning only about its own axis; growing: to .75 of the screen (the original's scale),
+      // tipping to the main page's 60° and half a turn, the sway coming back with it
+      const u=3.6*cv.clientHeight/4.823;
+      const D0=oval?OC.w*FS*e*.9:Math.min(w0,h0)*.8,D1=Math.min(W,Hh)*.75,D=D0+(D1-D0)*quartOut(clamp(P));
+      GL.setPos(PX,PY);GL.setPose((oval?0:.35)+((oval?1.05:.7))*turn,Math.max(D,.01)/u,-Math.PI*turn,oval?turn:.3+.7*turn,0);GL.draw(now/1000)}
     else{const m1=Math.min(W,Hh)*.95;let m0=Math.min(w0,h0)*1.05,sq0=1;if(oval){m0=OC.w*FS*e/.74;sq0=OC.h/OC.w}
       drawCoil(now/1000,PX,PY,m0+(m1-m0)*quartOut(clamp(P)),turn,1+(sq0-1)*(1-k),oval?1-k:0)}
     requestAnimationFrame(frame)}
