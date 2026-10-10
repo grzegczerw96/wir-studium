@@ -471,14 +471,15 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     // (the front starts well inside the O, so at the first moment there is no smoke anywhere; it is born at the O's
     //  centre — d3 — or the title's left edge, inside the reach of its front, never ahead of it: measured before, the
     //  first smoke was a ring 80-100 px around the O and the layer drew while the oval was still on its way)
-    '  float f=mix(-.45,1.35,uP),edge=f+(n-.5)*.35,dd=c-edge;',
+    '  float f=mix(-.3,1.35,uP),edge=f+(n-.5)*.35,dd=c-edge;',
     '  float rev=1.-smoothstep(-.1,.02,dd);',
     '  float core=exp(-pow(dd/.11,2.)),lead=exp(-pow((dd-.12)/.16,2.)),trail=exp(-pow((dd+.28)/.26,2.)),tx=smoothstep(.28,.72,n);',
     // (the layer's own edges never show: the smoke thins out towards them)
     '  float vig=smoothstep(0.,.14,v.x)*smoothstep(0.,.14,1.-v.x)*smoothstep(0.,.22,v.y)*smoothstep(0.,.22,1.-v.y);',
     '  float reach=1.-smoothstep(f+.12,f+.24,c);',
     // (a small dense puff right at the origin, growing from nothing as the effect starts and giving way to the ring)
-    '  float puff=exp(-pow(c/.07,2.))*smoothstep(-.45,-.3,f)*(1.-smoothstep(-.05,.35,f));',
+    // (the source keeps smoking until the ring is well out — before, the puff and the ring were two steps with a pause)
+    '  float puff=exp(-pow(c/.07,2.))*smoothstep(-.3,-.22,f)*(1.-smoothstep(.15,.55,f));',
     '  float sm=clamp(max(core*(.55+.45*tx)+lead*.7*tx+trail*.45*tx,0.)*reach+puff*(.6+.4*tx),0.,1.)*uFade*uAmt*vig;',
     '  vec2 d=(w-.5)*.025*(core+lead)*(1.-rev*.6);',
     '  float ta=texture2D(uText,v+d).a*rev;',
@@ -525,9 +526,11 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
       return mode?Math.hypot((u-ou[0])*asp,w-ou[1])/dmax:(u-tx[0])/(tx[1]-tx[0])});
     const v={p:0,fade:1},t0=performance.now();
     const draw=()=>{gl.uniform1f(U.uT,(performance.now()-t0)/1000);gl.uniform1f(U.uP,v.p);gl.uniform1f(U.uFade,v.fade);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-      const f=-.45+1.8*v.p;ch.forEach((e,i)=>e.dataset.vis=(1-clamp((cen[i]-(f-.1))/.12)).toFixed(3))};draw();
+      const f=-.3+1.65*v.p;ch.forEach((e,i)=>e.dataset.vis=(1-clamp((cen[i]-(f-.1))/.12)).toFixed(3))};draw();
     // slow motion: the front crosses in 3.3 s (sine in-out, so it eases out gently), the smoke thins out from 2.4 s over 1.5 s
-    tl.set(G.cv,{display:'block'},at).to(v,{p:1,duration:3.3,ease:'sine.inOut',onUpdate:draw},at).to(v,{fade:0,duration:1.5,ease:'power1.out',onUpdate:draw},at+2.4)
+    // (sine out: the front moves at once and slows only at the end — with sine in-out it hung still for ~.7 s after the
+    //  oval landed: Grzegorz saw pauses between the oval, the first puff and the smoke)
+    tl.set(G.cv,{display:'block'},at).to(v,{p:1,duration:3.4,ease:'sine.out',onUpdate:draw},at).to(v,{fade:0,duration:1.5,ease:'power1.out',onUpdate:draw},at+2.4)
       // (the page's own letters fade in on top of the identical drawn ones, then the layer goes: a cross-fade of the two
       //  dipped to grey half-way)
       .set(title,{visibility:'visible'},at+3.9).fromTo(ch,{opacity:0},{opacity:1,duration:.35,ease:'none',clearProps:'opacity',immediateRender:false},at+3.9)
@@ -568,11 +571,12 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
         c.style.translate=x.toFixed(1)+'px '+y.toFixed(1)+'px';c.style.scale=(s*sx).toFixed(4)+' '+s.toFixed(4)};put();
       tl.to(q,{t:1,duration:DUR,ease:'none',onUpdate:put,onComplete:()=>clearFx(c)},at+rnd()*.25)});
     return at+DUR+.25}
-  /* the note: its words appear from its middle out to the sides, unevenly (a little random), out of a light blur */
+  /* the note: its words appear from its middle out to the sides, unevenly (a little random) — opacity only: a blur filter
+     on ~20 words at once made 50-100 ms frames right while the smoke was moving (measured) */
   function noteIn(at){const k=R()/14,nb=note.getBoundingClientRect(),ncx=nb.left+nb.width/2,half=nb.width/2,rnd=seeded(5);
     note.querySelectorAll('.w').forEach(w=>{w.style.setProperty('--rx','0deg');w.style.setProperty('--sy','1')});
     note.querySelectorAll('.w').forEach(el=>{const r=el.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-ncx)/half;
-      fxTo(el,{o:0,b:3*k},{o:1,b:0},.9,'power1.out',at+d*.7+rnd()*.3)});
+      fxTo(el,{o:0},{o:1},.9,'power1.out',at+d*.7+rnd()*.3)});
     return at+1.9}
   if('scrollRestoration' in history)history.scrollRestoration='manual';
   function enter(){
@@ -647,7 +651,9 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
       // (5 opens from the O, so it waits until the oval is in it: earlier, the travelling oval crossed letters already shown)
       // (the note starts with the core of 7 and the stripes after it — the same times for every version, as Grzegorz asked)
       // (d3 starts once the oval is in the O, and its note when the smoke's front has passed the title's middle)
-      else{const t0=M+.45,ts=FX==='5'||FX==='d3'?M+1.1:t0;titleIn(ts);const ne=noteIn(FX==='d3'?ts+3.3*.55:t0+DUR*C0);bars(ne-.3)}}
+      // (d3 starts while the oval settles into the O — the last .5 s of its ride are a slow quart in-out landing; later, the
+      //  picture stood still for ~.2 s between the two)
+      else{const t0=M+.45,ts=FX==='5'?M+1.1:FX==='d3'?M+.65:t0;titleIn(ts);const ne=noteIn(FX==='d3'?ts+1.1:t0+DUR*C0);bars(ne-.3)}}
     enter.ran=true}
   document.querySelectorAll('.ctl [data-fx]').forEach(b=>b.onclick=()=>{FX=b.dataset.fx;IN='C';apply()});
   document.querySelectorAll('.ctl [data-nx]').forEach(b=>b.onclick=()=>{NX=b.dataset.nx;IN='C';apply()});

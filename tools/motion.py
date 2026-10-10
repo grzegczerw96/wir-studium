@@ -13,13 +13,17 @@
          add red pixels far beyond the farthest red of the frame before (60 px + 600 px/s) — smoke ahead of its front
          --origin=SELECTOR@bottom (or @top/@left/@right): the effect must be born at that point of the element's edge,
          within 60 % of its radius
+  stall  the picture stands still (less than 0.35 mean change per 0.1 s, the lab's panel left out) for 0.2 s or more inside
+         the animation — from its first movement to three quarters of the way to its last (the calm ending is allowed)
+  jank   frames longer than 50 ms after the animation has started (requestAnimationFrame times in the page), with the heavy
+         work that ran in them (WebGL compile/link/upload, getImageData, long tasks)
 usage: py -I tools/motion.py [url] --fx=3,5,7,7b,7c,d1,d2,d3 [--dev=d|m|both] [--t=6.5] [--origin=#winIn[@bottom]]
 The lab's own controls (label, switch panel) are left out. Crops of every finding go to out/motion/."""
 import os, sys, time, base64, io
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _env
 from playwright.sync_api import sync_playwright
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageStat
 args = [a for a in sys.argv[1:] if not a.startswith('--')]
 opt = lambda k, d: next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--' + k + '=')), d)
 url = args[0] if args else 'file:///' + os.path.join(_env.REPO, 'lab', 'hero.html').replace('\\', '/')
@@ -30,6 +34,12 @@ DUR = float(opt('t', '6.5'))
 out = os.path.join(_env.OUT, 'motion'); os.makedirs(out, exist_ok=True)
 TILE, POP, CALM = 16, 26, 5
 ORIGIN = opt('origin', None)
+HOOK = r"""window.__raf=[];window.__ops=[];(function f(t){window.__raf.push(t);requestAnimationFrame(f)})(0);
+for(const C of [window.WebGLRenderingContext,window.WebGL2RenderingContext].filter(Boolean))
+  for(const n of ['compileShader','linkProgram','texImage2D','drawArrays','getProgramParameter']){const o=C.prototype[n];
+    C.prototype[n]=function(...a){const t=performance.now(),r=o.apply(this,a),d=performance.now()-t;if(d>2)window.__ops.push([n,+t.toFixed(0),+d.toFixed(1)]);return r}}
+{const o=CanvasRenderingContext2D.prototype.getImageData;CanvasRenderingContext2D.prototype.getImageData=function(...a){const t=performance.now(),r=o.apply(this,a),d=performance.now()-t;if(d>2)window.__ops.push(['getImageData',+t.toFixed(0),+d.toFixed(1)]);return r}}
+try{new PerformanceObserver(l=>l.getEntries().forEach(e=>window.__ops.push(['longtask',+e.startTime.toFixed(0),+e.duration.toFixed(0)]))).observe({type:'longtask',buffered:true})}catch(e){}"""
 RED = lambda r, g, b_: r - g > 30   # the debug smoke (red over white or over the dark-blue debug stage)
 INFO = """()=>{const R=e=>{const r=e.getBoundingClientRect();return [r.left,r.top,r.right,r.bottom]};
  const sm=document.querySelector('.smoke'),skip=[...document.querySelectorAll('.ctl,.lbl')].map(R);
@@ -40,14 +50,14 @@ with sync_playwright() as p:
     b = _env.launch(p, scrollbars=True)
     for dev in devs:
         for fx in FXS:
-            ctx = b.new_context(**DEVS[dev]); pg = ctx.new_page(); cdp = ctx.new_cdp_session(pg); frames = []
+            ctx = b.new_context(**DEVS[dev]); pg = ctx.new_page(); pg.add_init_script(HOOK); cdp = ctx.new_cdp_session(pg); frames = []
             def on_frame(ev):
                 frames.append((time.time(), ev['data'])); cdp.send('Page.screencastFrameAck', {'sessionId': ev['sessionId']})
             cdp.on('Page.screencastFrame', on_frame)
             q = f"w=C&fx={fx}" + ('&dbg=smoke' if fx.startswith('d') else '')
             pg.goto(url + ('&' if '?' in url else '?') + q)
             pg.wait_for_function('window.gsap&&document.querySelector("#title .ch")&&document.getElementById("stage").style.clipPath', timeout=20000)
-            t0 = time.time(); cdp.send('Page.startScreencast', {'format': 'png', 'everyNthFrame': 1})
+            t0 = time.time(); ready = pg.evaluate('performance.now()'); cdp.send('Page.startScreencast', {'format': 'png', 'everyNthFrame': 1})
             info = pg.evaluate(INFO); smoke = None
             sel, _, at = (ORIGIN or '').partition('@')
             org = pg.evaluate(f"""(()=>{{const e=document.querySelector({sel!r});if(!e)return null;const r=e.getBoundingClientRect(),a={at!r};
@@ -57,7 +67,7 @@ with sync_playwright() as p:
                 if smoke is None and fx.startswith('d'):
                     smoke = pg.evaluate(INFO)['smoke']
                 pg.wait_for_timeout(150)
-            cdp.send('Page.stopScreencast'); ctx.close()
+            cdp.send('Page.stopScreencast'); RAF, OPS = pg.evaluate('window.__raf'), pg.evaluate('window.__ops'); ctx.close()
             ims = [(t - t0, Image.open(io.BytesIO(base64.b64decode(d))).convert('RGB')) for t, d in frames]
             if len(ims) < 5:
                 print(dev, fx, 'too few frames', len(ims)); continue
@@ -133,11 +143,36 @@ with sync_playwright() as p:
                             if len(ahead) >= 5: spread.append((round(t, 2), f'{len(ahead)} cells ahead of the front ({max(dist[q] for q in ahead) / k:.0f}px vs {maxd / k:.0f}px)'))
                         maxd = max(dist.values()) if maxd is None else max(maxd, max(dist.values()))
                     prev, tprev = red, t
-            found = len(pops) + (len(edges) if len(edges) > 2 else 0) + len(order) + len(spread)
+            # ---- stall: the picture standing still inside the animation (activity per 0.1 s, the lab's panel blacked out)
+            def masked(im):
+                im = im.convert('L').copy()
+                for r in skipb: im.paste(0, (int(r[0]) - 8, int(r[1]) - 8, int(r[2]) + 8, int(r[3]) + 8))
+                return im
+            act = {}; mprev = masked(ims[0][1])
+            for t, im in ims[1:]:
+                m = masked(im); act[int(t * 10)] = act.get(int(t * 10), 0) + ImageStat.Stat(ImageChops.difference(mprev, m)).mean[0]; mprev = m
+            busy = [kk for kk, v in act.items() if v >= .35]
+            stalls = []
+            if busy:
+                a0, a1 = min(busy), max(busy); lim = a0 + .75 * (a1 - a0); run = []
+                for kk in range(a0, int(lim) + 1):
+                    if act.get(kk, 0) < .35: run.append(kk)
+                    else:
+                        if len(run) >= 2: stalls.append((run[0] / 10, (run[-1] + 1) / 10))
+                        run = []
+                if len(run) >= 2: stalls.append((run[0] / 10, (run[-1] + 1) / 10))
+            # ---- jank: long frames after the start (page times)
+            jank = []
+            for i in range(1, len(RAF)):
+                if RAF[i] > ready and RAF[i] - RAF[i - 1] > 50:
+                    jank.append((round((RAF[i - 1] - ready) / 1000, 2), round(RAF[i] - RAF[i - 1]), [o[0] for o in OPS if RAF[i - 1] - 5 <= o[1] <= RAF[i]]))
+            found = len(pops) + (len(edges) if len(edges) > 2 else 0) + len(order) + len(spread) + len(stalls) + len(jank)
             total += found
             msg = []
             if pops: msg.append(f"pop {len(pops)}× e.g. t={pops[-1][0]}s at ({pops[-1][1]},{pops[-1][2]}) Δ{pops[-1][3]}")
             if len(edges) > 2: msg.append(f"edge in {len(edges)} frames ({', '.join(sorted(set(s for _, e in edges for s in e)))}) from {edges[0][0]}s")
+            if stalls: msg.append('stall ' + ', '.join(f'{a:.1f}–{z:.1f}s' for a, z in stalls))
+            if jank: msg.append('jank ' + ', '.join(f'{t}s {d}ms {w}' for t, d, w in jank[:5]))
             if spread: msg.append(f"spread: {len(spread)}× e.g. t={spread[0][0]}s {spread[0][1]}")
             if order: msg.append(f"order: ink before smoke in {len(order)} letters ({', '.join(f'{o[0]} ink {o[1]}s smoke {o[2]}s' for o in order[:8])})")
             print(f"{dev} {fx}: {len(ims)} frames | " + ('; '.join(msg) if msg else 'clean') + (f' [{born}]' if org and fx.startswith('d') and maxd is not None else ''))
