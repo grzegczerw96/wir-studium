@@ -8,7 +8,8 @@ Every ~40 ms of an entrance and at 21 scroll positions it reads the live boxes a
   off-screen     a visible letter or note line past the left/right edge
   letter-letter  two visible letters over each other (more than a quarter of the narrower one's width and a third of its
                  height: neighbours touch by the -.04em tracking, lines by the .84 leading — that is not an overlap)
-'visible' = turned less than 75° (the flip), opacity of its block above .3. The O's own window next to its letters is
+'visible' = turned less than 75° (the flip), opacity of its block above .3 (times data-vis, set by effects that hide text
+with a filter or a mask). The O's own window next to its letters is
 not an overlap (tolerance 3 px), nor the window over letters that are already fading (scroll: by design, they blur away).
 usage: py -I tools/overlap.py [url] [--shots] [--w=CDEFG]   (phones and desktops, real scrollbar)"""
 import os, sys, json, time
@@ -28,8 +29,11 @@ READ = r"""()=>{
  const m=cp.match(/inset\(([-\d.]+)px ([-\d.]+)px ([-\d.]+)px ([-\d.]+)px round ([-\d.]+)px \/ ([-\d.]+)px\)/);
  const win=m?{b:[sr.left+ +m[4],sr.top+ +m[1],sr.right- +m[2],sr.bottom- +m[3]],rx:+m[5],ry:+m[6]}:null;
  const O=document.getElementById('winIn');const ob=O?box(O):null;
- const letters=[...document.querySelectorAll('#title .ch')].filter(c=>deg(c)<75&&op(c)>.3).map(c=>({t:c.textContent,b:box(c),o:op(c)}));
- const lines={};document.querySelectorAll('#note .w').forEach(w=>{if(deg(w)>=75||op(w)<=.3)return;const b=box(w),k=Math.round(b[1]);
+ // (data-vis: effects that hide text with a filter or a mask, not opacity, say how much of it shows)
+ const vis=(el,host)=>+(el.dataset.vis??host.dataset.vis??1),T=document.getElementById('title'),N=document.getElementById('note');
+ const letters=[...document.querySelectorAll('#title .ch')].map(c=>({c,o:op(c)*vis(c,T)})).filter(x=>deg(x.c)<75&&x.o>.3).map(x=>({t:x.c.textContent,b:box(x.c),o:x.o}));
+ const wop=w=>{const ls=w.querySelectorAll('.nl');return (ls.length?Math.max(...[...ls].map(op)):op(w))*vis(w,N)};
+ const lines={};document.querySelectorAll('#note .w').forEach(w=>{if(deg(w)>=75||wop(w)<=.3)return;const b=box(w),k=Math.round(b[1]);
    lines[k]=lines[k]?[Math.min(lines[k][0],b[0]),Math.min(lines[k][1],b[1]),Math.max(lines[k][2],b[2]),Math.max(lines[k][3],b[3])]:b});
  const stripes=[...document.querySelectorAll('.stripes i')].filter(i=>op(i)>.3).map(box);
  const hd=document.querySelector('.hd'),head=op(hd)>.3?[box(document.querySelector('.logo')),box(document.querySelector('.dots'))]:[];

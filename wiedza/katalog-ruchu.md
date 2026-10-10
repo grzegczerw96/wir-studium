@@ -22,10 +22,12 @@ Słownik, z którego Claude dobiera ruch. Każda pozycja: co robi, kiedy pasuje,
 | 4 | Rozpraszanie | filtr SVG: szum (`fractalNoise`, 0,035/k) jako maska krycia, próg rośnie, maska lekko rozmyta (kłęby) | 1,9 s power1.inOut |
 | 5 | Dym z „O” | maska: miękkie koło rośnie od środka „O” + rozmycie 10px·k → 0 | 2,1 s power2.out |
 | 6 | Smugi wiru | filtr SVG: poziome rozmycie 36px·k → 0; wiersze na przemian z prawej/lewej o .35em | 1,8 s power3.out |
-| 7 | Zbieranie się | litery rozsunięte od środka tytułu (.22 odległości + losowo) i rozmyte zbierają się | 1,7 s power3.out, rozrzut .5 s |
+| 7 | Zbieranie się | litery blisko miejsca (.1 odległości od środka + losowo .12em), gęsty dym (rozmycie 22px·k, skala 1,08), położenie ustala się wcześnie, czerń dopiero na końcu | 2,1 s; krycie `.35·min(1,t/.2) + .65·t³` |
 | 8 | Oddech | cały tytuł z mgiełki (rozmycie 6px·k), skala 1,035 → 1 | 2,4 s power1.out |
+| 9 | Zawirowanie, czerń na końcu | jak 3, ale dym jasny i czerń dopiero na końcu, zawirowanie uspokaja się wolniej | 2,4 s; krycie jak w 7 |
 
 k = rem/14 (rozmycie rośnie z wielkością liter). Notka po tytule: a) słowa od środka na boki z losowym opóźnieniem, b) miękka maska od środka, c) litery jak pył. Wersje 3 i 4 pierwotnie za mocne (zniekształcone litery, ostre plamy), złagodzone.
+**Uwagi Grzegorza (10.10):** na razie 3, podoba się też 7; „czerń dopiero na samym końcu” (lekki dym od razu, gęstnienie w czerń w ostatniej części); notka a rusza w połowie pojawiania się tytułu.
 
 ## Okna i bryła
 

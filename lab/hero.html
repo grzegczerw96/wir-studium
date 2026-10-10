@@ -172,7 +172,7 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
   <filter id="fxStreak" x="-30%" y="-10%" width="160%" height="120%"><feGaussianBlur id="fxStreakB" stdDeviation="0 0"/></filter>
 </svg>
 <nav class="ctl" aria-label="Warianty">
-  <span class="cap">tytuł</span><button data-fx="1">1</button><button data-fx="2">2</button><button data-fx="3">3</button><button data-fx="4">4</button><button data-fx="5">5</button><button data-fx="6">6</button><button data-fx="7">7</button><button data-fx="8">8</button>
+  <span class="cap">tytuł</span><button data-fx="1">1</button><button data-fx="2">2</button><button data-fx="3">3</button><button data-fx="4">4</button><button data-fx="5">5</button><button data-fx="6">6</button><button data-fx="7">7</button><button data-fx="8">8</button><button data-fx="9">9</button>
   <span class="sep"></span>
   <span class="cap">notka</span><button data-nx="a">a</button><button data-nx="b">b</button><button data-nx="c">c</button>
   <span class="sep"></span>
@@ -192,7 +192,7 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
   const XN={0:'gaśnie (jak cappen)',1:'rozmycie',2:'rozsunięcie od O',3:'rozsunięcie i rozmycie'};
   // chosen 10.10: layout 2 with face A (the others stay reachable with ?v=&f=); the switch now compares the title's exit
   const q=new URLSearchParams(location.search);let V=q.get('v')||'2',F=q.get('f')||'1',X=q.get('x')||'1',IN=(q.get('w')||'C').toUpperCase(),FX=q.get('fx')||'1',NX=q.get('nx')||'a';
-  const FXN={1:'mgła',2:'dym w górę',3:'zawirowanie (dym)',4:'rozpraszanie (szum)',5:'dym z „O”',6:'smugi wiru',7:'zbieranie się',8:'oddech'};
+  const FXN={1:'mgła',2:'dym w górę',3:'zawirowanie (dym)',4:'rozpraszanie (szum)',5:'dym z „O”',6:'smugi wiru',7:'zbieranie się (dym, czerń na końcu)',8:'oddech',9:'zawirowanie, czerń na końcu'};
   const NXN={a:'od środka, nierówno (słowa)',b:'od środka, miękka maska',c:'od środka, pył (litery)'};
   const WN={A:'jak w oryginale',B:'najpierw O, litery falą od niego',C:'elipsa ładowania wskakuje w O',D:'nawijanie drutu, potem w O',
     E:'z wnętrza O: czerń się kurczy, napis wyostrza',F:'nawijanie w czerni, potem z wnętrza O',G:'wir wyrzuca litery po spirali'};
@@ -444,34 +444,50 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
   // one element from → to: hidden at its start values at once, then tweened, then cleared
   const fxTo=(el,from,to,dur,ease,at)=>{const v={...from};setFx(el,v);tl.to(v,{...to,duration:dur,ease,onUpdate:()=>setFx(el,v),onComplete:()=>clearFx(el)},at)};
   const svgFx=id=>document.getElementById(id);
+  // (Grzegorz 10.10: "the black only at the very end" — a light smoke at once, then it thickens into black in the last part)
+  const lateBlack=t=>.35*Math.min(1,t/.2)+.65*Math.pow(t,3);
   function titleIn(at){const ch=[...title.querySelectorAll('.ch')],rnd=seeded(17+ +FX),k=R()/14,fs=FS,lns=[...title.querySelectorAll('.ln')];
     gsap.set(ch,{'--rx':'0deg','--sy':1});
     if(FX==='1'){ch.forEach(c=>fxTo(c,{o:0,b:14*k,s:1.06},{o:1,b:0,s:1},1.6,'power2.out',at+rnd()*.7));return at+2.3}
     if(FX==='2'){ch.forEach(c=>{const li=lns.length-1-lns.indexOf(c.closest('.ln'));c.style.transformOrigin='50% 100%';
       fxTo(c,{o:0,b:12*k,y:.18*fs,sy:1.15},{o:1,b:0,y:0,sy:1},1.8,'power3.out',at+li*.18+rnd()*.25)});return at+2.6}
-    if(FX==='3'){const d=svgFx('fxSmokeD'),b=svgFx('fxSmokeB'),t=svgFx('fxSmokeT'),v={d:45*k,b:9*k,o:0,f:0};title.style.filter='url(#fxSmoke)';
+    if(FX==='3'||FX==='9'){const late=FX==='9',d=svgFx('fxSmokeD'),b=svgFx('fxSmokeB'),t=svgFx('fxSmokeT'),v={d:45*k,b:9*k,o:0,f:0};title.style.filter='url(#fxSmoke)';
       const put=()=>{d.setAttribute('scale',v.d.toFixed(1));b.setAttribute('stdDeviation',v.b.toFixed(2));t.setAttribute('baseFrequency',(.012/k).toFixed(4)+' '+((.03-.012*v.f)/k).toFixed(4));ch.forEach(c=>c.style.opacity=v.o.toFixed(3))};put();
+      // (9: the same swirl, but the smoke stays light and the letters turn black only at the end; the swirl settles slower)
+      if(late){const q={t:0};tl.to(q,{t:1,duration:2.4,ease:'none',onUpdate:()=>{const e=1-Math.pow(1-q.t,1.8);v.d=45*k*(1-e);v.b=9*k*(1-Math.pow(q.t,1.4));v.f=e;v.o=lateBlack(q.t);put()},
+        onComplete:()=>{title.style.filter='';ch.forEach(clearFx)}},at);return at+2.4}
       tl.to(v,{d:0,b:0,f:1,duration:2.1,ease:'power2.out',onUpdate:put,onComplete:()=>{title.style.filter='';ch.forEach(clearFx)}},at).to(v,{o:1,duration:1,ease:'power1.out',onUpdate:put},at);return at+2.1}
     if(FX==='4'){const a=svgFx('fxGrainA'),t=svgFx('fxGrainT'),v={p:0},S=5;t.setAttribute('baseFrequency',(.035/k).toFixed(4));title.style.filter='url(#fxGrain)';
-      const put=()=>a.setAttribute('intercept',(-S*.9+(1+S*.8)*v.p).toFixed(3));put();
-      tl.to(v,{p:1,duration:1.9,ease:'power1.inOut',onUpdate:put,onComplete:()=>{title.style.filter=''}},at);return at+1.9}
+      // (data-vis: how much of the title shows — the filter hides it, not opacity; read by tools/overlap.py)
+      const put=()=>{a.setAttribute('intercept',(-S*.9+(1+S*.8)*v.p).toFixed(3));title.dataset.vis=v.p.toFixed(3)};put();
+      tl.to(v,{p:1,duration:1.9,ease:'power1.inOut',onUpdate:put,onComplete:()=>{title.style.filter='';delete title.dataset.vis}},at);return at+1.9}
     if(FX==='5'){const o=win().getBoundingClientRect(),tb=title.getBoundingClientRect(),mx=o.left+o.width/2-tb.left,my=o.top+o.height/2-tb.top;
       const far=Math.max(...[[0,0],[tb.width,0],[0,tb.height],[tb.width,tb.height]].map(([x,y])=>Math.hypot(x-mx,y-my)))*1.3,v={r:0,b:10*k};
+      const dist=ch.map(c=>{const r=c.getBoundingClientRect();return Math.hypot(r.left+r.width/2-tb.left-mx,r.top+r.height/2-tb.top-my)});
       const put=()=>{const m='radial-gradient(circle at '+mx.toFixed(0)+'px '+my.toFixed(0)+'px, #000 '+(v.r*.5).toFixed(0)+'px, transparent '+v.r.toFixed(0)+'px)';
-        title.style.maskImage=title.style.webkitMaskImage=m;title.style.filter=v.b>.05?'blur('+v.b.toFixed(2)+'px)':''};put();
-      tl.to(v,{r:far,b:0,duration:2.1,ease:'power2.out',onUpdate:put,onComplete:()=>{title.style.maskImage=title.style.webkitMaskImage=title.style.filter=''}},at);return at+2.1}
+        title.style.maskImage=title.style.webkitMaskImage=m;title.style.filter=v.b>.05?'blur('+v.b.toFixed(2)+'px)':'';
+        ch.forEach((c,i)=>c.dataset.vis=clamp((v.r-dist[i])/Math.max(1,v.r*.5)).toFixed(3))};put();
+      tl.to(v,{r:far,b:0,duration:2.1,ease:'power2.out',onUpdate:put,onComplete:()=>{title.style.maskImage=title.style.webkitMaskImage=title.style.filter='';ch.forEach(c=>delete c.dataset.vis)}},at);return at+2.1}
     if(FX==='6'){const b=svgFx('fxStreakB'),v={sx:36*k,x:1,o:0};title.style.filter='url(#fxStreak)';
-      const put=()=>{b.setAttribute('stdDeviation',v.sx.toFixed(2)+' 0');lns.forEach((l,i)=>l.style.translate=((i%2?-1:1)*.35*fs*v.x).toFixed(1)+'px 0');ch.forEach(c=>c.style.opacity=v.o.toFixed(3))};put();
+      // (each line moves at most as far as there is room to the screen's edge: on a tablet the title is nearly full width)
+      const Wc=document.documentElement.clientWidth,gut=R()*1.25,off=lns.map((l,i)=>{const rg=document.createRange();rg.selectNodeContents(l);const r=rg.getBoundingClientRect(),d=i%2?-1:1;
+        return d*Math.max(0,Math.min(.35*fs,d>0?Wc-gut-r.right:r.left-gut))});
+      const put=()=>{b.setAttribute('stdDeviation',v.sx.toFixed(2)+' 0');lns.forEach((l,i)=>l.style.translate=(off[i]*v.x).toFixed(1)+'px 0');ch.forEach(c=>c.style.opacity=v.o.toFixed(3))};put();
       tl.to(v,{sx:0,x:0,duration:1.8,ease:'power3.out',onUpdate:put,onComplete:()=>{title.style.filter='';lns.forEach(l=>l.style.translate='');ch.forEach(clearFx)}},at).to(v,{o:1,duration:.9,ease:'power1.out',onUpdate:put},at);return at+1.8}
     if(FX==='7'){const tb=title.getBoundingClientRect(),tcx=tb.left+tb.width/2;
-      ch.forEach(c=>{const r=c.getBoundingClientRect(),dx=(r.left+r.width/2-tcx)*.22+(rnd()-.5)*.25*fs,dy=(rnd()-.5)*.3*fs;
-        fxTo(c,{o:0,b:10*k,x:dx,y:dy},{o:1,b:0,x:0,y:0},1.7,'power3.out',at+rnd()*.5)});return at+2.2}
+      const Wc=document.documentElement.clientWidth,gut=R()*1.25;
+      // (Grzegorz 10.10: the letters were too far from home and too sharp too soon — now about half as far, a thicker smoke
+      //  (blur 22px·k, a little larger) at first, the position settling early and the black only at the end)
+      ch.forEach(c=>{const r=c.getBoundingClientRect(),dx=Math.min(Wc-gut-r.right,Math.max(gut-r.left,(r.left+r.width/2-tcx)*.1+(rnd()-.5)*.12*fs)),dy=(rnd()-.5)*.14*fs;
+        const q={t:0},v={o:0,b:22*k,x:dx,y:dy,s:1.08},put=()=>{const t=q.t,e=1-Math.pow(1-t,2.2);
+          v.x=dx*(1-e);v.y=dy*(1-e);v.s=1+.08*(1-e);v.b=22*k*(1-Math.pow(t,1.6));v.o=lateBlack(t);setFx(c,v)};setFx(c,v);
+        tl.to(q,{t:1,duration:2.1,ease:'none',onUpdate:put,onComplete:()=>clearFx(c)},at+rnd()*.45)});return at+2.55}
     /* 8 */const v={o:0,b:6*k,s:1.035};const put=()=>{ch.forEach(c=>c.style.opacity=v.o.toFixed(3));title.style.filter=v.b>.05?'blur('+v.b.toFixed(2)+'px)':'';title.style.scale=v.s.toFixed(4)};put();
     tl.to(v,{o:1,b:0,s:1,duration:2.4,ease:'power1.out',onUpdate:put,onComplete:()=>{ch.forEach(clearFx);title.style.filter=title.style.scale=''}},at);return at+2.4}
   function noteIn(at){const k=R()/14,nb=note.getBoundingClientRect(),ncx=nb.left+nb.width/2,half=nb.width/2,rnd=seeded(5);
     note.querySelectorAll('.w').forEach(w=>{w.style.setProperty('--rx','0deg');w.style.setProperty('--sy','1')});
-    if(NX==='b'){const v={w:0};const put=()=>{const hw=v.w*64,fz=Math.min(14,hw),a=50-hw,b=50+hw,m='linear-gradient(90deg, transparent '+a.toFixed(1)+'%, #000 '+(a+fz).toFixed(1)+'%, #000 '+(b-fz).toFixed(1)+'%, transparent '+b.toFixed(1)+'%)';note.style.maskImage=note.style.webkitMaskImage=m};put();
-      tl.to(v,{w:1,duration:1.5,ease:'power2.inOut',onUpdate:put,onComplete:()=>{note.style.maskImage=note.style.webkitMaskImage=''}},at);return at+1.5}
+    if(NX==='b'){const v={w:0};const put=()=>{const hw=v.w*64,fz=Math.min(14,hw),a=50-hw,b=50+hw,m='linear-gradient(90deg, transparent '+a.toFixed(1)+'%, #000 '+(a+fz).toFixed(1)+'%, #000 '+(b-fz).toFixed(1)+'%, transparent '+b.toFixed(1)+'%)';note.style.maskImage=note.style.webkitMaskImage=m;note.dataset.vis=v.w.toFixed(3)};put();
+      tl.to(v,{w:1,duration:1.5,ease:'power2.inOut',onUpdate:put,onComplete:()=>{note.style.maskImage=note.style.webkitMaskImage='';delete note.dataset.vis}},at);return at+1.5}
     const parts=NX==='c'?[...note.querySelectorAll('.nl')]:[...note.querySelectorAll('.w')];
     parts.forEach(el=>{const r=el.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-ncx)/half;
       fxTo(el,{o:0,b:(NX==='c'?2:3)*k},{o:1,b:0},NX==='c'?.6:.9,'power1.out',at+d*(NX==='c'?.8:.7)+rnd()*(NX==='c'?.45:.3))});
@@ -479,7 +495,7 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
   if('scrollRestoration' in history)history.scrollRestoration='manual';
   function enter(){
     tl&&tl.kill();(enter.g||[]).forEach(t=>t.kill());enter.g=[];scrollTo(0,0);title.querySelectorAll('.ch').forEach(c=>{c.style.translate=c.style.rotate=c.style.scale=c.style.opacity=c.style.filter=c.style.transformOrigin=''});
-    title.style.filter=title.style.scale=title.style.maskImage=title.style.webkitMaskImage='';title.querySelectorAll('.ln').forEach(l=>l.style.translate='');note.style.maskImage=note.style.webkitMaskImage='';
+    title.style.filter=title.style.scale=title.style.maskImage=title.style.webkitMaskImage='';delete title.dataset.vis;delete note.dataset.vis;title.querySelectorAll('.ch').forEach(c=>delete c.dataset.vis);title.querySelectorAll('.ln').forEach(l=>l.style.translate='');note.style.maskImage=note.style.webkitMaskImage='';
     Object.assign(E,{rev:0,wind:1});const ch=[...title.querySelectorAll('.ch')],nl=noteLines(),st=[...document.querySelectorAll('.stripes i')].reverse();
     // (B and C: the O is already open while the letters flip; a letter swings in from .85em below its place, so the line
     //  above the O swung through it — measured: "R" over the O for ~.3 s. There the lines above the O come from above)
@@ -544,7 +560,8 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
       tl.to(E,{go:1,duration:1.15,ease:'power4.inOut'},M).to(E,{spin:0,duration:1.4,ease:'power2.out'},M)
         .to('.hd',{opacity:1,duration:.6,ease:'power1.out'},M+.6);
       if(D){flip(M+.5,.035);linesAfter(M+.9,M+.5,.035*(ch.length-1));bars(M+1)}
-      else{const te=titleIn(M+.45),ns=under?te-.5:te-1.1,ne=noteIn(ns);bars(ne-.3)}}
+      // (Grzegorz 10.10: the note starts half-way through the title's appearance)
+      else{const t0=M+.45,te=titleIn(t0),ns=(t0+te)/2,ne=noteIn(ns);bars(ne-.3)}}
     enter.ran=true}
   document.querySelectorAll('.ctl [data-fx]').forEach(b=>b.onclick=()=>{FX=b.dataset.fx;IN='C';apply()});
   document.querySelectorAll('.ctl [data-nx]').forEach(b=>b.onclick=()=>{NX=b.dataset.nx;IN='C';apply()});
@@ -554,7 +571,7 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     if(on){tl&&tl.progress(1);lbl.textContent=offText();lbl.classList.remove('off')}else apply()};
   document.getElementById('copy').onclick=()=>{const t=offText()+'\n'+location.href;navigator.clipboard?navigator.clipboard.writeText(t).then(()=>{lbl.textContent='Skopiowano: '+offText()},()=>{lbl.textContent=t}):lbl.textContent=t};
   document.getElementById('zero').onclick=()=>{OFF.t=[0,0];OFF.n=[0,0];applyOff();history.replaceState(null,'',query());alignNote();cacheCh();lbl.textContent=offText()};
-  addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(/^[1-8]$/.test(k)){FX=k;IN='C';apply()}else if('abc'.indexOf(k)>-1&&k.length===1){NX=k;IN='C';apply()}});
+  addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(/^[1-9]$/.test(k)){FX=k;IN='C';apply()}else if('abc'.indexOf(k)>-1&&k.length===1){NX=k;IN='C';apply()}});
   let lastW=innerWidth;addEventListener('resize',()=>{size();if(innerWidth!==lastW){lastW=innerWidth;fit();if(V==='4')placeWin4();applyOff();alignNote();cacheCh()}});
   size();
   // every face is loaded before the first measure, so switching never fits a line in a fallback font
