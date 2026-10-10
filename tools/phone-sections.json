@@ -1,0 +1,11 @@
+[
+ {"reload":true},{"wait":2000},
+ {"fps":"start"},{"swipe":-1300,"speed":900},{"fps":"stop"},{"js":"'intro '+(scrollY/innerHeight).toFixed(2)"},
+ {"fps":"start"},{"swipe":-3000,"speed":900},{"fps":"stop"},{"js":"'manifest '+(scrollY/innerHeight).toFixed(2)"},
+ {"fps":"start"},{"swipe":-2000,"speed":900},{"fps":"stop"},{"js":"'work '+(scrollY/innerHeight).toFixed(2)"},
+ {"fps":"start"},{"swipe":-2000,"speed":900},{"fps":"stop"},{"js":"'list/about '+(scrollY/innerHeight).toFixed(2)"},
+ {"fps":"start"},{"swipe":-2500,"speed":900},{"fps":"stop"},{"js":"'about/clients '+(scrollY/innerHeight).toFixed(2)"},
+ {"fps":"start"},{"swipe":-2500,"speed":900},{"fps":"stop"},{"js":"'clients/awards '+(scrollY/innerHeight).toFixed(2)"},
+ {"fps":"start"},{"swipe":-2500,"speed":900},{"fps":"stop"},{"js":"'awards/contact '+(scrollY/innerHeight).toFixed(2)"},
+ {"fps":"start"},{"swipe":-2500,"speed":900},{"fps":"stop"},{"js":"'contact '+(scrollY/innerHeight).toFixed(2)"}
+]

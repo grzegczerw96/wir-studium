@@ -47,21 +47,58 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
    - **Panel przeglądarki musi być widoczny.** Gdy jest schowany, `requestAnimationFrame` staje: preloader oryginału się nie kończy, a skrypty czekające na klatki wiszą.
 2. **Zmień `index.html`.** Cała strona to jeden plik: HTML, CSS i JS razem.
 3. **Sprawdź składnię:** wytnij skrypt inline i uruchom `node --check`.
-4. **Test lokalny w Playwright** (Chromium, `--use-gl=swiftshader`), z kopią strony, w której biblioteki z CDN są podmienione na lokalne pliki. Na komputerze Grzegorza (Windows 10, Python 3.8): `pip install --target <scratchpad>/pw playwright==1.47.0`; pobrany Chromium Playwrighta nie startuje (błąd „konfiguracja równoczesna”), więc uruchamiaj zainstalowany Chrome przez `channel='chrome'`. W przeglądarce aplikacji system ma włączone ograniczanie ruchu: na naszej stronie ustaw `localStorage['wir-motion']='on'`. Testuj:
-   - prawdziwymi ruchami kółka (`page.mouse.wheel`), a nie tylko skokami;
-   - na desktopie 1280×620;
-   - na telefonie 375×812 (`is_mobile`, `has_touch`);
-   - brak przewijania w poziomie i brak błędów w konsoli.
-   - **Pomiar oryginału bez panelu:** skrypt `probe.py` (Playwright z zainstalowanym Chrome) otwiera cappen albo naszą stronę, przewija do zadanych miejsc i wykonuje JS. W cappen przed pomiarem `window.main.scroller.stop()` (jego przyciąganie zwraca wtedy bieżącą pozycję), u nas `__autoScrolling` na stałe `true`. Litery oryginału mają `--rotateX` w `style`, nasze `--rx`. Liczby porównuje się w ekranach od początku sekcji.
-   - **Prawdziwy telefon (Samsung Galaxy M15 5G, Chrome, 360×649 z paskiem adresu, 705 bez niego, 90 Hz):** telefon podłączony kablem z debugowaniem USB, `adb` z `Google.PlatformTools`. `adb forward tcp:9222 localabstract:chrome_devtools_remote`, potem Playwright `connect_over_cdp`. Używaj tylko karty z naszą stroną, inne karty to prywatne karty Grzegorza. Skrypt `phone.py`: gest palca `Input.synthesizeScrollGesture` (prawdziwe przewijanie z chowaniem paska adresu), zrzut całego ekranu `adb exec-out screencap -p`, płynność klatek z `requestAnimationFrame`, koszt z `Performance.getMetrics`. Niewypchniętą wersję podaje telefonowi lokalny serwer (`py -m http.server 8765` w kopii z lokalnymi bibliotekami) i `adb reverse tcp:8765 tcp:8765`.
-   - **Jak szukać szarpnięć:** zwykła strona z samym tekstem daje na tym telefonie równe 11 ms, więc wszystko powyżej to nasz koszt. Mierz każdą sekcję osobno, zimny przejazd (zaraz po załadowaniu) i rozgrzany, a winowajcę zawężaj wyłączaniem: `ScrollTrigger.getAll()[i].disable()` grupami, ukrywanie elementów. Oryginał na tym telefonie: 40–175 ms na klatkę.
-   - **Automatyczny przegląd na wielu ekranach:** `audit.py` (11 rozmiarów: 320×568, 360×649, 390×664, 412×839, telefon w poziomie 844×390, 768×1024, 1024×1366, 1025×700, 1280×620, 1440×900, 1920×1080). Przewija całą stronę (w intro 5× gęściej) i w każdym miejscu sprawdza: przewijanie w poziomie przez prawdziwy element, jasny pasek przy jednej krawędzi przy ciemnym kadrze (analiza pikseli zrzutu), nachodzący tekst z różnych bloków, tekst ucięty przez krawędź ekranu, obrazy ucięte przez krawędź kontenera w środku ekranu. Na telefonach dodatkowo udaje schowanie paska adresu (zmiana samej wysokości). Sprawdzony na wersji `0b79250`: znajduje oba błędy ze zrzutów Grzegorza z 10.10.2026. Czego nie wyłapie: zachowania Chrome na Androidzie przy chowaniu paska (`svh` w emulacji też się zmienia) i płynności — to sprawdza się na telefonie.
-   - **Znane fałszywe alarmy przeglądu:** 4 px klasycznego paska przewijania emulatora na tabletach (prawy margines okna intro), biały margines strony pod oknem klientów, nagłówek w trakcie chowania (pomiar 450 ms po skoku), litery intro zasłonięte czarnym oknem.
-   - **Telefon w poziomie (844×390):** jeszcze bez własnego układu na niskie ekrany — w intro okno nachodzi na paski i nie mieści się tekst, w manifeście tekst i kwadraty nachodzą na spiralę.
-   - **Filmy Grzegorza** (`.mp4`): brak ffmpeg; klatki wyciąga zainstalowany Chrome przez Playwright (strona z `<video>` ładowana jako plik, przewijanie `currentTime`, zrzut), a kilka klatek składa się w jeden arkusz.
+4. **Sprawdź jakość** metodą z §3a: po każdej zmianie poziom 1, po skończonej sekcji poziom 2, przed oddaniem całości poziom 3.
 5. **Commit** jako `grzegczerw96 <greg.wolwlod@gmail.com>`, z opisem po polsku. Push na `main`, GitHub Pages aktualizuje się po ok. 1 minucie. Przy sprawdzaniu dopisz do adresu `?v=<hash>`, żeby ominąć cache.
 6. **Sprawdź na żywo** wersję z Pages, potem zaktualizuj artefakt.
 7. **Po testach przywróć widok przeglądarki** do ustawienia „desktop”.
+
+## 3a. Kontrola jakości (metoda)
+
+Narzędzia są w `tools/` (Python 3.8, uruchamiane przez `py -I`). Biblioteki leżą poza repo w `%LOCALAPPDATA%\wir-tools`:
+- `pw/`: `py -m pip install --target %LOCALAPPDATA%\wir-tools\pw playwright==1.47.0 pillow==10.4.0`;
+- `lib/`: lokalne kopie gsap 3.12.5, ScrollTrigger, lenis 1.1.13 i three r149 (pobrane z tych samych adresów CDN co strona);
+- `out/`: zrzuty i raporty.
+
+Pobrany Chromium Playwrighta nie startuje na tym Windowsie (błąd „konfiguracja równoczesna”), więc narzędzia uruchamiają zainstalowany Chrome (`channel='chrome'`). Gdy brakuje `wir-tools`, odtwarza się go powyższymi poleceniami.
+
+**Zasada:** szukać błędów automatycznie i tanio, a oczami oglądać tylko to, co narzędzie zgłosi. Zrzuty ekranu są najdroższą częścią pracy, dlatego przegląd składa zgłoszone kadry w jeden arkusz (`out/audit_sheet_<urządzenie>.png`).
+
+| Poziom | Kiedy | Co | Koszt |
+|---|---|---|---|
+| 1 | po każdej zmianie | `node --check` skryptu; pomiar zmienionego miejsca przez `tools/probe.py` (liczby, bez zrzutów); `tools/audit.py --section '#id'` (3 urządzenia: telefon, tablet, desktop) | ok. 1 min |
+| 2 | po skończonej sekcji | `tools/audit.py --section '#id' --devices all`; na telefonie Grzegorza `tools/phone.py` z płynnością tej sekcji i zrzutami ekranu | kilka min |
+| 3 | przed oddaniem całości | `tools/audit.py --devices all` (cała strona, 11 ekranów); `tools/phone.py tools/phone-sections.json` dwa razy (zimny i rozgrzany przejazd); porównanie z oryginałem przez `tools/probe.py` | ok. 20 min |
+
+- **`tools/audit.py`:**
+  - urządzenia: `quick` (domyślnie: 360×649, 768×1024, 1280×620), `phones` (320–412 px) albo `all` (11 rozmiarów, z telefonem w poziomie 844×390, tabletami do 1024×1366 i desktopami do 1920×1080);
+  - zakres: `--section '#id'`, albo `--from` i `--to` w ekranach; `--src plik` sprawdza inną wersję strony;
+  - co sprawdza: przewijanie w poziomie przez prawdziwy element, jasny pasek przy jednej krawędzi przy ciemnym kadrze (piksele), nachodzący tekst z różnych bloków, tekst ucięty przez krawędź ekranu, obrazy ucięte przez krawędź kontenera w środku ekranu;
+  - na telefonach dodatkowo udaje schowanie paska adresu;
+  - w intro sprawdza 5× gęściej, bo tam zmiany są szybkie.
+- **Narzędzie sprawdzone na wersji z błędami:** na `0b79250` (`git show 0b79250:index.html`) znajduje oba błędy ze zrzutów Grzegorza z 10.10.2026 (prześwit przy 0,8 intro, przycięte kwadraty manifestu). Po każdej zmianie narzędzia trzeba je znowu sprawdzić na starej wersji z błędem.
+- **Znane fałszywe alarmy:**
+  - 4 px paska przewijania emulatora na tabletach (prawy margines okna intro);
+  - biały margines strony pod oknem klientów;
+  - nagłówek w trakcie chowania;
+  - litery intro zasłonięte czarnym oknem.
+- **Czego emulacja nie pokaże:** chowania paska adresu w Chrome na Androidzie (w emulacji zmienia się też `svh`) i płynności. To sprawdza tylko prawdziwy telefon.
+- **`tools/probe.py`:** pomiar oryginału albo naszej strony w wybranych miejscach. W cappen przed pomiarem `window.main.scroller.stop()` (jego przyciąganie zwraca wtedy bieżącą pozycję), u nas przyciąganie wyłączone. Litery oryginału mają `--rotateX` w `style`, nasze `--rx`. Liczby porównuje się w ekranach od początku sekcji.
+- **`tools/phone.py` na prawdziwym telefonie** (Samsung Galaxy M15 5G, Chrome, 360×649 z paskiem adresu, 705 bez niego, 90 Hz):
+  - przygotowanie: kabel USB, debugowanie USB, `adb` z `Google.PlatformTools`; na telefonie otwarta nasza strona;
+  - **dotykać tylko karty z naszą stroną**, inne karty to prywatne karty Grzegorza;
+  - gest palca `Input.synthesizeScrollGesture` (z chowaniem paska adresu), zrzut całego ekranu przez `adb`, czasy klatek;
+  - `--local` podaje telefonowi niewypchniętą wersję z tego komputera.
+- **Szukanie szarpnięć na telefonie:** zwykła strona z samym tekstem daje na nim równe 11 ms, więc wszystko powyżej to nasz koszt. Mierzyć sekcjami, zimny i rozgrzany przejazd. Winowajcę zawężać wyłączaniem: `ScrollTrigger.getAll()[i].disable()` grupami, ukrywanie elementów. Oryginał na tym telefonie: 40–175 ms na klatkę.
+- **Materiały od Grzegorza:** zrzuty ekranu z telefonu są w `/sdcard/DCIM/Screenshots` (`adb pull` tylko dzisiejszych z Chrome). Filmy (`.mp4`) rozkłada się na klatki przez `ffmpeg` (zainstalowany przez winget).
+- **W przeglądarce aplikacji** system ma włączone ograniczanie ruchu: na naszej stronie trzeba ustawić `localStorage['wir-motion']='on'`.
+- **Skrypty z wieloma odwróconymi apostrofami** (Markdown, JS) zapisuje się narzędziami do edycji plików, nie przez `bash -c "…"`: bash wykonuje tekst w odwróconych apostrofach jako polecenia.
+
+### Na koniec: gotowość na wszystkich rozdzielczościach
+Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowość na wszystkie ekrany to osobny etap na końcu (poziom 3). Lista znanych spraw do tego etapu:
+- **Telefon w poziomie (844×390):** brak układu na niskie ekrany. W intro okno nachodzi na paski i nie mieści się tekst, w manifeście tekst i kwadraty nachodzą na spiralę.
+- **Okno klientów na telefonie:** kilka szarpnięć do ok. 90 ms przy otwieraniu (`clip-path` przerysowywany co klatkę).
+- **Pierwszy przejazd po załadowaniu na telefonie:** manifest, okolice „O nas” i nagrody ok. 45 kl./s (rozgrzany: 90).
+- **Safari/iPhone:** niesprawdzone.
 
 ## 4. Technologia
 
