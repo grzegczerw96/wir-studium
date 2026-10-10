@@ -21,13 +21,14 @@ REC = r"""(()=>{const R=window.__rec=[];const form=document.getElementById('tkFo
   const fr=form.getBoundingClientRect(),fVis=fr.bottom>0&&fr.top<H;
   R.push({y:+(scrollY/H).toFixed(3),formOp:fVis?+getComputedStyle(form).opacity:0,letters:Math.max(...rx.map(v=>1-Math.abs(v)/90)),
    boxIn:lines.some(l=>{const r=l.getBoundingClientRect();return r.right>0&&r.left<W&&r.bottom>0&&r.top<H}),tVis,
+   fb:Math.round(fr.bottom),ftTop:Math.round(document.getElementById('ftTitle').getBoundingClientRect().top),
    tC:tVis?+contrast(title).toFixed(2):99,fC:+contrast(document.getElementById('ftTitle')).toFixed(2),
    awC:(()=>{const v=[...document.querySelectorAll('.aw-name')].filter(n=>{const r=n.getBoundingClientRect();return r.bottom>0&&r.top<H&&r.height>4});return v.length?+Math.min(...v.map(contrast)).toFixed(2):99})(),
    awGrey:(()=>{const v=[...document.querySelectorAll('.aw-name')].some(n=>{const r=n.getBoundingClientRect();return r.bottom>8&&r.top<H&&r.height>4});
      const g=+(bgAt(document.querySelector('.aw-name')).match(/\d+/)||[252])[0];return v&&g>70&&g<200})(),
    coilGrey:(()=>{const s=document.getElementById('stage3'),o=+(s.style.opacity||0),g=+(bgAt(document.getElementById('contact')).match(/\d+/)||[0])[0];return o>.25&&g>70})()});requestAnimationFrame(f)})()})()"""
 RULES = [
-    ('footer-over-form', lambda s: s['letters'] > .1 and s['formOp'] > .05),
+    ('footer-over-form', lambda s: s['letters'] > .1 and s['formOp'] > .05 and s['fb'] > s['ftTop']),   # the form still reaching into the title
     ('title-over-form', lambda s: A.mode == 'm' and s['tVis'] and s['boxIn']),
     ('low-contrast', lambda s: (s['tVis'] and s['tC'] < 3) or (s['letters'] > .1 and s['fC'] < 3) or s.get('awC', 99) < 3),
     ('list-on-grey', lambda s: s.get('awGrey')),     # Grzegorz 10.10.2026: the award list must not sit on the mid-grey of the change

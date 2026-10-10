@@ -20,11 +20,13 @@ Stan na 9.10.2026, ostatnie zmiany: wersja na telefon zmierzona w oryginale (375
 - **Kod oryginału** (`/wp-content/themes/cappen/js/main.js`) to najlepsze źródło liczb. Filmy Grzegorza pokazują to, czego kod nie mówi wprost, np. kolejność warstw albo to, co faktycznie widać.
 - **Jedna sekcja na raz.** Uwagi przychodzą ponumerowane („* …”). Każdą trzeba odhaczyć w odpowiedzi.
 - **Najważniejsza jest czytelność.** Tekst nigdy nie może stać na tle, na którym go nie widać, ani nachodzić na inny tekst.
+- **Reguły to pomoc, nie gorset** (Grzegorz, 10.10.2026). Jeśli jest sposób szybszy albo dokładniejszy, którego nie ma w tym pliku (nowe narzędzie, program do zainstalowania, agent, polecenie), zaproponuj go i użyj. Technologia się zmienia; cel to ułatwiać pracę i trafiać w efekt bez jego ingerencji. Zasady czytelności i wierności oryginałowi zostają.
 - **Odpowiedzi po polsku**, konkretne. Najpierw wynik, potem co zmieniono i dlaczego, a na końcu czego nie dało się sprawdzić.
 - **Zatwierdzone odstępstwa od oryginału** (nie „naprawiać” ich z powrotem):
   - lista projektów zostaje dłużej na czarnym tle (przejście w biel startuje, gdy góra „O nas” jest na 55% ekranu, a nie przy dolnej krawędzi);
   - w kartach realizacji nie ma wybrzuszania obrazu po najechaniu ani wypływającego tekstu, tylko płynięcie obrazu z tekstem przy przewijaniu;
   - formularz kontaktowy wjeżdża później niż w cappen, dopiero gdy wielki napis prawie zniknął;
+  - na telefonie tytuł stopki składa się szybciej niż w oryginale: oś stopki od góry stopki 10% nad ekranem przez jeden ekran (zamiast 2,5); litery ruszają przy ok. 0,3 ekranu, gdy formularz zszedł już z obszaru tytułu, całość gotowa przy ok. 0,6 (10.10.2026);
   - spirala przed kontaktem zaczyna się pojawiać od 45% wysokości ekranu, a nie od dolnej krawędzi (najpierw tło ma być ciemne);
   - powrót do czerni po nagrodach jest krótszy niż w oryginale: od ostatniej nazwy na 15% ekranu do góry kontaktu przy górze ekranu (telefon ok. 0,6 ekranu, desktop ok. 0,95), żeby lista schodziła na białym, a nie stała na szarym (10.10.2026);
   - brak kursora „DISCOVER” i brak dociągania w manifeście.

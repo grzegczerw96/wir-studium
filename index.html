@@ -1591,7 +1591,9 @@ html:not(.motion) .stage3{display:none}
      the top): letters move from .2, the first is whole at .6, every next one ~.03 later; copyright .35–.75, social
      .42–1.5, tags .5–1.6, address 1.0–1.4, then nothing until the end (2.5). That is one timeline unit = 1.2 screens,
      so the timeline is fixed at 2.08 units (2.5 screens). Each letter: .69 units, .025 apart (= .83 / .03 screens). */
-  const ftTl=gsap.timeline({scrollTrigger:{trigger:'#footer',start:'top top',end:'bottom bottom',scrub:true,invalidateOnRefresh:true}});
+  // (phones, at Grzegorz's request: the form only scrolls away there and has left the title's area at .2 of a screen, so
+  //  the same timeline runs from .1 over one screen instead of 2.5 — the title is whole after ~.65 instead of ~1.2)
+  const ftTl=gsap.timeline({scrollTrigger:{trigger:'#footer',start:()=>isDesk()?'top top':'top -10%',end:()=>isDesk()?'bottom bottom':'+='+innerHeight,scrub:true,invalidateOnRefresh:true}});
   ftTl.set({},{},2.08);
   ftCh.forEach((c,i)=>ftTl.fromTo(c,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.69,ease:'power4.inOut',immediateRender:true},.1+.025*i));   // (+.1: only once the form has gone, also with its .5 s scrub lag)
   ftTl.fromTo(ftLine(document.querySelector('.ft-copy')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.35,ease:'power1.inOut'},.25)
