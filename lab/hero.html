@@ -7,6 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Inter+Tight:wght@400;500;900&family=Schibsted+Grotesk:wght@400..900&family=JetBrains+Mono:wght@400&display=swap">
+<script>
+/* entrance C: the loader's oval is drawn by CSS from the first paint (before the libraries arrive) */
+if((new URLSearchParams(location.search).get('w')||'C').toUpperCase()==='C')document.documentElement.classList.add('pre');
+</script>
 <style>
 /* Lab page: four hero layouts × four title faces, switchable (1–4 / A–D, also ?v=&f= in the address).
    Scroll down to see how the window grows to the full screen (the original's curve: edges quad out over 75 %,
@@ -32,6 +36,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 /* the black stage: fixed, cut to the window's rectangle (set every frame from the placeholder .win) */
 .stage{position:fixed;inset:0;height:100lvh;background:var(--ink);z-index:1;pointer-events:none;clip-path:inset(50% 50% 50% 50%)}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* entrance C: while the page loads, a black oval stands in the middle of the empty page (the original's preloader, without
+   pictures); the script takes it over at exactly this size and place (10 × 10.5rem) and carries it into the O */
+html.pre .stage{clip-path:ellipse(calc(var(--r)*5) calc(var(--r)*5.25) at 50% 50svh)}
+html.pre .note,html.pre .stripes,html.pre .hd{visibility:hidden}
 .fade{position:relative;z-index:2}
 .title{margin:0;font-family:var(--face),Arial,sans-serif;font-weight:var(--fw);font-stretch:calc(var(--wdth)*1%);letter-spacing:var(--ls);line-height:.84;text-transform:uppercase;font-size:var(--fs,4rem);white-space:nowrap}
 .title .ln{display:block;perspective:calc(var(--r)*31.25)}
@@ -141,7 +149,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 <section class="after">Tu zaczyna się manifest (czarna sala). Przewiń w górę, żeby wrócić do hero.</section>
 <div class="lbl" id="lbl"></div>
 <nav class="ctl" aria-label="Warianty">
-  <span class="cap">wyjście</span><button data-x="0">0</button><button data-x="1">1</button><button data-x="2">2</button><button data-x="3">3</button>
+  <span class="cap">wejście</span><button data-w="A">A</button><button data-w="B">B</button><button data-w="C">C</button>
   <span class="sep"></span>
   <button id="replay" title="Odtwórz wejście">↻</button>
   <span class="sep"></span>
@@ -157,7 +165,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   const FN={1:'Inter Tight Black (jak Helvetica Now)',2:'Archivo Black, normalna szerokość',3:'Archivo Black 125% (obecny)',4:'Schibsted Grotesk Black'};
   const XN={0:'gaśnie (jak cappen)',1:'rozmycie',2:'rozsunięcie od O',3:'rozsunięcie i rozmycie'};
   // chosen 10.10: layout 2 with face A (the others stay reachable with ?v=&f=); the switch now compares the title's exit
-  const q=new URLSearchParams(location.search);let V=q.get('v')||'2',F=q.get('f')||'1',X=q.get('x')||'1';
+  const q=new URLSearchParams(location.search);let V=q.get('v')||'2',F=q.get('f')||'1',X=q.get('x')||'1',IN=(q.get('w')||'C').toUpperCase();
+  const WN={A:'jak w oryginale',B:'najpierw O, litery falą od niego',C:'ładowanie przechodzi w O'};
   const probe=document.createElement('i');probe.style.cssText='position:absolute;width:calc(var(--r)*1);visibility:hidden';document.body.append(probe);
   const R=()=>probe.getBoundingClientRect().width;
   const desk=()=>innerWidth>=1025;
@@ -194,13 +203,13 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     title.style.setProperty('--fs',Math.floor(fs)+'px');FS=Math.floor(fs);
   }
   function apply(){H.dataset.v=V;H.dataset.f=F;
-    document.querySelectorAll('.ctl [data-x]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.x===X));
+    document.querySelectorAll('.ctl [data-w]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===IN));
     history.replaceState(null,'',query());
-    lbl.textContent='Wyjście '+X+' · '+XN[X]+'  /  układ '+V+' · '+'ABCD'[F-1];lbl.classList.remove('off');clearTimeout(apply.t);apply.t=setTimeout(()=>lbl.classList.add('off'),3500);
+    lbl.textContent='Wejście '+IN+' · '+WN[IN]+'  /  wyjście '+X+' · '+XN[X];lbl.classList.remove('off');clearTimeout(apply.t);apply.t=setTimeout(()=>lbl.classList.add('off'),3500);
     build();fit();if(V==='4')placeWin4();splitNote();applyOff();alignNote();cacheCh();scrollTo(0,0);enter()}
   /* ---- offsets set by hand (in rem, so they hold at every width) ---- */
   const num=v=>(v||'0,0').split(',').map(Number);const OFF={t:num(q.get('t')),n:num(q.get('n'))};
-  const query=()=>'?v='+V+'&f='+F+'&x='+X+(OFF.t[0]||OFF.t[1]?'&t='+OFF.t.join(','):'')+(OFF.n[0]||OFF.n[1]?'&n='+OFF.n.join(','):'');
+  const query=()=>'?v='+V+'&f='+F+'&x='+X+'&w='+IN+(OFF.t[0]||OFF.t[1]?'&t='+OFF.t.join(','):'')+(OFF.n[0]||OFF.n[1]?'&n='+OFF.n.join(','):'');
   function applyOff(){title.style.translate=OFF.t[0]||OFF.t[1]?(OFF.t[0]*R())+'px '+(OFF.t[1]*R())+'px':'';
     note.style.translate=OFF.n[0]||OFF.n[1]?(OFF.n[0]*R())+'px '+(OFF.n[1]*R())+'px':''}
   const offText=()=>'tytuł x '+OFF.t[0]+' y '+OFF.t[1]+' · notka x '+OFF.n[0]+' y '+OFF.n[1]+' (rem; '+innerWidth+'×'+innerHeight+')';
@@ -246,7 +255,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
   /* the window: a placeholder's rectangle → the stage's clip; scroll p 0..1 grows it to the screen */
   const win=()=>document.getElementById('winIn')&&getComputedStyle(document.getElementById('winIn').parentNode).display!=='none'?document.getElementById('winIn'):winSolo;
-  const E={win:0};   // entrance of the window (0 → 1: grows from its middle)
+  // entrance: win 0 → 1 opens the window from its middle; go 0 → 1 carries it from the loader's oval (screen middle,
+  // 10 × 10.5rem) to the O; coil 0 → 1 grows the coil in; spin keeps it turning faster (the loader, the spin-in)
+  const E={win:0,go:1,coil:1,spin:0};
   const quadOut=t=>1-(1-t)*(1-t),quartOut=t=>1-Math.pow(1-t,4),clamp=v=>Math.min(1,Math.max(0,v));
   let P=0;
   function frame(now){
@@ -255,13 +266,16 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     //  right and the coil sat 7px off its middle on every desktop with a scrollbar)
     const el=win(),r=el.getBoundingClientRect(),sr=stage.getBoundingClientRect(),W=document.documentElement.clientWidth,Hh=innerHeight;
     const hero=document.querySelector('.hero');P=clamp(-hero.getBoundingClientRect().top/(hero.offsetHeight-Hh));
-    const e=E.win,cx=r.left+r.width/2,cy=r.top+r.height/2,w0=r.width*e,h0=r.height*e;
+    const g=E.go,pw=R()*10,ph=pw*1.05,bw=pw+(r.width-pw)*g,bh=ph+(r.height-ph)*g,sc=bw/r.width;
+    const e=E.win,cx=W/2+(r.left+r.width/2-W/2)*g,cy=Hh/2+(r.top+r.height/2-Hh/2)*g,w0=bw*e,h0=bh*e;
     const k=quadOut(clamp(P/.75));
     const L=(cx-w0/2-sr.left)*(1-k),T=(cy-h0/2-sr.top)*(1-k),Rt=(sr.right-(cx+w0/2))*(1-k),B=(sr.bottom-(cy+h0/2))*(1-k);
     // corners: 4px, squared off over the last quarter; layout 2's oval opens into the rectangle over the first 60 %
     const oval=V==='2',j=clamp(k/.6),cr=1-quadOut(clamp((P-.75)/.25));
-    const rx=(oval?w0/2*(1-j)+4*j:4)*cr,ry=(oval?h0/2*(1-j)+4*j:4)*cr;
+    // (the loader is an oval in every layout; in layout 2 it stays one, as the O)
+    const ex=w0/2*(1-j)+4*j,ey=h0/2*(1-j)+4*j,rx=(oval?ex:ex*(1-g)+4*g)*cr,ry=(oval?ey:ey*(1-g)+4*g)*cr;
     stage.style.clipPath=`inset(${T}px ${Rt}px ${B}px ${L}px round ${rx}px / ${ry}px)`;
+    if(H.classList.contains('pre'))H.classList.remove('pre');
     // title, note and stripes fade over the first half (the original's --o, quad out)
     const o=1-quadOut(clamp(P/.5));
     if(P!==frame.lastP){frame.lastP=P;
@@ -271,7 +285,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
       const s=(X==='2'||X==='3')?quadOut(clamp(P/.55)):0;
       CHS.forEach(([c,dx,dy])=>{c.style.translate=s?(dx*s*1.3).toFixed(1)+'px '+(dy*s*1.3).toFixed(1)+'px':'';c.style.scale=s?String(1+.35*s):''})}
     // coil: from the window's middle and size to the screen's, half a turn and tilting flat (the original's scene)
-    let ccx=cx,ccy=cy;if(oval){ccx=cx+OC.dx*FS;ccy=cy+OC.dy*FS}
+    let ccx=cx,ccy=cy;if(oval){ccx=cx+OC.dx*FS*sc;ccy=cy+OC.dy*FS*sc}
     const PX=ccx+(W/2-ccx)*k-sr.left,PY=ccy+(Hh/2-ccy)*k-sr.top,turn=quartOut(clamp(P/.75));
     window.__o={cx,cy,ccx,ccy,OC,FS,r:[r.left,r.top,r.width,r.height]};
     if(GL){
@@ -279,7 +293,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
       // ~90% of the counter's width, turning only about its own axis; growing: to .75 of the screen (the original's scale),
       // tipping to the main page's 60° and half a turn, the sway coming back with it
       const u=3.6*cv.clientHeight/4.823;
-      const D0=oval?OC.w*FS*e*.9:Math.min(w0,h0)*.8,D1=Math.min(W,Hh)*.75,D=D0+(D1-D0)*quartOut(clamp(P));
+      if(E.spin>.01)GL.kick(E.spin);
+      const D0=(oval?OC.w*FS*sc*e*.9:Math.min(w0,h0)*.8)*E.coil,D1=Math.min(W,Hh)*.75,D=D0+(D1-D0)*quartOut(clamp(P));
       GL.setPos(PX,PY);GL.setPose((oval?0:.35)+((oval?1.05:.7))*turn,Math.max(D,.01)/u,-Math.PI*turn,oval?turn:.3+.7*turn,0);GL.draw(now/1000)}
     else{const m1=Math.min(W,Hh)*.95;let m0=Math.min(w0,h0)*1.05,sq0=1;if(oval){m0=OC.w*FS*e/.74;sq0=OC.h/OC.w}
       drawCoil(now/1000,PX,PY,m0+(m1-m0)*quartOut(clamp(P)),turn,1+(sq0-1)*(1-k),oval?1-k:0)}
@@ -367,22 +382,41 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
      the note's lines flip up from .35 s (.5 s quad in-out, .1 s apart), the window opens from its middle,
      the stripes rise from the lowest, the header's hairline draws in */
   let tl=null;
+  /* A · as the original: the letters one after another, the O opens from its middle at .45 s, the note, the stripes.
+     B · the O first: it opens and the coil spins in (.9 s quart out), then the letters flip up in a wave running out from
+         the O (delay by distance, up to .55 s), then the note and the stripes.
+     C · the loader becomes the O: while loading, the oval with a fast-turning coil in the middle of the empty page; when
+         ready (at least .9 s) it travels into the O and shrinks (1.15 s quart in-out) while the letters flip up around it;
+         the header, the note and the stripes follow. On the first load the oval is already there (CSS); ↻ replays it. */
   function enter(){
-    tl&&tl.kill();const ch=title.querySelectorAll('.ch'),nl=noteLines(),st=[...document.querySelectorAll('.stripes i')].reverse();
-    tl=gsap.timeline()
-      .fromTo(ch,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',stagger:.035},0)
-      .fromTo(E,{win:0},{win:1,duration:1.1,ease:'power4.inOut'},.45);
-    nl.forEach((l,i)=>tl.fromTo(l,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.35+i*.1));
-    gsap.set(st,{opacity:0,'--y':'100%'});
-    st.forEach((s,i)=>tl.set(s,{opacity:1},.6+i*.15).fromTo(s,{'--y':'100%'},{'--y':'0%',duration:.75,ease:'power4.out',immediateRender:false},.6+i*.15));
-  }
-  document.querySelectorAll('.ctl [data-x]').forEach(b=>b.onclick=()=>{X=b.dataset.x;apply()});
+    tl&&tl.kill();const ch=[...title.querySelectorAll('.ch')],nl=noteLines(),st=[...document.querySelectorAll('.stripes i')].reverse();
+    gsap.set(ch,{'--rx':'-90deg','--sy':1.5});nl.forEach(l=>gsap.set(l,{'--rx':'-90deg','--sy':1.5}));gsap.set(st,{opacity:0,'--y':'100%'});
+    tl=gsap.timeline();
+    const lines=at=>nl.forEach((l,i)=>tl.to(l,{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},at+i*.1));
+    const bars=at=>st.forEach((s,i)=>tl.set(s,{opacity:1},at+i*.15).to(s,{'--y':'0%',duration:.75,ease:'power4.out'},at+i*.15));
+    const flip=(at,stagger)=>tl.to(ch,{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',stagger},at);
+    if(IN==='A'){Object.assign(E,{win:0,go:1,coil:1,spin:0});gsap.set('.hd',{opacity:1});
+      flip(0,.035);tl.to(E,{win:1,duration:1.1,ease:'power4.inOut'},.45);lines(.35);bars(.6)}
+    else if(IN==='B'){Object.assign(E,{win:0,go:1,coil:1,spin:4});gsap.set('.hd',{opacity:1});
+      const o=win().getBoundingClientRect(),ox=o.left+o.width/2,oy=o.top+o.height/2;
+      const d=ch.map(c=>{const r=c.getBoundingClientRect();return Math.hypot(r.left+r.width/2-ox,r.top+r.height/2-oy)}),dm=Math.max(...d);
+      tl.to(E,{win:1,duration:.9,ease:'power4.out'},0).to(E,{spin:0,duration:1.6,ease:'power2.out'},0);
+      flip(.5,i=>d[i]/dm*.55);lines(1);bars(1.1)}
+    else{const fresh=!enter.ran;Object.assign(E,{win:fresh?1:0,go:0,coil:0,spin:2.5});gsap.set('.hd',{opacity:0});
+      if(!fresh)tl.to(E,{win:1,duration:.6,ease:'power4.out'},0);
+      tl.to(E,{coil:1,duration:.8,ease:'power3.out'},fresh?0:.2);
+      const M=fresh?.9:1.2;
+      tl.to(E,{go:1,duration:1.15,ease:'power4.inOut'},M).to(E,{spin:0,duration:1.4,ease:'power2.out'},M)
+        .to('.hd',{opacity:1,duration:.6,ease:'power1.out'},M+.6);
+      flip(M+.5,.035);lines(M+.9);bars(M+1)}
+    enter.ran=true}
+  document.querySelectorAll('.ctl [data-w]').forEach(b=>b.onclick=()=>{IN=b.dataset.w;apply()});
   document.getElementById('replay').onclick=()=>{scrollTo(0,0);enter()};
   document.getElementById('edit').onclick=e=>{const on=H.classList.toggle('edit');e.currentTarget.setAttribute('aria-pressed',on);scrollTo(0,0);
     if(on){tl&&tl.progress(1);lbl.textContent=offText();lbl.classList.remove('off')}else apply()};
   document.getElementById('copy').onclick=()=>{const t=offText()+'\n'+location.href;navigator.clipboard?navigator.clipboard.writeText(t).then(()=>{lbl.textContent='Skopiowano: '+offText()},()=>{lbl.textContent=t}):lbl.textContent=t};
   document.getElementById('zero').onclick=()=>{OFF.t=[0,0];OFF.n=[0,0];applyOff();history.replaceState(null,'',query());alignNote();cacheCh();lbl.textContent=offText()};
-  addEventListener('keydown',e=>{if(/^[0-3]$/.test(e.key)){X=e.key;apply()}});
+  addEventListener('keydown',e=>{const k=e.key.toUpperCase();if(k==='A'||k==='B'||k==='C'){IN=k;apply()}});
   let lastW=innerWidth;addEventListener('resize',()=>{size();if(innerWidth!==lastW){lastW=innerWidth;fit();if(V==='4')placeWin4();applyOff();alignNote();cacheCh()}});
   size();
   // every face is loaded before the first measure, so switching never fits a line in a fallback font
