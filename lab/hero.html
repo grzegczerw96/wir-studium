@@ -388,27 +388,38 @@ html.pre .note,html.pre .stripes,html.pre .hd{visibility:hidden}
      C · the loader becomes the O: while loading, the oval with a fast-turning coil in the middle of the empty page; when
          ready (at least .9 s) it travels into the O and shrinks (1.15 s quart in-out) while the letters flip up around it;
          the header, the note and the stripes follow. On the first load the oval is already there (CSS); ↻ replays it. */
+  // (as the original, the page always starts at the top: a reload in the middle restored the scroll and the entrance
+  //  played on a window that was already growing over the letters)
+  if('scrollRestoration' in history)history.scrollRestoration='manual';
   function enter(){
-    tl&&tl.kill();const ch=[...title.querySelectorAll('.ch')],nl=noteLines(),st=[...document.querySelectorAll('.stripes i')].reverse();
-    gsap.set(ch,{'--rx':'-90deg','--sy':1.5});nl.forEach(l=>gsap.set(l,{'--rx':'-90deg','--sy':1.5}));gsap.set(st,{opacity:0,'--y':'100%'});
+    tl&&tl.kill();scrollTo(0,0);const ch=[...title.querySelectorAll('.ch')],nl=noteLines(),st=[...document.querySelectorAll('.stripes i')].reverse();
+    // (B and C: the O is already open while the letters flip; a letter swings in from .85em below its place, so the line
+    //  above the O swung through it — measured: "R" over the O for ~.3 s. There the lines above the O come from above)
+    const oLine=win().closest('.ln'),above=c=>IN!=='A'&&oLine&&c.closest('.ln')!==oLine&&!!(c.closest('.ln').compareDocumentPosition(oLine)&Node.DOCUMENT_POSITION_FOLLOWING);
+    gsap.set(ch,{'--rx':i=>above(ch[i])?'90deg':'-90deg','--sy':1.5});nl.forEach(l=>gsap.set(l,{'--rx':'-90deg','--sy':1.5}));gsap.set(st,{opacity:0,'--y':'100%'});
     tl=gsap.timeline();
     const lines=at=>nl.forEach((l,i)=>tl.to(l,{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},at+i*.1));
     const bars=at=>st.forEach((s,i)=>tl.set(s,{opacity:1},at+i*.15).to(s,{'--y':'0%',duration:.75,ease:'power4.out'},at+i*.15));
     const flip=(at,stagger)=>tl.to(ch,{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',stagger},at);
+    // phones and tablets: the note stands right under the title, and a letter half-way through its flip is 1.5× tall and
+    // leans out over it (measured: tablet, the note's first line under "MATERIAŁ"); there the note waits until the
+    // title's letters are nearly flat (.25 s before the last one lands)
+    const under=!desk(),last=(start,spread)=>start+spread+1.1-.25,lines0=lines;
+    const linesAfter=(at,start,spread)=>lines0(under?Math.max(at,last(start,spread)):at);
     if(IN==='A'){Object.assign(E,{win:0,go:1,coil:1,spin:0});gsap.set('.hd',{opacity:1});
-      flip(0,.035);tl.to(E,{win:1,duration:1.1,ease:'power4.inOut'},.45);lines(.35);bars(.6)}
+      flip(0,.035);tl.to(E,{win:1,duration:1.1,ease:'power4.inOut'},.45);linesAfter(.35,0,.035*(ch.length-1));bars(.6)}
     else if(IN==='B'){Object.assign(E,{win:0,go:1,coil:1,spin:4});gsap.set('.hd',{opacity:1});
       const o=win().getBoundingClientRect(),ox=o.left+o.width/2,oy=o.top+o.height/2;
       const d=ch.map(c=>{const r=c.getBoundingClientRect();return Math.hypot(r.left+r.width/2-ox,r.top+r.height/2-oy)}),dm=Math.max(...d);
       tl.to(E,{win:1,duration:.9,ease:'power4.out'},0).to(E,{spin:0,duration:1.6,ease:'power2.out'},0);
-      flip(.5,i=>d[i]/dm*.55);lines(1);bars(1.1)}
+      flip(.5,i=>d[i]/dm*.55);linesAfter(1,.5,.55);bars(1.1)}
     else{const fresh=!enter.ran;Object.assign(E,{win:fresh?1:0,go:0,coil:0,spin:2.5});gsap.set('.hd',{opacity:0});
       if(!fresh)tl.to(E,{win:1,duration:.6,ease:'power4.out'},0);
       tl.to(E,{coil:1,duration:.8,ease:'power3.out'},fresh?0:.2);
       const M=fresh?.9:1.2;
       tl.to(E,{go:1,duration:1.15,ease:'power4.inOut'},M).to(E,{spin:0,duration:1.4,ease:'power2.out'},M)
         .to('.hd',{opacity:1,duration:.6,ease:'power1.out'},M+.6);
-      flip(M+.5,.035);lines(M+.9);bars(M+1)}
+      flip(M+.5,.035);linesAfter(M+.9,M+.5,.035*(ch.length-1));bars(M+1)}
     enter.ran=true}
   document.querySelectorAll('.ctl [data-w]').forEach(b=>b.onclick=()=>{IN=b.dataset.w;apply()});
   document.getElementById('replay').onclick=()=>{scrollTo(0,0);enter()};
