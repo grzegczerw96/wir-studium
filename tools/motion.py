@@ -4,7 +4,7 @@
          jumping in or out, e.g. a sliver of the last letter when a mask
          comes off. (Per 16 ms: the screencast drops frames, and a .6 s fade seen across a 100 ms gap is not a jump.)
   edge   a visible straight border of an effect layer (.smoke): along a side, pixels 2 px inside differ from 2 px outside
-         by more than 6/255 along more than a quarter of its length (a real border is a long line; a round object crossing
+         by more than 6/255 (where they did not before the effect) along more than a quarter of its length (a real border is a long line; a round object crossing
          the side differs only where its curve does), in more than 2 frames
   order  (smoke versions, run with ?dbg=smoke, which paints the smoke red and the black stage dark blue) a letter whose box
          shows ink before it showed any smoke: the title must come out of the smoke, never ahead of it
@@ -13,8 +13,9 @@
          add red pixels far beyond the farthest red of the frame before (60 px + 600 px/s) — smoke ahead of its front
          --origin=SELECTOR@bottom (or @top/@left/@right): the effect must be born at that point of the element's edge,
          within 60 % of its radius
-  stall  the picture stands still (less than 0.35 mean change per 0.1 s, the lab's panel left out) for 0.2 s or more inside
-         the animation — from its first movement to three quarters of the way to its last (the calm ending is allowed)
+  stall  the picture stands still (less than 0.35 mean change per 0.1 s, the lab's panel left out) for 0.2 s or more and then
+         moves again clearly (within 0.3 s at least twice as much and over 0.5): a pause, not a calm ending fading out.
+         Tiles that never stop moving (a spinning coil: still changing in most frames of the last 0.8 s) are left out
   jank   frames longer than 50 ms after the animation has started (requestAnimationFrame times in the page), with the heavy
          work that ran in them (WebGL compile/link/upload, getImageData, long tasks)
 usage: py -I tools/motion.py [url] --fx=3,5,7,7b,7c,d1,d2,d3 [--dev=d|m|both] [--t=6.5] [--origin=#winIn[@bottom]]
@@ -23,7 +24,7 @@ import os, sys, time, base64, io
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _env
 from playwright.sync_api import sync_playwright
-from PIL import Image, ImageChops, ImageStat
+from PIL import Image, ImageChops
 args = [a for a in sys.argv[1:] if not a.startswith('--')]
 opt = lambda k, d: next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--' + k + '=')), d)
 url = args[0] if args else 'file:///' + os.path.join(_env.REPO, 'lab', 'hero.html').replace('\\', '/')
@@ -76,11 +77,11 @@ with sync_playwright() as p:
             inskip = lambda x, y: any(r[0] - 8 <= x <= r[2] + 8 and r[1] - 8 <= y <= r[3] + 8 for r in skipb)
             # ---- pop: abrupt, isolated change of a tile
             gw, gh = W // TILE, H // TILE
-            D = []
+            D, RAW = [], []
             for i in range(1, len(ims)):
                 d = ImageChops.difference(ims[i - 1][1], ims[i][1]).convert('L').resize((gw, gh), Image.BOX)
                 f = .016 / max(.016, ims[i][0] - ims[i - 1][0])
-                D.append([v * f for v in d.getdata()])
+                RAW.append(list(d.getdata())); D.append([v * f for v in RAW[-1]])
             pops = []
             for i in range(len(D)):
                 for j, val in enumerate(D[i]):
@@ -98,11 +99,14 @@ with sync_playwright() as p:
             edges = []
             if smoke:
                 L, T, R_, B = [v * k for v in smoke]
+                # (a border the page already had before the effect — a stripe, a line of text — is not the layer's)
+                p0 = ims[0][1].convert('L').load()
                 for t, im in ims:
                     px = im.convert('L').load(); bad = []
                     def side(name, pts):
-                        ds = [abs(px[a] - px[c]) for a, c in pts if 0 <= a[0] < W and 0 <= c[0] < W and 0 <= a[1] < H and 0 <= c[1] < H]
-                        if len(ds) > 20 and sum(1 for d in ds if d > 6) / len(ds) > .25: bad.append(name)
+                        pts = [(a, c) for a, c in pts if 0 <= a[0] < W and 0 <= c[0] < W and 0 <= a[1] < H and 0 <= c[1] < H]
+                        ds = [abs(px[a] - px[c]) > 6 and abs(p0[a] - p0[c]) <= 6 for a, c in pts]
+                        if len(ds) > 20 and sum(ds) / len(ds) > .25: bad.append(name)
                     side('left', [((int(L) + 2, y), (int(L) - 3, y)) for y in range(int(T), int(B))])
                     side('right', [((int(R_) - 3, y), (int(R_) + 2, y)) for y in range(int(T), int(B))])
                     side('top', [((x, int(T) + 2), (x, int(T) - 3)) for x in range(int(L), int(R_))])
@@ -144,23 +148,24 @@ with sync_playwright() as p:
                         maxd = max(dist.values()) if maxd is None else max(maxd, max(dist.values()))
                     prev, tprev = red, t
             # ---- stall: the picture standing still inside the animation (activity per 0.1 s, the lab's panel blacked out)
-            def masked(im):
-                im = im.convert('L').copy()
-                for r in skipb: im.paste(0, (int(r[0]) - 8, int(r[1]) - 8, int(r[2]) + 8, int(r[3]) + 8))
-                return im
-            act = {}; mprev = masked(ims[0][1])
-            for t, im in ims[1:]:
-                m = masked(im); act[int(t * 10)] = act.get(int(t * 10), 0) + ImageStat.Stat(ImageChops.difference(mprev, m)).mean[0]; mprev = m
+            tend = ims[-1][0] - .8; last = [i for i in range(len(RAW)) if ims[i + 1][0] >= tend]
+            ambient = {j for j in range(gw * gh) if last and sum(1 for i in last if RAW[i][j] > 1) >= .7 * len(last)}
+            keep = [j for j in range(gw * gh) if j not in ambient and not inskip((j % gw) * TILE + TILE // 2, (j // gw) * TILE + TILE // 2)]
+            act = {}
+            for i in range(len(RAW)):
+                t = ims[i + 1][0]; act[int(t * 10)] = act.get(int(t * 10), 0) + sum(RAW[i][j] for j in keep) / (gw * gh)
             busy = [kk for kk, v in act.items() if v >= .35]
             stalls = []
             if busy:
-                a0, a1 = min(busy), max(busy); lim = a0 + .75 * (a1 - a0); run = []
-                for kk in range(a0, int(lim) + 1):
+                a0, a1 = min(busy), max(busy); run = []
+                def resumes(run):
+                    m = sum(act.get(q, 0) for q in run) / len(run); after = max(act.get(run[-1] + q, 0) for q in (1, 2, 3))
+                    return after >= max(.5, 2 * m)
+                for kk in range(a0, a1 + 1):
                     if act.get(kk, 0) < .35: run.append(kk)
                     else:
-                        if len(run) >= 2: stalls.append((run[0] / 10, (run[-1] + 1) / 10))
+                        if len(run) >= 2 and resumes(run): stalls.append((run[0] / 10, (run[-1] + 1) / 10))
                         run = []
-                if len(run) >= 2: stalls.append((run[0] / 10, (run[-1] + 1) / 10))
             # ---- jank: long frames after the start (page times)
             jank = []
             for i in range(1, len(RAF)):

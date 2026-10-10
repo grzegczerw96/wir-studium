@@ -38,7 +38,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .stage{position:fixed;inset:0;height:100lvh;background:var(--ink);z-index:1;pointer-events:none;clip-path:inset(50% 50% 50% 50%)}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* title version d: the smoke layer over the title (WebGL), shown only while it plays */
-.smoke{position:absolute;z-index:3;pointer-events:none;display:none}
+/* (under the title: each page letter comes in over the drawn one as soon as the smoke has passed it) */
+.smoke{position:absolute;z-index:1;pointer-events:none;display:none}
 /* entrance C: while the page loads, a black oval stands in the middle of the empty page (the original's preloader, without
    pictures); the script takes it over at exactly this size and place (10 × 10.5rem) and carries it into the O */
 html.pre .stage{clip-path:ellipse(calc(var(--r)*5) calc(var(--r)*5.25) at 50% 50svh)}
@@ -55,7 +56,6 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
 .win{display:block;flex:none}
 .note{margin:0;width:calc(var(--r)*16.25);font:400 calc(var(--r)*.9375)/1.2 "Inter Tight",Arial,sans-serif;text-align:justify;text-align-last:left;text-indent:4.75em}
 .note .w{display:inline-block;text-indent:0;transform:translateZ(-1em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(1em);backface-visibility:hidden}
-.note .w:first-child{margin-right:1.35em}
 .stripes{position:absolute;left:0;right:0;bottom:0;display:grid;z-index:2}
 .stripes i{display:block;overflow:hidden}
 .stripes i::before{content:"";display:block;height:100%;background:var(--ink);transform:translateY(var(--y,0%))}
@@ -101,6 +101,11 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
 @media (min-width:1025px){
   [data-v="2"] .title{position:relative;left:calc(var(--r)*-5.68);top:calc(var(--r)*-1.07)}
   [data-v="2"] .note{position:absolute;bottom:calc(var(--r)*7.8);right:calc(var(--gut) + var(--r)*.38)}
+}
+/* tablets and phones: the note at the bottom right as well (Grzegorz 10.10), 1.5rem above the stripes; the title is
+   centred in what is left above it (fit() keeps it clear of the note) */
+@media (max-width:1024px){
+  [data-v="2"] .note{position:absolute;bottom:calc(var(--r)*6.5);right:var(--gut);margin:0}
 }
 
 /* ---- 3 · frame: the first line across the top, the window wide in the middle, the last word across the bottom;
@@ -218,11 +223,16 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     const widest=Math.max(...lns.map(wid));let fs=100*avail/widest*.97;
     const base=R()*(V==='2'?(innerWidth>=1025?9.75:innerWidth>=600?8.4:4):(innerWidth>=1025?8.75:innerWidth>=600?7.5:4));
     if(V==='1'||V==='2')fs=Math.min(fs,V==='2'&&!desk()?fs:base);
+    // (2: also no taller than the room it has — on a tablet-wide but low window the width alone made it too tall and the
+    //  note ran onto the stripes. Desktop: the note stands beside it; tablets and phones: the note is under it)
+    let room2=0;
+    if(V==='2'){const ps=getComputedStyle(pin),inner=pin.clientHeight-parseFloat(ps.paddingTop)-parseFloat(ps.paddingBottom);
+      room2=desk()?inner-R()*1.5:inner-note.offsetHeight-R()*2.5;fs=Math.min(fs,room2/(3*.84))}
     // (4: the three lines fill the height left between the header and the stripes; on desktop also above the note)
     if(V==='4'){const ps=getComputedStyle(pin),inner=pin.clientHeight-parseFloat(ps.paddingTop)-parseFloat(ps.paddingBottom);
       const room=inner-(desk()?note.offsetHeight+R()*2:note.offsetHeight+R()*2.5);fs=Math.min(fs,room/(3*.84));
       title.style.marginBottom=desk()?(note.offsetHeight+R()*2)+'px':''}   // (desktop: the centred title keeps clear of the note below it)
-    else title.style.marginBottom='';
+    else title.style.marginBottom=V==='2'&&!desk()?(note.offsetHeight+R()*2.5)+'px':'';   // (the centred title keeps clear of the note under it)
     title.style.setProperty('--fs',Math.floor(fs)+'px');FS=Math.floor(fs);
   }
   function apply(){H.dataset.v=V;H.dataset.f=F;
@@ -479,7 +489,7 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     '  float reach=1.-smoothstep(f+.12,f+.24,c);',
     // (a small dense puff right at the origin, growing from nothing as the effect starts and giving way to the ring)
     // (the source keeps smoking until the ring is well out — before, the puff and the ring were two steps with a pause)
-    '  float puff=exp(-pow(c/.07,2.))*smoothstep(-.3,-.22,f)*(1.-smoothstep(.15,.55,f));',
+    '  float puff=exp(-pow(c/.12,2.))*smoothstep(-.3,-.22,f)*(1.-smoothstep(.15,.55,f));',   // (larger: a smaller one left .2 s with little change after the oval landed; a quicker one popped in)
     '  float sm=clamp(max(core*(.55+.45*tx)+lead*.7*tx+trail*.45*tx,0.)*reach+puff*(.6+.4*tx),0.,1.)*uFade*uAmt*vig;',
     '  vec2 d=(w-.5)*.025*(core+lead)*(1.-rev*.6);',
     '  float ta=texture2D(uText,v+d).a*rev;',
@@ -502,16 +512,31 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     // the layer: the title's box and room around it for the smoke to thin out; cut back so it never covers the note
     const roomy=desk(),mx=tb.width*(roomy?.3:.15),my=tb.height*(roomy?.45:.25);
     let L0=tb.left-mx,T0=tb.top-my,R0=tb.right+mx,B0=tb.bottom+my;const nb=note.getBoundingClientRect();
-    if(nb.right>L0&&nb.left<R0&&nb.bottom>T0&&nb.top<B0){if(nb.top>=tb.bottom-2)B0=Math.min(B0,nb.top-6);else if(nb.left>=tb.right-2)R0=Math.min(R0,nb.left-6);else if(nb.bottom<=tb.top+2)T0=Math.max(T0,nb.bottom+6)}
+    // (cut on the side that keeps the most room, never into the title: on desktops the note is low on the right, and cutting
+    //  the bottom left the smoke's thick part right at the cut — its edge showed for a few frames, measured)
+    if(nb.right>L0&&nb.left<R0&&nb.bottom>T0&&nb.top<B0){const opts=[];
+      if(nb.top>=tb.bottom+2)opts.push([L0,T0,R0,Math.min(B0,nb.top-6)]);
+      if(nb.left>=tb.right+2)opts.push([L0,T0,Math.min(R0,nb.left-6),B0]);
+      if(nb.bottom<=tb.top-2)opts.push([L0,Math.max(T0,nb.bottom+6),R0,B0]);
+      if(opts.length){const o=opts.sort((a,b)=>(b[2]-b[0])*(b[3]-b[1])-(a[2]-a[0])*(a[3]-a[1]))[0];[L0,T0,R0,B0]=o}}
+    // (on whole pixels: at a fractional position the drawn title sat half a pixel off the page's own text, and the
+    //  hand-over at the end made every letter's edge flicker)
+    L0=Math.floor(L0-pr.left)+pr.left;T0=Math.floor(T0-pr.top)+pr.top;R0=Math.ceil(R0-pr.left)+pr.left;B0=Math.ceil(B0-pr.top)+pr.top;
     const bx={l:L0-pr.left,t:T0-pr.top,w:R0-L0,h:B0-T0};
     const sc=(coarse||innerWidth<700)?.75:Math.min(devicePixelRatio||1,1.5),Wd=Math.round(bx.w*sc),Hd=Math.round(bx.h*sc);
     Object.assign(G.cv.style,{left:bx.l+'px',top:bx.t+'px',width:bx.w+'px',height:bx.h+'px',opacity:1,display:'none'});G.cv.width=Wd;G.cv.height=Hd;
     // the title, drawn into a texture letter by letter at the letters' own places and baselines
-    const T=G.txt;T.width=Wd;T.height=Hd;const c=T.getContext('2d');c.clearRect(0,0,Wd,Hd);c.fillStyle='#fff';
-    const cs=getComputedStyle(title);c.font='900 '+(parseFloat(cs.fontSize)*sc)+'px '+cs.fontFamily;
+    const T=G.txt;T.width=Wd;T.height=Hd;const c=T.getContext('2d');
+    const cs=getComputedStyle(title),glyphs=[];
     title.querySelectorAll('.ln').forEach(ln=>{const m=document.createElement('i');m.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';ln.append(m);const by=m.getBoundingClientRect().top;m.remove();
-      ln.querySelectorAll('.ch').forEach(e=>{const r=e.getBoundingClientRect();c.fillText(e.textContent.toUpperCase(),(r.left-pr.left-bx.l)*sc,(by-pr.top-bx.t)*sc)})});
-    const gl=G.gl,U=G.U;gl.viewport(0,0,Wd,Hd);gl.bindTexture(gl.TEXTURE_2D,G.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,T);
+      ln.querySelectorAll('.ch').forEach(e=>{const r=e.getBoundingClientRect();glyphs.push([e.textContent.toUpperCase(),(r.left-pr.left-bx.l)*sc,(by-pr.top-bx.t)*sc])})});
+    const gl=G.gl,U=G.U;gl.viewport(0,0,Wd,Hd);gl.bindTexture(gl.TEXTURE_2D,G.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+    // (the drawn letters, without those already handed over to the page: once a page letter is whole, the softer drawn
+    //  one under it goes, so nothing is left to disappear at the end — on phones its halo did, as a last sharpening)
+    const gone=glyphs.map(()=>false);
+    const textTex=()=>{c.clearRect(0,0,Wd,Hd);c.fillStyle='#fff';c.font='900 '+(parseFloat(cs.fontSize)*sc)+'px '+cs.fontFamily;
+      glyphs.forEach((g,i)=>{if(!gone[i])c.fillText(g[0],g[1],g[2])});gl.bindTexture(gl.TEXTURE_2D,G.tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,T)};
+    textTex();
     // (d3's smoke comes out from under the O — Grzegorz 10.10: born in its middle, it greyed the O out first)
     const o=win().getBoundingClientRect(),oy=FX==='d3'?o.bottom-o.height*.06:o.top+o.height/2,ou=[(o.left+o.width/2-pr.left-bx.l)/bx.w,1-(oy-pr.top-bx.t)/bx.h];
     const ink=FX==='d2',mode=FX==='d3'?1:0,asp=bx.w/bx.h,tx=[(tb.left-pr.left-bx.l)/bx.w,(tb.right-pr.left-bx.l)/bx.w];
@@ -520,21 +545,24 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     gl.uniform2f(U.uRes,Wd,Hd);gl.uniform2f(U.uO,ou[0],ou[1]);gl.uniform2f(U.uTx,tx[0],tx[1]);gl.uniform1f(U.uDmax,dmax);gl.uniform1f(U.uMode,mode);gl.uniform1f(U.uAmt,ink?.75:.9);
     // (?dbg=smoke paints the smoke red, so tools/motion.py can tell smoke from ink by colour)
     gl.uniform3fv(U.uSmoke,DBG?[1,.15,.15]:ink?[.1,.1,.1]:[.72,.72,.72]);gl.uniform3fv(U.uInk,[.02,.02,.02]);
-    // (the page's own letters stay hidden meanwhile; data-vis tells tools/overlap.py how much of each one the smoke shows)
-    title.style.visibility='hidden';gsap.set(ch,{'--rx':'0deg','--sy':1});   // (the page's letters must stand flat for the hand-over)
+    // (the page's own letters wait, transparent, over the drawn title, and each one fades in as soon as the smoke has
+    //  passed it — so the hand-over from the drawn letters, softer on phones where the layer is drawn at 75 %, happens
+    //  letter by letter inside the movement; all at once at the end it showed as the whole title sharpening — measured)
+    gsap.set(ch,{'--rx':'0deg','--sy':1,opacity:0});const shown=ch.map(()=>false);
     const cen=ch.map(e=>{const r=e.getBoundingClientRect(),u=(r.left+r.width/2-pr.left-bx.l)/bx.w,w=1-(r.top+r.height/2-pr.top-bx.t)/bx.h;
       return mode?Math.hypot((u-ou[0])*asp,w-ou[1])/dmax:(u-tx[0])/(tx[1]-tx[0])});
     const v={p:0,fade:1},t0=performance.now();
     const draw=()=>{gl.uniform1f(U.uT,(performance.now()-t0)/1000);gl.uniform1f(U.uP,v.p);gl.uniform1f(U.uFade,v.fade);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-      const f=-.3+1.65*v.p;ch.forEach((e,i)=>e.dataset.vis=(1-clamp((cen[i]-(f-.1))/.12)).toFixed(3))};draw();
+      const f=-.3+1.65*v.p;ch.forEach((e,i)=>{if(!shown[i]&&cen[i]<f-.14)handOver(i)})};
+    const handOver=i=>{shown[i]=true;enter.g.push(gsap.to(ch[i],{opacity:1,duration:.45,ease:'power1.out',onComplete:()=>{gone[i]=true;textTex()}}))};
+    draw();
     // slow motion: the front crosses in 3.3 s (sine in-out, so it eases out gently), the smoke thins out from 2.4 s over 1.5 s
-    // (sine out: the front moves at once and slows only at the end — with sine in-out it hung still for ~.7 s after the
+    // (power2 out: the front moves at once and slows only at the end — with sine in-out it hung still for ~.7 s after the
     //  oval landed: Grzegorz saw pauses between the oval, the first puff and the smoke)
-    tl.set(G.cv,{display:'block'},at).to(v,{p:1,duration:3.4,ease:'sine.out',onUpdate:draw},at).to(v,{fade:0,duration:1.5,ease:'power1.out',onUpdate:draw},at+2.4)
-      // (the page's own letters fade in on top of the identical drawn ones, then the layer goes: a cross-fade of the two
-      //  dipped to grey half-way)
-      .set(title,{visibility:'visible'},at+3.9).fromTo(ch,{opacity:0},{opacity:1,duration:.35,ease:'none',clearProps:'opacity',immediateRender:false},at+3.9)
-      .call(()=>{G.cv.style.display='none';ch.forEach(e=>delete e.dataset.vis)},null,at+4.25);
+    tl.set(G.cv,{display:'block'},at).to(v,{p:1,duration:3.6,ease:'power2.out',onUpdate:draw},at).to(v,{fade:0,duration:1.5,ease:'power1.out',onUpdate:draw},at+2.4)
+      // (any letter not yet handed over by then comes in; then the layer, now under whole page letters, fades away)
+      .call(()=>ch.forEach((e,i)=>{if(!shown[i])handOver(i)}),null,at+3.4)
+      .to(G.cv,{opacity:0,duration:.4,ease:'none',onComplete:()=>{G.cv.style.display='none';ch.forEach(e=>e.style.opacity='')}},at+3.9);
     return at+4.25}
   function titleIn(at){if(FX[0]==='d')return smokeIn(at);const ch=[...title.querySelectorAll('.ch')],k=R()/14,fs=FS;
     gsap.set(ch,{'--rx':'0deg','--sy':1});
@@ -653,7 +681,9 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
       // (d3 starts once the oval is in the O, and its note when the smoke's front has passed the title's middle)
       // (d3 starts while the oval settles into the O — the last .5 s of its ride are a slow quart in-out landing; later, the
       //  picture stood still for ~.2 s between the two)
-      else{const t0=M+.45,ts=FX==='5'?M+1.1:FX==='d3'?M+.65:t0;titleIn(ts);const ne=noteIn(FX==='d3'?ts+1.1:t0+DUR*C0);bars(ne-.3)}}
+      // (d3: the stripes come in while the note is half-way, so nothing stands still before them — measured: .6 s of calm
+      //  between the finished note and the stripes on phones)
+      else{const t0=M+.45,ts=FX==='5'?M+1.1:FX==='d3'?M+.65:t0;titleIn(ts);const ns=FX==='d3'?ts+1.1:t0+DUR*C0,ne=noteIn(ns);bars(FX==='d3'?ns+.9:ne-.3)}}
     enter.ran=true}
   document.querySelectorAll('.ctl [data-fx]').forEach(b=>b.onclick=()=>{FX=b.dataset.fx;IN='C';apply()});
   document.querySelectorAll('.ctl [data-nx]').forEach(b=>b.onclick=()=>{NX=b.dataset.nx;IN='C';apply()});
@@ -664,11 +694,12 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
   document.getElementById('copy').onclick=()=>{const t=offText()+'\n'+location.href;navigator.clipboard?navigator.clipboard.writeText(t).then(()=>{lbl.textContent='Skopiowano: '+offText()},()=>{lbl.textContent=t}):lbl.textContent=t};
   document.getElementById('zero').onclick=()=>{OFF.t=[0,0];OFF.n=[0,0];applyOff();history.replaceState(null,'',query());alignNote();cacheCh();lbl.textContent=offText()};
   addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='3'||k==='5'||k==='7'){FX=k;IN='C';apply()}});
-  let lastW=innerWidth;addEventListener('resize',()=>{size();if(innerWidth!==lastW){lastW=innerWidth;fit();if(V==='4')placeWin4();applyOff();alignNote();cacheCh()}});
+  let lastW=innerWidth,lastH=innerHeight;addEventListener('resize',()=>{size();if(innerWidth!==lastW||(!coarse&&innerHeight!==lastH)){lastW=innerWidth;lastH=innerHeight;fit();if(V==='4')placeWin4();applyOff();alignNote();cacheCh()}});
   size();
   // every face is loaded before the first measure, so switching never fits a line in a fallback font
   const FACES=['900 100px "Inter Tight"','400 15px "Inter Tight"','900 100px Archivo','900 100px "Schibsted Grotesk"'];
-  Promise.race([document.fonts?Promise.all(FACES.map(f=>document.fonts.load(f))).catch(()=>{}):0,new Promise(r=>setTimeout(r,3000))]).then(()=>{apply();requestAnimationFrame(frame)});
+  const STILL=q.get('still')==='1';
+  Promise.race([document.fonts?Promise.all(FACES.map(f=>document.fonts.load(f))).catch(()=>{}):0,new Promise(r=>setTimeout(r,3000))]).then(()=>{apply();if(STILL)tl.progress(1);requestAnimationFrame(frame)});
 })();
 </script>
 </body>
