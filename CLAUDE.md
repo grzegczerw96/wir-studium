@@ -12,7 +12,7 @@ Stan na 10.10.2026: plik odchudzony do zasad i pętli; pomiary, lekcje, hero i s
 | `wiedza/pomiary.md` | praca nad daną sekcją: liczby z oryginału (desktop, telefon, tablet), mechanizmy dociągania |
 | `wiedza/lekcje.md` | szukanie błędu: ok. 50 objawów z przyczyną i rozwiązaniem |
 | `wiedza/hero.md` | praca nad hero: co wybrane, co jest w labie, wszystkie uwagi Grzegorza |
-| `wiedza/marka.md`, `inspiracje.md`, `katalog-ruchu.md` | przed propozycjami dla sekcji, którą projektujemy (a nie odtwarzamy); dopisywać do katalogu po każdej decyzji |
+| `wiedza/marka.md`, `inspiracje.md`, `katalog-ruchu.md` | przed propozycjami dla sekcji, którą projektujemy (a nie odtwarzamy); dopisywać do katalogu po każdej decyzji. `marka.md` także przy pisaniu tekstów każdej sekcji (ton, słowa) |
 | `tools/README.md` | instalacja narzędzi, ich opcje, znane fałszywe alarmy |
 
 ## 1. Czym jest ten projekt
@@ -89,8 +89,8 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 
 | Poziom | Kiedy | Co | Koszt |
 |---|---|---|---|
-| 1 | po każdej zmianie | `node --check`; pomiar zmienionego miejsca (`probe.py`, liczby); narzędzia z tabeli pasujące do zmiany, na `quick` (telefon, tablet, desktop) | kilka min |
-| 2 | przed oddaniem sekcji | `audit.py --section '#id' --devices all`; narzędzia ruchu z tabeli; `phone.py` z płynnością tej sekcji | do ok. 15 min |
+| 1 | po każdej zmianie | zawsze `node --check`; gdy zmiana dotyka układu strony głównej, zawsze `audit.py --section '#id'` na `quick` (telefon, tablet, desktop; ok. 1 min, łapie ucięty tekst, przewijanie w poziomie, nachodzenie); narzędzia ruchu (`overlap`, `motion`, `center`) tylko, gdy zmienia się ruch; pomiar zmienionego miejsca (`probe.py`) przy odtwarzaniu | kilka min |
+| 2 | przed oddaniem sekcji | `audit.py --section '#id' --devices all`; narzędzia ruchu z tabeli; `phone.py` z płynnością tej sekcji | kilka do kilkunastu min |
 | 3 | przed oddaniem całości | `audit.py --devices all` (11 ekranów); `phone.py tools/phone-sections.json` dwa razy (zimny i rozgrzany przejazd); porównanie z oryginałem | ok. 20 min |
 
 - **Pasek przewijania:** Playwright domyślnie go ukrywa, a u Grzegorza (Windows, Chrome, gęstość 1,25) ma 15 px. Narzędzia do położeń uruchamiać z `_env.launch(p, scrollbars=True)`.
@@ -126,15 +126,19 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 | Kontakt (napis, formularz) | zbudowany | spirala kontaktu liczy środek z `innerWidth/2` (`cX`): z paskiem przewijania ok. 7 px w prawo (zadanie 2) |
 | Stopka | zbudowana | etap końcowy |
 
+„Zbudowana” i „etap końcowy” znaczą: nie znamy konkretnego problemu, a nie: sprawdzona na wszystkim. Wszystkie te sekcje sprawdzano dotąd bez paska przewijania, więc położenie z paskiem jest niesprawdzone (pokrywają to zadania 2 i 3).
+
 **Zadania po kolei:**
 1. **Przeniesienie hero na stronę główną** (`wiedza/hero.md`): układ 2, krój A, wejście C, tytuł d3, wyjście przez rozmycie; wersja 5 jako kandydat na telefony. Przy tym:
    - jedna implementacja `GLCoil` na stronie głównej (kopia w zamrożonym labie zostaje);
    - start zawsze na górze (`history.scrollRestoration='manual'`, `scrollTo(0,0)`), jak w oryginale i w labie;
    - `overlap.py` (i `center.py`) przepięte na stronę główną, z grupami podawanymi w wywołaniu, jak w `sizes.py`;
-   - nowe narzędzie **porównania obok siebie**: zrzuty oryginału i naszej strony w tych samych miejscach sekcji ułożone w pary w jednym obrazku, plus wykres przebiegu kluczowych wartości (jasność tła, położenie tytułu) w funkcji przewijania. Tak znaleźliśmy przejście do czerni przesunięte o 0,8 ekranu: z liczb, nie z wrażenia. Grzegorz ocenia efekt, Claude dostaje dokładną różnicę.
+   - **przed oddaniem hero: pomiar d3 na prawdziwym telefonie** (`phone.py`) po ostatniej zmianie (przekazanie liter z dymu stronie po kolei); telefon się wtedy rozłączył. Ten pomiar decyduje, czy na telefonach zostaje d3, czy wchodzi wersja 5;
+   - hero to nasz własny pomysł, nie odtworzenie cappen: **nie porównujemy go z oryginałem**; wzorcem jest `lab/hero.html` (wygląd, czasy, kolejność).
 2. **Przegląd `innerWidth`/`innerHeight` w `index.html`** (42 użycia: 17 szerokość, 25 wysokość) według §6.3: szerokość liczona z paskiem przewijania to błąd, wysokość bywa w porządku. Przejrzeć, a nie zamieniać hurtem.
 3. **`audit.py` i `paths.py` z prawdziwym paskiem przewijania** (`scrollbars=True`).
-4. **Etap końcowy: gotowość na wszystkich ekranach** (poziom 3, uzgodnione 10.10.2026):
+4. **Narzędzie porównania obok siebie** (przy następnej pracy nad sekcją odtwarzaną z oryginału): zrzuty oryginału i naszej strony w tych samych miejscach sekcji ułożone w pary w jednym obrazku, plus wykres przebiegu kluczowych wartości (jasność tła, położenie tytułu) w funkcji przewijania. Tak znaleźliśmy przejście do czerni przesunięte o 0,8 ekranu: z liczb, nie z wrażenia. Grzegorz ocenia efekt, Claude dostaje dokładną różnicę.
+5. **Etap końcowy: gotowość na wszystkich ekranach** (poziom 3, uzgodnione 10.10.2026):
    - telefon w poziomie (844×390): brak układu na niskie ekrany; w intro okno nachodzi na paski i nie mieści się tekst, w manifeście tekst i kwadraty nachodzą na spiralę;
    - płynność na telefonie (klienci, pierwszy przejazd);
    - Safari/iPhone: niesprawdzone.
@@ -174,9 +178,9 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
   3. Mierzyć od nowa, gdy coś się zmienia (`ResizeObserver` na elementach, doczytane fonty), nie tylko przy `resize` okna.
   4. Każde nowe położenie sprawdzać narzędziem na wielu szerokościach i gęstościach, z prawdziwym paskiem przewijania (wzór: `tools/center.py`), a nie wzrokiem na jednym zrzucie.
   5. **Tekst, który z założenia nie wychodzi** (taniej niż sprawdzanie; `sizes.py` ma tylko potwierdzać):
-     - duże tytuły mają wielkość ograniczoną i szerokością, i wysokością (`min(…vw, …vh)` albo `clamp`), lokalnie w danym tytule, bez zmiany globalnego `--r`;
+     - duże tytuły mają wielkość ograniczoną i szerokością, i wysokością (`min(…vw, …svh)` albo `clamp`; `svh`, nie `vh`, bo na telefonie `vh` zmienia się z paskiem adresu, §6.4 p. 7), lokalnie w danym tytule, bez zmiany globalnego `--r`;
      - teksty w układzie flex/grid z odstępami, a nie w pozycjach absolutnych obok innych elementów;
-     - wielkość liczona względem pudełka, w którym tekst stoi (jednostki kontenera `cqi`/`cqh`), a nie całego okna.
+     - wielkość liczona względem pudełka, w którym tekst stoi (jednostki kontenera `cqi`/`cqh`; rodzic potrzebuje `container-type: size` albo `inline-size`), a nie całego okna.
 
 ### 6.4 Sposoby, które rodzą błędy (pamiętać przy pisaniu kodu; pełne przypadki w `wiedza/lekcje.md`)
 1. **Ten sam element sterowany dwa razy.** Przejście CSS i GSAP na jednej właściwości, dwa tweeny na jednej zmiennej. Jedno źródło prawdy dla każdej wartości.
@@ -192,7 +196,7 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 ## 7. Lista kontrolna przed oddaniem sekcji
 
 - [ ] Liczby (długość sekcji, progi, czasy, krzywe) wzięte z kodu oryginału albo zmierzone, nie zgadnięte; nowe pomiary dopisane do `wiedza/pomiary.md`.
-- [ ] Porównanie z oryginałem w tych samych miejscach sekcji (liczby, a od zadania 1 także obraz obok siebie).
+- [ ] Sekcja odtwarzana: porównanie z oryginałem w tych samych miejscach (liczby, a gdy powstanie narzędzie z zadania 4, także obraz obok siebie). Sekcja własna (np. hero): porównanie z jej wzorcem w `lab/`.
 - [ ] Przewinięte prawdziwym kółkiem: wolno, szybko, z zatrzymaniem w połowie przejścia, w górę i z powrotem.
 - [ ] Nic nie nachodzi na tekst; kontrast w każdej klatce przejścia kolorów.
 - [ ] Ruch sprawdzony narzędziem co klatkę (`overlap.py`, `motion.py`), na telefonach, tablecie i desktopach z paskiem przewijania; w spoczynku to za mało.
