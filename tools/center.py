@@ -1,8 +1,8 @@
-"""Is the coil in the middle of the black O? (lab/hero.html, layout 2) — measured from pixels only, never from the page's
+"""Is the coil in the middle of the black O? (the main page's hero, or lab/hero.html layout 2) — measured from pixels only, never from the page's
 own numbers, on several window sizes and pixel densities, with the real scrollbar shown (Playwright hides it by default)
 and the mouse parked at the bottom right (the coil once followed the mouse).
-usage: py -I tools/center.py [url] [--all]
-  url: default the local lab/hero.html; --all also saves a close-up of every case (otherwise only failures)
+usage: py -I tools/center.py [main|lab|url] [--all]
+  default: the local main page (index.html); lab: the local lab/hero.html; --all also saves a close-up of every case (otherwise only failures)
 The oval: dark runs along rows/columns at 42 % of its radius from the middle (clear of the coil); the coil: everything
 not black inside the oval. Pass: both centres within 1 % of the O's width (at least 1 css px): the metal's shaded right
 edge is darker than the threshold, so a centred coil measures ~0.8 % to the left at every size."""
@@ -12,7 +12,7 @@ import _env
 from playwright.sync_api import sync_playwright
 from PIL import Image
 args = [a for a in sys.argv[1:] if not a.startswith('--')]
-url = args[0] if args else 'file:///' + os.path.join(_env.REPO, 'lab', 'hero.html').replace('\\', '/')
+url, PR = _env.page(args[0] if args else None)
 SAVE_ALL = '--all' in sys.argv
 CASES = [(w, h, d, False) for (w, h) in ((1280, 620), (1366, 768), (1440, 900), (1536, 742), (1920, 1080)) for d in (1, 1.25, 1.5)]
 CASES += [(768, 1024, 2, True), (360, 649, 3, True), (412, 915, 2.6, True)]
@@ -23,8 +23,13 @@ with sync_playwright() as p:
     for W, H, dpr, mobile in CASES:
         ctx = b.new_context(viewport={'width': W, 'height': H}, device_scale_factor=dpr, is_mobile=mobile, has_touch=mobile)
         pg = ctx.new_page(); errs = []
+        if PR['init']: pg.add_init_script(PR['init'])
         pg.on('pageerror', lambda e: errs.append(str(e)[:100]))
-        pg.goto(url + ('&' if '?' in url else '?') + 'v=2&f=1&x=1&w=A'); pg.wait_for_timeout(2800)
+        pg.goto(_env.with_q(url, PR['center_q']))
+        try: pg.wait_for_function("document.getElementById('winIn')", timeout=20000)
+        except Exception:
+            print(f'{W}x{H}@{dpr}: no O on the page', errs[:2]); fails += 1; ctx.close(); continue
+        pg.wait_for_timeout(PR['center_wait'] - 1200)
         if not mobile: pg.mouse.move(W - 40, H - 20)
         pg.wait_for_timeout(1200)
         r = pg.evaluate("(()=>{const r=document.getElementById('winIn').getBoundingClientRect();return [r.left,r.top,r.width,r.height]})()")

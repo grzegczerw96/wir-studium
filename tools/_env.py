@@ -32,3 +32,36 @@ def launch(p, scrollbars=False):
     # with the scrollbar, e.g. innerWidth, looks right in the tools and wrong in Grzegorz's browser)
     return p.chromium.launch(channel='chrome', args=['--use-gl=angle', '--ignore-gpu-blocklist'],
                              ignore_default_args=['--hide-scrollbars'] if scrollbars else None)
+
+# The pages the hero tools (center, overlap, motion) know: the main page (index.html, the default) and the hero lab
+# (lab/hero.html). Their page JS is written with the lab's ids; adapt() swaps in the page's own, so one tool checks both.
+PAGES = {
+    'lab': dict(title='title', note='note', stage='stage', section='.hero', smoke='.smoke', settle=120, init=None,
+                center_q='v=2&f=1&x=1&w=A', center_wait=4000, entrances='CDEFG', motion_t=6.5,
+                enter_q=lambda w: 'w=' + w,
+                fx_q=lambda fx: f'w=C&fx={fx}' + ('&dbg=smoke' if fx.startswith('d') else '')),
+    # (main: the intro's scroll is scrubbed over .6 s, so a position needs a moment to settle, and its carrying of a
+    #  slow scroll to the end is switched off; one entrance, C, with the title d3 or ?fx=5)
+    'main': dict(title='heroT', note='heroNote', stage='box', section='#intro', smoke='.hero-smoke', settle=800, init=NO_CARRY,
+                 center_q='', center_wait=7500, entrances='C', motion_t=7.5,
+                 enter_q=lambda w: '',
+                 fx_q=lambda fx: '&'.join(x for x in ('fx=5' if fx == '5' else '', 'dbg=smoke' if fx.startswith('d') else '') if x)),
+}
+
+def page(arg=None):
+    """'main' or nothing: the local index.html with local libraries; 'lab': the local lab/hero.html; a URL: the
+    profile by its path → (url, profile)"""
+    if arg in (None, 'main'): return local_page(), PAGES['main']
+    if arg == 'lab': return 'file:///' + os.path.join(REPO, 'lab', 'hero.html').replace('\\', '/'), PAGES['lab']
+    return arg, PAGES['lab' if 'hero.html' in arg else 'main']
+
+def adapt(js, pr):
+    """the lab's ids in a tool's page JS → the page's own"""
+    for k in ('stage', 'title', 'note'):
+        for q in ("'", '"'):
+            js = js.replace(f'getElementById({q}{k}{q})', f'getElementById({q}{pr[k]}{q})')
+        js = js.replace(f'#{k} ', f'#{pr[k]} ').replace(f"'#{k}'", f"'#{pr[k]}'")
+    return js.replace("querySelector('.hero')", f"querySelector('{pr['section']}')").replace("querySelector('.smoke')", f"querySelector('{pr['smoke']}')")
+
+def with_q(url, q):
+    return url + (('&' if '?' in url else '?') + q if q else '')

@@ -12,7 +12,7 @@
    then its preloader). Here the layout class is decided now and the page stays blank until the fonts and the script
    are ready, so the plain layout (box in the middle, thick stripes, the headline in a fallback font) never flashes */
 (function(){var d=document.documentElement,f=false;try{f=localStorage.getItem('wir-motion')==='on'}catch(e){}
-  if(!matchMedia('(prefers-reduced-motion: reduce)').matches||f)d.classList.add('motion');d.classList.add('wait')})();
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches||f)d.classList.add('motion','pre');d.classList.add('wait')})();
 </script>
 <style>
 /* Layout: white intro with a full-width black-weight headline and a small black window that grows into the whole screen,
@@ -48,13 +48,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 /* blank until the script reveals the page; if it never runs (a library failed to load), the page shows itself after 15 s (no script at all: no "wait", a failed library: the script reveals it) */
 html.wait .hd,html.wait main{visibility:hidden;animation:wir-show 0s 15s forwards}
 @keyframes wir-show{to{visibility:visible}}
+/* the hero's entrance (C): while the page loads, a black oval stands in the middle of the empty page (the original's
+   preloader, without its pictures); the script takes it over at exactly this size and place and carries it into the O */
+html.pre .box{clip-path:ellipse(calc(var(--r)*5) calc(var(--r)*5.25) at 50% 50svh)}
+html.wait.pre .box{visibility:visible;animation:none}
 .it{font-family:var(--serif);font-style:italic;font-weight:400}
 .mono{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 
 /* header: difference blend so it reads on white and on black */
 .hd{position:fixed;inset:0 0 auto;z-index:40;display:flex;justify-content:space-between;align-items:center;padding:calc(18px + env(safe-area-inset-top,0px)) var(--gut) 18px;color:#fff;mix-blend-mode:difference;pointer-events:none}
 .hd>*{pointer-events:auto}
-.hd::after{content:"";position:absolute;left:var(--gut);right:calc(var(--gut) + 60px);bottom:0;height:1px;background:currentColor;opacity:.35;transform-origin:0 50%;transform:scaleX(var(--p,1))}
+/* (no hairline under the header row: Grzegorz 10.10) */
 .logo{font:800 22px/1 var(--wide);font-stretch:118%;letter-spacing:-.02em;text-transform:uppercase}
 .dots{width:40px;height:40px;border-radius:50%;border:1px solid currentColor;display:grid;place-items:center}
 .dots i{position:relative;width:4px;height:4px;border-radius:50%;background:currentColor;box-shadow:-7px 0 0 currentColor,7px 0 0 currentColor;transition:width .35s,height .35s,border-radius .35s,box-shadow .35s,transform .45s cubic-bezier(.7,0,.2,1)}
@@ -67,7 +71,6 @@ html.wait .hd,html.wait main{visibility:hidden;animation:wir-show 0s 15s forward
 /* phones and tablets, as in the original: a 2.5rem ring at .2, the hairline under the logo row across the full width */
 @media (max-width:1024px){
   .hd{padding:calc(var(--gut) + env(safe-area-inset-top,0px)) var(--gut) calc(var(--r)*1.125)}
-  .hd::after{right:var(--gut);opacity:.2}
   .dots{width:calc(var(--r)*2.5);height:calc(var(--r)*2.5);border:0;position:relative}
   .dots::before{content:"";position:absolute;inset:0;border:1px solid currentColor;border-radius:50%;opacity:.2;transition:background-color .65s var(--ease-out),opacity .65s var(--ease-out)}
   .dots i{width:calc(var(--r)*.25);height:calc(var(--r)*.25);box-shadow:calc(var(--r)*-.5) 0 0 currentColor,calc(var(--r)*.5) 0 0 currentColor}
@@ -128,25 +131,49 @@ html:not(.motion) .menu.open{clip-path:none}
 
 
 
-/* ===== intro ===== */
+/* ===== intro: the hero (lab/hero.html, chosen 10.10: layout 2, face A, entrance C, title d3, exit by blur) =====
+   "RUCH / T▢ NASZ / MATERIAŁ": the window is the O of "TO", the glyph's own outline measured from the face; scrolling
+   grows that O into the whole screen. Lines centred; the note at the bottom right; three stripes along the bottom. */
 .intro{position:relative}
-/* dvh: on a phone the pinned screens follow the address bar, so nothing white shows under them when it slides away */
-.intro-pin{position:relative;height:100svh;overflow-x:clip;display:flex;flex-direction:column;padding:96px var(--gut) 0}
+.intro-pin{position:relative;height:100svh;overflow-x:clip;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;gap:calc(var(--r)*3);
+  padding:calc(var(--gut) + var(--r)*3.625 + env(safe-area-inset-top,0px)) var(--gut) calc(var(--r)*6.5)}
 html.motion .intro{height:200svh}
 html.motion .intro-pin{position:sticky;top:0}
-.mega{margin:0;font-family:var(--wide);font-weight:900;font-stretch:125%;text-transform:uppercase;letter-spacing:-.045em;line-height:.84;text-align:center;font-size:var(--mega,18vw)}
-.mega .ln{display:block;overflow:hidden;padding-bottom:.03em;white-space:nowrap}
-.mega .ln>span{display:inline-block}
-.mega .ch{display:inline-block;will-change:transform}
-.slot{width:min(42vw,560px);aspect-ratio:1.62;margin:18px auto 0;flex:none;max-width:100%}
-.hero-note{align-self:flex-end;margin:28px 0 0;max-width:300px;text-align:justify;font-size:14px;line-height:1.35}
-.hero-note .it{font-size:1.12em}
-.hero-note .wd{display:inline-block;white-space:nowrap}
-.hero-note .c{display:inline-block}
-.stripes{position:absolute;left:0;right:0;bottom:0;display:grid;gap:9px;transform-origin:bottom}
+.hero-t{position:relative;z-index:3;margin:0;font-family:var(--grot);font-weight:900;letter-spacing:-.04em;
+  line-height:.84;text-transform:uppercase;text-align:center;white-space:nowrap;font-size:var(--fs,4rem)}
+.hero-t .ln{display:block;perspective:calc(var(--r)*31.25)}
+.hero-t .ch{display:inline-block;backface-visibility:hidden;
+  transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em)}
+/* (a word space of its own: at -.04em tracking a plain space let "TO NASZ" read as one word) */
+.hero-t .sp{display:inline-block;width:.26em}
+/* the O: an empty inline-block on the baseline as wide as the glyph's advance, with the window hung from it at the
+   glyph's ink box (--ow, --ol, --od, --obw, --obh in em, measured from a canvas rendering of the face) */
+.hero-t .gap{display:inline-block;position:relative;width:var(--ow,.78em);height:0;vertical-align:baseline}
+.hero-t .win{position:absolute;left:var(--ol,0em);bottom:var(--od,0em);width:var(--obw,.78em);height:var(--obh,.74em)}
+.hero-note{position:absolute;z-index:3;right:var(--gut);bottom:calc(var(--r)*6.5);margin:0;
+  width:calc(var(--r)*16.25);font-size:calc(var(--r)*.9375);line-height:1.2;
+  text-align:justify;text-align-last:left;text-indent:4.75em}
+.hero-note .w{display:inline-block;text-indent:0;backface-visibility:hidden;
+  transform:translateZ(-1em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(1em)}
+/* the smoke the title comes out of (WebGL), over the black stage and under the title; shown only while it plays */
+.hero-smoke{position:absolute;z-index:2;pointer-events:none;display:none}
+/* three stripes, the lowest the thickest (no 1px hairline on top: Grzegorz 10.10) */
+.stripes{position:absolute;z-index:3;left:0;right:0;bottom:0;display:grid}
 .stripes i{display:block;overflow:hidden}
 .stripes i::before{content:"";display:block;height:100%;background:var(--ink);transform:translateY(var(--y,0%))}
-.stripes i:nth-child(1){height:1px}.stripes i:nth-child(2){height:3px}.stripes i:nth-child(3){height:6px}.stripes i:nth-child(4){height:10px}.stripes i:nth-child(5){height:22px}
+.stripes i:nth-child(1){height:calc(var(--r)*.25)}
+.stripes i:nth-child(2){height:calc(var(--r)*.5);margin-top:var(--r)}
+.stripes i:nth-child(3){height:calc(var(--r)*2.5);margin-top:calc(var(--r)*.75)}
+/* phones: flush with the real bottom edge, also when the address bar has gone */
+@media (max-width:1024px){.stripes{bottom:min(0px,100svh - 100dvh)}}
+/* desktop, as Grzegorz placed them (10.10, 1536×742): the title 5.68rem left of the middle and 1.07rem up, the note
+   at the bottom right, 2.8rem above the stripes */
+@media (min-width:1025px){
+  .intro-pin{padding-top:calc(var(--gut) + 55px);padding-bottom:calc(var(--r)*7.8)}
+  .hero-t{left:calc(var(--r)*-5.68);top:calc(var(--r)*-1.07)}
+  .hero-note{bottom:calc(var(--r)*7.8);right:calc(var(--gut) + var(--r)*.38)}
+}
 /* one black stage with one coil: a window in the intro, the whole screen in the manifesto */
 .box{position:absolute;inset:0;background:var(--ink);z-index:2;clip-path:var(--clip,inset(40% 30% 20% 30%));pointer-events:none}
 /* the black stage is as tall as the screen without the address bar (lvh), so nothing white shows below it while the
@@ -156,29 +183,6 @@ html.motion .box{position:fixed;bottom:auto;height:100vh;height:100lvh}
 html.motion .orb-wrap{bottom:auto;height:100vh;height:100dvh}
 .orb-wrap{position:absolute;inset:0;display:grid;place-items:center;will-change:transform}
 .orb{width:min(70vh,80vw);aspect-ratio:1;display:block}
-/* phones and tablets (the original's base layout): title, window and note form one group centred between the header
-   and the four stripes; the window is 15rem (tablets 20rem) at 260/160, the note 16.25rem, justified on both edges */
-@media (max-width:1024px){
-  .intro-pin{padding:calc(var(--gut) + var(--r)*3.625 + env(safe-area-inset-top,0px)) var(--gut) calc(var(--r)*7.6875 + 1px)}
-  .mega{margin-top:auto}
-  .slot{width:calc(var(--r)*15);aspect-ratio:260/160;margin:2.44svh auto 4.61svh}
-  .hero-note{margin:0 0 auto;width:calc(var(--r)*16.25);max-width:none;font-size:calc(var(--r)*.9375);line-height:1.2;text-align:justify;text-align-last:justify;text-indent:4.75em}
-  .hero-note .wd,.hero-note .c{text-indent:0}
-  .hero-note>span:first-child>.wd:first-child{margin-right:1.35em}
-  .stripes{bottom:min(0px,100svh - 100dvh);gap:0}   /* flush with the real bottom edge, also when the address bar has gone (the original leaves 3.5rem of white below; it read as a gap) */
-  .stripes i:nth-child(4){display:none}
-  .stripes i:nth-child(2){height:calc(var(--r)*.25);margin-top:calc(var(--r)*1.1875)}
-  .stripes i:nth-child(3){height:calc(var(--r)*.5);margin-top:var(--r)}
-  .stripes i:nth-child(5){height:calc(var(--r)*2.5);margin-top:calc(var(--r)*.75)}
-}
-@media (min-width:600px) and (max-width:1024px){.slot{width:calc(var(--r)*20)}}
-/* desktop: the note stands top right, level with the title (as the original); under the window it fell below the
-   stripes and off a 620px-high screen */
-@media (min-width:1025px){
-  .hero-note{position:absolute;top:96px;right:var(--gut);z-index:1;margin:0;width:calc(var(--r)*16.25);max-width:none;font-size:calc(var(--r)*.9375);line-height:1.2;text-align-last:justify;text-indent:4.75em}
-  .hero-note .wd,.hero-note .c{text-indent:0}
-  .hero-note>span:first-child>.wd:first-child{margin-right:1.35em}
-}
 
 /* ===== manifesto (black room) ===== */
 .mani{position:relative;z-index:3;background:var(--ink);color:#f2f2f2}
@@ -640,10 +644,10 @@ html:not(.motion) .stage3{display:none}
 <main id="top">
   <section class="intro" id="intro">
     <div class="intro-pin" id="introPin">
-      <h1 class="mega" id="mega"><span class="ln"><span>Ruch</span></span><span class="ln"><span>to nasz</span></span><span class="ln"><span>materiał</span></span></h1>
-      <div class="slot" id="slot" aria-hidden="true"></div>
-      <p class="hero-note">Małe, <span class="it">niezależne</span> studio, które od 2014 roku projektuje i koduje strony <span class="it">z ruchem</span> dla marek, które nie chcą wyglądać jak wszyscy.</p>
-      <div class="stripes" id="stripes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <!-- the letters and the O (the window) are built by the script; without it the plain title stays -->
+      <h1 class="hero-t" id="heroT" aria-label="Ruch to nasz materiał">Ruch to nasz materiał</h1>
+      <p class="hero-note" id="heroNote">Małe, niezależne studio, które od 2014 roku projektuje i koduje strony z ruchem dla marek, które nie chcą wyglądać jak wszyscy.</p>
+      <div class="stripes" id="stripes" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="box" id="box" aria-hidden="true"><div class="orb-wrap" id="orbWrap1"><canvas class="orb" id="orb1"></canvas></div></div>
     </div>
   </section>
@@ -760,23 +764,8 @@ html:not(.motion) .stage3{display:none}
   const small=matchMedia('(max-width: 700px)').matches;
   document.documentElement.classList.toggle('motion',G);
   // the fonts of the first screen (at most 2.5 s): the headline is fitted to its real width before anyone sees it
-  const fontsIn=Promise.race([document.fonts?Promise.all(['900 100px Archivo','400 15px "Inter Tight"','italic 400 15px "Instrument Serif"'].map(f=>document.fonts.load(f))).catch(()=>{}):0,
+  const fontsIn=Promise.race([document.fonts?Promise.all(['900 100px "Inter Tight"','900 100px Archivo','400 15px "Inter Tight"','italic 400 15px "Instrument Serif"'].map(f=>document.fonts.load(f))).catch(()=>{}):0,
     new Promise(r=>setTimeout(r,2500))]);
-
-  /* ================= fit the giant headlines to the width ================= */
-  function fit(el,varName){
-    const lines=[...el.querySelectorAll('.ln>span')];
-    el.style.setProperty(varName,'100px');
-    const widest=Math.max(...lines.map(l=>l.getBoundingClientRect().width));
-    const ps=getComputedStyle(el.parentElement);const avail=el.parentElement.clientWidth-parseFloat(ps.paddingLeft)-parseFloat(ps.paddingRight);
-    let fs=Math.floor(100*avail/widest*0.985);
-    if(varName==='--mega'){const cap=Math.max(48,(innerHeight-96-Math.min(innerWidth*.42,560)/1.62-110)/(lines.length*.86));fs=Math.min(fs,cap)}
-    el.style.setProperty(varName,fs+'px');
-  }
-  const fitAll=()=>{fit(document.getElementById('mega'),'--mega')};
-  fitAll();
-  // split headline letters for the intro
-  document.querySelectorAll('#mega .ln>span').forEach(s=>{s.innerHTML=[...s.textContent].map(c=>c===' '?' ':`<span class="ch">${c}</span>`).join('')});
 
   /* ================= coil renderer (torus with a helix wound round it) ================= */
   function Coil(canvas,opt={}){
@@ -860,7 +849,9 @@ html:not(.motion) .stage3{display:none}
       const dt=Math.min(.05,Math.max(0,t-last));last=t;
       spin+=dt*(.32+Math.min(vel,4)*.8);vel*=.93;            // scroll speed spins it faster, then it calms down
       mx+=(tmx-mx)*.05;my+=(tmy-my)*.05;                       // the cursor tilts it slightly
-      grp.rotation.set(tilt+Math.sin(t*.37)*.1+my*.3*mk,Math.sin(t*.23)*.2+mx*.4*mk,spin);grp.scale.setScalar(pscale*(1-.15*dark));
+      // (sway 0: face-on and still, no drift and no mouse — the hero's coil in the O; a turned ring has one thick and
+      //  one thin side and reads off-centre)
+      grp.rotation.set(tilt+(Math.sin(t*.37)*.1+my*.3*mk)*sway,yaw+(Math.sin(t*.23)*.2+mx*.4*mk)*sway,spin+zr);grp.scale.setScalar(pscale*(1-.15*dark));
       renderer.render(scene,cam);
     }
     const full=geo.index.count;
@@ -870,7 +861,8 @@ html:not(.motion) .stage3{display:none}
     // the last 20% fades what is left together with the texts
     let lastOp=-1;   // (styles are written only when they change: a write every frame keeps the page restyling)
     const setDark=v=>{dark=v;setShade(.9+.1*v,.35-1.5*v);const o=v<.8?1:Math.max(0,(1-v)/.2);if(o!==lastOp){lastOp=o;canvas.style.opacity=o}};
-    const setPose=(tl,sc)=>{tilt=tl;pscale=sc};
+    // tilt, scale, and optionally a turn about the view axis, the sway (1 = drift and mouse, 0 = still) and a yaw
+    let zr=0,sway=1,yaw=0;const setPose=(tl,sc,z=0,sw=1,y=0)=>{tilt=tl;pscale=sc;zr=z;sway=sw;yaw=y};
     // place the coil centre at screen pixel (px,py) of its canvas (camera at z 9, 30° fov → 4.823 units of height)
     const setPos=(px,py)=>{if(!W)size();if(!H)return;const k=2*9*Math.tan(Math.PI/12)/H;grp.position.set((px-W/2)*k,-(py-H/2)*k,0)};
     return {draw,size,canvas,setDark,setShade,setPose,setPos,dpr:v=>{renderer.setPixelRatio(v);size()},kick:v=>{vel=Math.max(vel,Math.abs(v))},
@@ -1193,26 +1185,152 @@ html:not(.motion) .stage3{display:none}
     hd.classList.remove('away');
     requestAnimationFrame(()=>closeMenu())}));
 
-  /* ================= intro window geometry (needed with or without GSAP) ================= */
-  const pin=document.getElementById('introPin'),slot=document.getElementById('slot'),box=document.getElementById('box'),ow1=document.getElementById('orbWrap1');
-  // measure against the black layer itself (fixed = the viewport), not the pinned section, so short windows can't misalign it
-  function geom(){const p=box.getBoundingClientRect(),s=slot.getBoundingClientRect();
-    return {t:s.top-p.top,r:p.right-s.right,b:p.bottom-s.bottom,l:s.left-p.left,
-      dy:(s.top+s.height/2)-(p.top+ow1.offsetHeight/2),sc:Math.min(s.height/document.getElementById('orb1').clientHeight*1.25,1)}}
-  function setStart(){const g=geom();box.style.setProperty('--clip',`inset(${g.t}px ${g.r}px ${g.b}px ${g.l}px)`);ow1.style.transform=`translateY(${g.dy}px) scale(${g.sc})`}
-  setStart();
-  // fonts change the headline width, which moves the window: re-measure once they arrive and on resize
-  const relayout=()=>{fitAll();setStart();coils.forEach(c=>{c.size();if(reduce)c.draw(2.2)});if(window.ScrollTrigger)ScrollTrigger.refresh()};
+  /* ================= the hero (needed with or without GSAP) =================
+     Ported from lab/hero.html (chosen 10.10, see wiedza/hero.md): layout 2 — "RUCH / T▢ NASZ / MATERIAŁ", the window
+     is the O of "TO" — face A (Inter Tight Black), entrance C, the title out of smoke (d3), the exit by blur. */
+  const pin=document.getElementById('introPin'),box=document.getElementById('box'),ow1=document.getElementById('orbWrap1');
+  const heroT=document.getElementById('heroT'),heroNote=document.getElementById('heroNote');
+  const HQ=new URLSearchParams(location.search);
+  // ?fx=5: the lighter title (a soft mask opening from the O), the candidate for phones if d3 is too heavy there.
+  // ?dbg=smoke: the smoke red, the stage dark blue and the coil hidden, so tools/motion.py can tell smoke from ink
+  let FX=HQ.get('fx')==='5'?'5':'d3';
+  const DBG=HQ.get('dbg')==='smoke';
+  if(DBG){box.style.background='#000050';orbCanvas.style.visibility='hidden'}
+  // the original's rem in px, read from CSS (the same --r the layout uses)
+  const probe=document.createElement('i');
+  probe.style.cssText='position:absolute;width:calc(var(--r)*1);visibility:hidden;pointer-events:none';
+  document.body.append(probe);
+  const R=()=>probe.getBoundingClientRect().width;
+  // as the original, the page always starts at the top: a reload in the middle restored the scroll, and the entrance
+  // played on a window that was already growing over the letters
+  if('scrollRestoration' in history)history.scrollRestoration='manual';
+  scrollTo(0,0);
+
+  // the letters, one span each; {o} is the O of "TO": an empty gap carrying the window
+  const LINES=['Ruch','T{o} nasz','Materiał'];
+  const chars=t=>[...t].map(c=>c===' '?'<span class="sp"> </span>':`<span class="ch">${c}</span>`).join('');
+  heroT.innerHTML=LINES.map(l=>'<span class="ln" aria-hidden="true">'
+    +l.split('{o}').map(chars).join('<span class="gap"><span class="win" id="winIn"></span></span>')+'</span>').join('');
+  const winIn=document.getElementById('winIn');
+  heroNote.innerHTML=heroNote.textContent.split(' ').map(w=>`<span class="w">${w}</span>`).join(' ');
+
+  /* the O of the face: advance, ink box and counter (the white inside), in em, from a canvas rendering */
+  let OC={w:.3,h:.45,dx:0,dy:0},FS=100;
+  function measureO(){
+    const fam=getComputedStyle(heroT).fontFamily,Z=200,c=document.createElement('canvas'),g2=c.getContext('2d');
+    g2.font='900 '+Z+'px '+fam;
+    const m=g2.measureText('O'),l=m.actualBoundingBoxLeft,r=m.actualBoundingBoxRight;
+    const a=m.actualBoundingBoxAscent,d=m.actualBoundingBoxDescent;
+    const set=(k,v)=>heroT.style.setProperty(k,(v/Z).toFixed(4)+'em');
+    set('--ow',m.width);set('--ol',-l);set('--od',-d);set('--obw',l+r);set('--obh',a+d);
+    c.width=Math.ceil(l+r+20);c.height=Math.ceil(a+d+20);
+    g2.font='900 '+Z+'px '+fam;g2.fillStyle='#000';g2.fillText('O',10+l,10+a);
+    const D=g2.getImageData(0,0,c.width,c.height).data,ink=(x,y)=>D[(y*c.width+x)*4+3]>128;
+    // from the middle of the ink box outwards to the ink: the counter
+    const cx=Math.round(10+(l+r)/2),cy=Math.round(10+(a+d)/2);
+    let x0=cx,x1=cx,y0=cy,y1=cy;
+    while(x0>0&&!ink(x0-1,cy))x0--;
+    while(x1<c.width-1&&!ink(x1+1,cy))x1++;
+    const mx=Math.round((x0+x1)/2);
+    while(y0>0&&!ink(mx,y0-1))y0--;
+    while(y1<c.height-1&&!ink(mx,y1+1))y1++;
+    OC={w:(x1-x0+1)/Z,h:(y1-y0+1)/Z,dx:((x0+x1)/2-(10+(l+r)/2))/Z,dy:((y0+y1)/2-(10+(a+d)/2))/Z};
+  }
+  /* the title's size: 9.75rem on desktops, otherwise as wide as the screen allows; never taller than the room it has
+     (on a tablet-wide but low window the width alone made it too tall and the note ran onto the stripes). Desktop: the
+     note stands beside it; tablets and phones: under it, so the centred title keeps clear of it */
+  function fitHero(){
+    measureO();
+    const ps=getComputedStyle(pin),avail=pin.clientWidth-2*parseFloat(ps.paddingRight);
+    heroT.style.setProperty('--fs','100px');
+    // (widths from offsetWidth: a letter in mid-flip has a thin box)
+    const wid=l=>[...l.children].reduce((s,e)=>s+e.offsetWidth,0);
+    const widest=Math.max(...[...heroT.querySelectorAll('.ln')].map(wid));
+    let fs=100*avail/widest*.97;
+    if(isDesk())fs=Math.min(fs,R()*9.75);
+    const inner=pin.clientHeight-parseFloat(ps.paddingTop)-parseFloat(ps.paddingBottom);
+    const room=isDesk()?inner-R()*1.5:inner-heroNote.offsetHeight-R()*2.5;
+    fs=Math.min(fs,room/(3*.84));
+    heroT.style.marginBottom=isDesk()?'':(heroNote.offsetHeight+R()*2.5)+'px';
+    FS=Math.floor(fs);
+    heroT.style.setProperty('--fs',FS+'px');
+  }
+  // the letters' and the note's boxes at rest, relative to the pinned screen (flat: a letter in mid-flip has a thin box)
+  let CHS=[],NB=[0,0,0,0];
+  function cacheCh(){
+    const pr=pin.getBoundingClientRect(),ch=[...heroT.querySelectorAll('.ch')],tf=ch.map(c=>c.style.transform);
+    const rel=r=>[r.left-pr.left,r.top-pr.top,r.right-pr.left,r.bottom-pr.top];
+    ch.forEach(c=>c.style.transform='none');
+    CHS=ch.map(c=>[c,rel(c.getBoundingClientRect())]);
+    ch.forEach((c,i)=>c.style.transform=tf[i]);
+    NB=rel(heroNote.getBoundingClientRect());
+  }
+
+  /* the window and the coil, from the intro's scroll P (0..1) and the entrance state E:
+     win 0 → 1 opens the window; go 0 → 1 carries it from the loader's oval (the screen's middle, 10 × 10.5rem, the
+     same as the CSS one shown while loading) into the O; coil 0 → 1 grows the coil in; spin keeps it turning faster */
+  const E=G?{win:1,go:0,coil:0,spin:0}:{win:1,go:1,coil:1,spin:0};
+  const IP={p:0};
+  const quadOut=t=>1-(1-t)*(1-t),quartOut=t=>1-Math.pow(1-t,4),clamp=v=>Math.min(1,Math.max(0,v));
+  let lastClip='',lastTr='',lastP=-1,sepOn=false;
+  function place(P){
+    // (every position is taken in the black layer's own box, where the clip-path insets live: innerWidth counts the
+    //  scrollbar and the layer does not — the O lost 15px and the coil sat 7px off its middle that way in the lab)
+    const r=winIn.getBoundingClientRect(),sr=box.getBoundingClientRect(),W=document.documentElement.clientWidth,Hh=innerHeight;
+    const g=E.go,pw=R()*10,ph=pw*1.05,bw=pw+(r.width-pw)*g,bh=ph+(r.height-ph)*g,sc=bw/r.width;
+    const e=E.win,cx=W/2+(r.left+r.width/2-W/2)*g,cy=Hh/2+(r.top+r.height/2-Hh/2)*g,w0=bw*e,h0=bh*e;
+    // the original's curve: the edges open over the first 75 % (quad out), the corners square off over the last 25 %;
+    // the oval (the O) becomes the rectangle over the first 60 %
+    const k=quadOut(clamp(P/.75)),j=clamp(k/.6),cr=1-quadOut(clamp((P-.75)/.25));
+    const L=(cx-w0/2-sr.left)*(1-k),T=(cy-h0/2-sr.top)*(1-k),Rt=(sr.right-(cx+w0/2))*(1-k),B=(sr.bottom-(cy+h0/2))*(1-k);
+    const rx=(w0/2*(1-j)+4*j)*cr,ry=(h0/2*(1-j)+4*j)*cr;
+    const f2=v=>v.toFixed(2);
+    const clip=`inset(${f2(T)}px ${f2(Rt)}px ${f2(B)}px ${f2(L)}px round ${f2(rx)}px / ${f2(ry)}px)`;
+    if(clip!==lastClip){box.style.clipPath=clip;lastClip=clip}
+    // the title, the note and the stripes fade over the first half (the original's --o, quad out) and blur (exit 1);
+    // black text never stands on the black window: each letter and the note also fade with their live distance to its
+    // edge (gone when touching, whole 1.5rem away), whatever the screen
+    if(P!==lastP){lastP=P;
+      const o=1-quadOut(clamp(P/.5)),stripes=document.getElementById('stripes');
+      heroT.style.opacity=stripes.style.opacity=o<1?o.toFixed(3):'';
+      const pr=pin.getBoundingClientRect(),wr=[sr.left+L-pr.left,sr.top+T-pr.top,sr.right-Rt-pr.left,sr.bottom-B-pr.top],gap=R()*1.5;
+      const sep=b=>Math.max(b[0]-wr[2],wr[0]-b[2],b[1]-wr[3],wr[1]-b[3]);
+      if(P>0){
+        CHS.forEach(([c,b])=>{c.style.opacity=clamp(sep(b)/gap).toFixed(3)});
+        heroNote.style.opacity=(o*clamp(sep(NB)/gap)).toFixed(3);sepOn=true}
+      else if(sepOn){CHS.forEach(([c])=>{c.style.opacity=''});heroNote.style.opacity='';sepOn=false}
+      const bl=18*quadOut(clamp(P/.5))*R()/14;
+      heroT.style.filter=heroNote.style.filter=bl>.05?'blur('+bl.toFixed(2)+'px)':'';
+    }
+    // the coil: in the O face-on and still, ~90 % of the counter's width; growing, it travels to the middle, turns half a
+    // turn and tips to 60°, the sway coming back with it, and ends at the size the manifesto takes over (scale 1).
+    // It is moved by its wrapper (the canvas is a square in the middle of the stage), so at the end nothing is left over
+    const C=coils[0],ccx=cx+OC.dx*FS*sc,ccy=cy+OC.dy*FS*sc,turn=quartOut(clamp(P/.75));
+    // (the canvas stands in the middle of its wrapper, which is as wide as the layer: its centre from the layer's own
+    //  box and the wrapper's computed height — offsetLeft and offsetWidth are whole pixels, and put it ~.5px off)
+    const cvx=sr.left+sr.width/2,cvy=sr.top+parseFloat(getComputedStyle(ow1).height)/2;
+    const tr=f2((ccx-cvx)*(1-k))+'px '+f2((ccy-cvy)*(1-k))+'px';
+    if(tr!==lastTr){ow1.style.translate=tr;lastTr=tr}
+    const u=C.setPose?3.6*orbCanvas.clientHeight/4.823:.74*Math.min(orbCanvas.clientWidth,orbCanvas.clientHeight);
+    const D0=OC.w*FS*sc*e*.9*E.coil,D=D0+(u-D0)*quartOut(clamp(P));
+    if(C.setPose){if(E.spin>.01)C.kick(E.spin);C.setPose(1.05*turn,Math.max(D,.01)/u,-Math.PI*turn,turn,0)}
+    else ow1.style.scale=(Math.max(D,.01)/u).toFixed(4);
+    window.__o={cx,cy,ccx,ccy,OC,FS,r:[r.left,r.top,r.width,r.height]};   // (tools/center.py)
+  }
+
+  // fonts change the title's width, which moves the O: measure again once they arrive, on resize and when the title or
+  // the note change size
+  const relayout=()=>{fitHero();cacheCh();lastP=-1;place(IP.p);coils.forEach(c=>{c.size();if(reduce)c.draw(2.2)});if(window.ScrollTrigger)ScrollTrigger.refresh()};
   if(document.fonts)document.fonts.ready.then(relayout);
   addEventListener('load',relayout);
   // (touch screens: the address bar sliding in and out fires resize with only the height changed — a full refresh then,
   //  in the middle of a scroll, made the page stutter; only a new width re-measures)
   {let lastW=innerWidth;addEventListener('resize',()=>{if(coarse&&innerWidth===lastW)return;lastW=innerWidth;relayout()})}
-  // a late font can change the title or the note by a line, which moves the centred window: measure again then
   {let raf=0,first=true;const ro=new ResizeObserver(()=>{if(first){first=false;return}cancelAnimationFrame(raf);raf=requestAnimationFrame(relayout)});
-   ro.observe(document.getElementById('mega'));ro.observe(document.querySelector('.hero-note'))}
-  // reveal: measured with the real fonts first, then the page shows and the entrance starts
-  const show=f=>fontsIn.then(()=>requestAnimationFrame(()=>{relayout();document.documentElement.classList.remove('wait');f&&f()}));
+   ro.observe(heroT);ro.observe(heroNote)}
+  // reveal: measured with the real fonts first, then the page shows (the loader's oval is taken over at its own place)
+  // and the entrance starts
+  const show=f=>fontsIn.then(()=>requestAnimationFrame(()=>{relayout();document.documentElement.classList.remove('wait','pre');f&&f()}));
 
   if(!G){show();return}
   /* ================= GSAP ================= */
@@ -1233,8 +1351,6 @@ html:not(.motion) .stage3{display:none}
   addEventListener('scroll',()=>{if(scrollY<140)hd.classList.remove('away')},{passive:true});
   // the entrance waits for the reveal (show() below); its start states are set at once, while the page is still blank
   const enter=gsap.timeline({paused:true});
-  enter.fromTo(hd,{'--p':0},{'--p':1,duration:innerWidth>=600?1.5:1,ease:'power1.inOut'},.5)
-    .from(menuBtn,{y:()=>-menuBtn.getBoundingClientRect().bottom,rotate:-10,transformOrigin:'0% 100%',duration:1,ease:'power4.out'},.25);
   const SECS=[['#intro','Start'],['#mani','Manifest'],['#work','Realizacje'],['#projects','Projekty'],['#about','O nas'],['#contact','Kontakt']];
   const secB=document.querySelector('#hdSec b'),secS=document.querySelector('#hdSec span');let secCur=0;
   SECS.forEach(([sel,name],i)=>ScrollTrigger.create({trigger:sel==='#work'?'#wi':sel,endTrigger:sel,start:'top 50%',end:'bottom 50%',onToggle:st=>{if(!st.isActive||i===secCur)return;
@@ -1242,47 +1358,208 @@ html:not(.motion) .stage3{display:none}
     gsap.timeline().to(secS,{yPercent:-110*dir,duration:.25,ease:'power2.in'}).add(()=>{secS.textContent=name;secB.textContent=String(i+1).padStart(2,'0')+' / '+String(SECS.length).padStart(2,'0')})
       .fromTo(secS,{yPercent:110*dir},{yPercent:0,duration:.35,ease:'power3.out'})}}));
 
-  // headline letters rise, a few lean, then settle
-  enter.from('#mega .ch',{yPercent:110,rotate:()=>gsap.utils.random(-14,14),duration:1.4,ease:'expo.out',stagger:{each:.035,from:'random'}},.15);
-  const note=document.querySelector('.hero-note');
-  [...note.childNodes].forEach(n=>{const wrap=document.createElement('span');if(n.nodeType===1)wrap.className=n.className;
-    // letters stay grouped per word so a line never breaks inside a word
-    wrap.innerHTML=n.textContent.split(/(\s+)/).map(w=>/^\s+$/.test(w)?' ':w?`<span class="wd">${[...w].map(c=>`<span class="c">${c}</span>`).join('')}</span>`:'').join('');n.replaceWith(wrap)});
-  enter.from('.hero-note .c',{x:()=>gsap.utils.random(-60,60),opacity:0,duration:1.1,ease:'expo.out',stagger:{each:.008,from:'random'}},.8)
-    .from(box,{autoAlpha:0,duration:1.2},.6);
-  // the stripes rise out of their own clip, the lowest first (.75 s each, .2 s apart); as in the original the run is
-  // stopped at 75 %, so the two thinnest stay a little short of the top
-  {const sts=[...document.querySelectorAll('#stripes i')].filter(i=>i.offsetHeight);
-   const stl=gsap.timeline({paused:true}).fromTo(sts,{'--y':'100%'},{'--y':'0%',duration:.75,ease:'none',stagger:-.2});
-   enter.to(stl,{progress:.75,duration:stl.duration(),ease:'power4.inOut'},.8)}
+  /* ---- the hero's entrance (C, lab/hero.html): while loading, the oval with a fast-turning coil stands in the middle
+     of the empty page; when ready it travels into the O and shrinks (1.15 s quart in-out); the title comes out of slow
+     smoke spreading from under the O (d3), the note's words from its middle out (once the smoke's front has passed the
+     title's middle), the stripes while the note is half-way; the header fades in ---- */
+  const seeded=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+  const setFx=(el,v)=>{if('o' in v)el.style.opacity=v.o.toFixed(3)};
+  const clearFx=el=>{el.style.opacity=''};
+  // one element from → to: hidden at its start values at once, then tweened, then cleared
+  const fxTo=(tl,el,from,to,dur,ease,at)=>{const v={...from};setFx(el,v);tl.to(v,{...to,duration:dur,ease,onUpdate:()=>setFx(el,v),onComplete:()=>clearFx(el)},at)};
+  /* d3 · the title out of smoke, in slow motion (after a smoke-reveal video). A small WebGL layer over the title draws
+     drifting, curling smoke (fbm noise, domain-warped, flowing slowly) whose front spreads as a ring from under the O;
+     behind the front the title is there, the front's ragged edge is covered by the smoke, letters still in it waver a
+     little. The front slows at the end, the smoke thins out over 1.5 s, and the page's own letters take over one by one
+     as the smoke passes them */
+  const SMOKE_VS='attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}';
+  const SMOKE_FS=[
+    'precision highp float;varying vec2 v;uniform sampler2D uText;uniform float uT,uP,uFade,uAmt,uDmax;uniform vec2 uRes,uO;uniform vec3 uSmoke,uInk;',
+    'float h(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}',
+    'float n2(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),u.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),u.x),u.y);}',
+    'float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<5;i++){s+=a*n2(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return s;}',
+    'void main(){float asp=uRes.x/uRes.y;vec2 q=vec2(v.x*asp,v.y)*2.6;',
+    // domain warp: the smoke curls; everything drifts slowly
+    '  vec2 w=vec2(fbm(q+vec2(0.,uT*.05)),fbm(q+vec2(5.2,1.3)-vec2(uT*.04,0.)));',
+    '  float n=fbm(q+1.9*w+vec2(-uT*.06,uT*.015));',
+    // c: how far this pixel is from the O, in the title's own units (1 at its farthest corner)
+    '  float c=length((v-uO)*vec2(asp,1.))/uDmax;',
+    // the reveal's edge is ragged with the smoke, and the smoke is built around that same edge, so wherever the title
+    // is half-shown there is smoke over it; the front starts inside the O, so at first there is no smoke anywhere
+    '  float f=mix(-.3,1.35,uP),edge=f+(n-.5)*.35,dd=c-edge;',
+    '  float rev=1.-smoothstep(-.1,.02,dd);',
+    '  float core=exp(-pow(dd/.11,2.)),lead=exp(-pow((dd-.12)/.16,2.)),trail=exp(-pow((dd+.28)/.26,2.)),tx=smoothstep(.28,.72,n);',
+    // (the layer's own edges never show: the smoke thins out towards them)
+    '  float vig=smoothstep(0.,.14,v.x)*smoothstep(0.,.14,1.-v.x)*smoothstep(0.,.22,v.y)*smoothstep(0.,.22,1.-v.y);',
+    '  float reach=1.-smoothstep(f+.12,f+.24,c);',
+    // (a small dense puff at the source, growing from nothing and smoking until the ring is well out)
+    '  float puff=exp(-pow(c/.12,2.))*smoothstep(-.3,-.22,f)*(1.-smoothstep(.15,.55,f));',
+    '  float sm=clamp(max(core*(.55+.45*tx)+lead*.7*tx+trail*.45*tx,0.)*reach+puff*(.6+.4*tx),0.,1.)*uFade*uAmt*vig;',
+    '  vec2 d=(w-.5)*.025*(core+lead)*(1.-rev*.6);',
+    '  float ta=texture2D(uText,v+d).a*rev;',
+    '  float a=sm+ta*(1.-sm);gl_FragColor=vec4(uSmoke*sm+uInk*ta*(1.-sm),a);}'].join('\n');
+  let SM=null;
+  function smokeGL(){
+    if(SM)return SM;
+    const cv=document.createElement('canvas');cv.className='hero-smoke';pin.appendChild(cv);
+    const gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false});
+    if(!gl)return SM={fail:true};
+    const sh=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);return o};
+    const pr=gl.createProgram();
+    gl.attachShader(pr,sh(gl.VERTEX_SHADER,SMOKE_VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,SMOKE_FS));gl.linkProgram(pr);
+    if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){console.warn(gl.getProgramInfoLog(pr));return SM={fail:true}}
+    gl.useProgram(pr);
+    const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    const la=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(la);gl.vertexAttribPointer(la,2,gl.FLOAT,false,0,0);
+    const U={};
+    ['uText','uT','uP','uFade','uAmt','uDmax','uRes','uO','uSmoke','uInk'].forEach(n=>U[n]=gl.getUniformLocation(pr,n));
+    const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+    [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.uniform1i(U.uText,0);
+    return SM={cv,gl,U,tex,txt:document.createElement('canvas')};
+  }
+  function smokeIn(tl,at){
+    const G2=smokeGL();
+    if(G2.fail){FX='5';return maskIn(tl,at)}
+    const ch=[...heroT.querySelectorAll('.ch')],pr=pin.getBoundingClientRect(),tb=heroT.getBoundingClientRect();
+    // the layer: the title's box and room around it for the smoke to thin out; cut back so it never covers the note,
+    // on the side that keeps the most room, never into the title (cutting the bottom on desktops left the smoke's thick
+    // part right at the cut — its edge showed for a few frames)
+    const roomy=isDesk(),mx=tb.width*(roomy?.3:.15),my=tb.height*(roomy?.45:.25);
+    let L0=tb.left-mx,T0=tb.top-my,R0=tb.right+mx,B0=tb.bottom+my;
+    const nb=heroNote.getBoundingClientRect();
+    if(nb.right>L0&&nb.left<R0&&nb.bottom>T0&&nb.top<B0){const opts=[];
+      if(nb.top>=tb.bottom+2)opts.push([L0,T0,R0,Math.min(B0,nb.top-6)]);
+      if(nb.left>=tb.right+2)opts.push([L0,T0,Math.min(R0,nb.left-6),B0]);
+      if(nb.bottom<=tb.top-2)opts.push([L0,Math.max(T0,nb.bottom+6),R0,B0]);
+      if(opts.length)[L0,T0,R0,B0]=opts.sort((a,b)=>(b[2]-b[0])*(b[3]-b[1])-(a[2]-a[0])*(a[3]-a[1]))[0]}
+    // (on whole pixels: at a fractional position the drawn title sat half a pixel off the page's own text, and the
+    //  hand-over made every letter's edge flicker)
+    L0=Math.floor(L0-pr.left)+pr.left;T0=Math.floor(T0-pr.top)+pr.top;R0=Math.ceil(R0-pr.left)+pr.left;B0=Math.ceil(B0-pr.top)+pr.top;
+    const bx={l:L0-pr.left,t:T0-pr.top,w:R0-L0,h:B0-T0};
+    const sc=(coarse||small)?.75:Math.min(devicePixelRatio||1,1.5),Wd=Math.round(bx.w*sc),Hd=Math.round(bx.h*sc);
+    Object.assign(G2.cv.style,{left:bx.l+'px',top:bx.t+'px',width:bx.w+'px',height:bx.h+'px',opacity:1,display:'none'});
+    G2.cv.width=Wd;G2.cv.height=Hd;
+    // the title, drawn into a texture letter by letter at the letters' own places and baselines
+    const T=G2.txt;T.width=Wd;T.height=Hd;
+    const c=T.getContext('2d'),cs=getComputedStyle(heroT),glyphs=[];
+    // (measured flat: the letters wait flipped away in perspective, and a flipped letter's box sits off its place —
+    //  measured that way, the drawn letters stood up to a letter wide of the page's own)
+    const tf=ch.map(e=>e.style.transform);ch.forEach(e=>e.style.transform='none');
+    heroT.querySelectorAll('.ln').forEach(ln=>{
+      const m=document.createElement('i');m.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';
+      ln.append(m);const by=m.getBoundingClientRect().top;m.remove();
+      ln.querySelectorAll('.ch').forEach(e=>{const r=e.getBoundingClientRect();
+        glyphs.push([e.textContent.toUpperCase(),(r.left-pr.left-bx.l)*sc,(by-pr.top-bx.t)*sc])})});
+    const gl=G2.gl,U=G2.U;
+    gl.viewport(0,0,Wd,Hd);gl.bindTexture(gl.TEXTURE_2D,G2.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
+    // (once a page letter is whole, the softer drawn one under it goes, so nothing is left to disappear at the end —
+    //  on phones its halo did, as a last sharpening)
+    const gone=glyphs.map(()=>false);
+    const textTex=()=>{c.clearRect(0,0,Wd,Hd);c.fillStyle='#fff';c.font='900 '+(parseFloat(cs.fontSize)*sc)+'px '+cs.fontFamily;
+      glyphs.forEach((g,i)=>{if(!gone[i])c.fillText(g[0],g[1],g[2])});
+      gl.bindTexture(gl.TEXTURE_2D,G2.tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,T)};
+    textTex();
+    // (the smoke comes out from under the O — born in its middle, it greyed the O out first)
+    const o=winIn.getBoundingClientRect(),oy=o.bottom-o.height*.06,ou=[(o.left+o.width/2-pr.left-bx.l)/bx.w,1-(oy-pr.top-bx.t)/bx.h];
+    const asp=bx.w/bx.h;
+    const tc=[[tb.left,tb.top],[tb.right,tb.top],[tb.left,tb.bottom],[tb.right,tb.bottom]].map(([x,y])=>[(x-pr.left-bx.l)/bx.w,1-(y-pr.top-bx.t)/bx.h]);
+    const dmax=Math.max(...tc.map(([x,y])=>Math.hypot((x-ou[0])*asp,y-ou[1])));
+    gl.uniform2f(U.uRes,Wd,Hd);gl.uniform2f(U.uO,ou[0],ou[1]);gl.uniform1f(U.uDmax,dmax);gl.uniform1f(U.uAmt,.9);
+    gl.uniform3fv(U.uSmoke,DBG?[1,.15,.15]:[.72,.72,.72]);gl.uniform3fv(U.uInk,[.02,.02,.02]);
+    // (the page's own letters wait, transparent, over the drawn title, and each one fades in as soon as the smoke has
+    //  passed it — all at once at the end it showed as the whole title sharpening)
+    gsap.set(ch,{'--rx':'0deg','--sy':1,opacity:0});
+    const shown=ch.map(()=>false);
+    const cen=ch.map(e=>{const r=e.getBoundingClientRect(),u=(r.left+r.width/2-pr.left-bx.l)/bx.w,w=1-(r.top+r.height/2-pr.top-bx.t)/bx.h;
+      return Math.hypot((u-ou[0])*asp,w-ou[1])/dmax});
+    ch.forEach((e,i)=>e.style.transform=tf[i]);
+    const v={p:0,fade:1},t0=performance.now();
+    const handOver=i=>{shown[i]=true;gsap.to(ch[i],{opacity:1,duration:.45,ease:'power1.out',onComplete:()=>{gone[i]=true;textTex()}})};
+    const draw=()=>{gl.uniform1f(U.uT,(performance.now()-t0)/1000);gl.uniform1f(U.uP,v.p);gl.uniform1f(U.uFade,v.fade);
+      gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      const f=-.3+1.65*v.p;ch.forEach((e,i)=>{if(!shown[i]&&cen[i]<f-.14)handOver(i)})};
+    draw();
+    // the front crosses in 3.6 s (power2 out: it moves at once and slows only at the end — with sine in-out it hung still
+    // for ~.7 s after the oval landed), the smoke thins out from 2.4 s over 1.5 s
+    tl.set(G2.cv,{display:'block'},at)
+      .to(v,{p:1,duration:3.6,ease:'power2.out',onUpdate:draw},at)
+      .to(v,{fade:0,duration:1.5,ease:'power1.out',onUpdate:draw},at+2.4)
+      // (any letter not yet handed over by then comes in; then the layer, now under whole page letters, fades away)
+      .call(()=>ch.forEach((e,i)=>{if(!shown[i])handOver(i)}),null,at+3.4)
+      .to(G2.cv,{opacity:0,duration:.4,ease:'none',onComplete:()=>{G2.cv.style.display='none';ch.forEach(e=>e.style.opacity='')}},at+3.9);
+    return at+4.25;
+  }
+  /* 5 · the lighter title (no WebGL): a soft circle opens from the O while the blur clears; its solid part catches up
+     with the edge as it reaches the farthest corner, so removing the mask at the end changes nothing */
+  function maskIn(tl,at){
+    const ch=[...heroT.querySelectorAll('.ch')],k=R()/14;
+    gsap.set(ch,{'--rx':'0deg','--sy':1});
+    // (a mask only paints inside the element's box; with -.04em tracking the last "Ł" overhangs the title's box by about
+    //  .04em, so that sliver was cut off and popped in when the mask came off: a padding with the same negative margin
+    //  gives the mask room without moving anything)
+    // (left and right only: on phones the bottom margin keeps the title clear of the note)
+    const side=(pd,mg)=>{heroT.style.paddingLeft=heroT.style.paddingRight=pd;heroT.style.marginLeft=heroT.style.marginRight=mg};
+    side('.2em','-.2em');
+    const o=winIn.getBoundingClientRect(),tb=heroT.getBoundingClientRect(),mx=o.left+o.width/2-tb.left,my=o.top+o.height/2-tb.top;
+    const far=Math.max(...[[0,0],[tb.width,0],[0,tb.height],[tb.width,tb.height]].map(([x,y])=>Math.hypot(x-mx,y-my)))+2,v={r:0,b:10*k};
+    const put=()=>{const g=v.r/far,inner=v.r*(.5+.5*Math.pow(g,3));
+      const m='radial-gradient(circle at '+mx.toFixed(0)+'px '+my.toFixed(0)+'px, #000 '+inner.toFixed(1)+'px, transparent '+v.r.toFixed(1)+'px)';
+      heroT.style.maskImage=heroT.style.webkitMaskImage=m;heroT.style.filter=v.b>.05?'blur('+v.b.toFixed(2)+'px)':''};
+    put();
+    tl.to(v,{r:far,b:0,duration:2.1,ease:'power2.out',onUpdate:put,
+      onComplete:()=>{heroT.style.maskImage=heroT.style.webkitMaskImage=heroT.style.filter='';side('','')}},at);
+    return at+2.1;
+  }
+  /* the note: its words appear from its middle out to the sides, unevenly (a little random) — opacity only: a blur
+     filter on ~20 words at once made 50-100 ms frames while the smoke was moving */
+  function noteIn(tl,at){
+    const ws=[...heroNote.querySelectorAll('.w')],nb=heroNote.getBoundingClientRect(),ncx=nb.left+nb.width/2,half=nb.width/2,rnd=seeded(5);
+    gsap.set(ws,{'--rx':'0deg','--sy':1});
+    ws.forEach(el=>{const r=el.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-ncx)/half;
+      fxTo(tl,el,{o:0},{o:1},.9,'power1.out',at+d*.7+rnd()*.3)});
+    return at+1.9;
+  }
+  function heroEnter(tl){
+    const ch=[...heroT.querySelectorAll('.ch')],ws=[...heroNote.querySelectorAll('.w')],st=[...document.querySelectorAll('#stripes i')].reverse();
+    gsap.set(ch,{'--rx':'-90deg','--sy':1.5});gsap.set(ws,{'--rx':'-90deg','--sy':1.5});
+    gsap.set(st,{opacity:0,'--y':'100%'});gsap.set(hd,{opacity:0});
+    Object.assign(E,{win:1,go:0,coil:0,spin:2.5});
+    tl.to(E,{coil:1,duration:.8,ease:'power3.out'},0);
+    const M=.9;
+    tl.to(E,{go:1,duration:1.15,ease:'power4.inOut'},M).to(E,{spin:0,duration:1.4,ease:'power2.out'},M)
+      .to(hd,{opacity:1,duration:.6,ease:'power1.out'},M+.6)
+      .from(menuBtn,{y:()=>-menuBtn.getBoundingClientRect().bottom,rotate:-10,transformOrigin:'0% 100%',duration:1,ease:'power4.out'},M+.6);
+    // d3 starts while the oval settles into the O (later, the picture stood still for ~.2 s between the two), its note
+    // when the smoke's front has passed the title's middle, the stripes while the note is half-way; 5 waits until the
+    // oval is in the O (the travelling oval crossed letters already shown)
+    const bars=at=>st.forEach((s,i)=>tl.set(s,{opacity:1},at+i*.15).to(s,{'--y':'0%',duration:.75,ease:'power4.out'},at+i*.15));
+    if(FX==='5'){maskIn(tl,M+1.1);const ne=noteIn(tl,M+1.6);bars(ne-.3)}
+    else{const ts=M+.65;smokeIn(tl,ts);const ns=ts+1.1;noteIn(tl,ns);bars(ns+.9)}
+  }
   lenis&&gsap.ticker.lagSmoothing(0);
   buildScroll();
-  show(()=>enter.play());
+  // (the entrance's start states are set when the page is shown, after the measuring, so the letters' boxes are cached flat)
+  show(()=>{heroEnter(enter);enter.play()});
 
   function buildScroll(){
   /* window grows to full screen (the original's curve, normalised): the edges open over the first 75 % (quad out),
      the corners square off over the rest; the coil travels to the middle with the edges and grows over the whole range.
      Past 10 %, a slow downward scroll is carried to the end (as in the clients section; phones 25 % faster). */
-  const quadIO=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2,quadOut=t=>1-(1-t)*(1-t);
-  // (a refresh at rest does not redraw the scrubbed window, so it kept the place measured before the fonts arrived)
-  const redraw=st=>{setStart();const a=st.animation;if(!a)return;const p=a.progress();a.invalidate();a.progress(Math.min(1,p+.001)).progress(p)};
-  const tl=gsap.timeline({scrollTrigger:{trigger:'#intro',start:'top top',end:'bottom bottom',scrub:.6,invalidateOnRefresh:true,onRefresh:redraw,
+  const quadIO=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  // (one number, scrubbed; the window, the coil and the fades are computed from it every frame in place(), so a refresh
+  //  that skips callbacks never leaves them behind)
+  gsap.to(IP,{p:1,ease:'none',scrollTrigger:{trigger:'#intro',start:'top top',end:'bottom bottom',scrub:.6,invalidateOnRefresh:true,
     onUpdate:st=>{const L=window.__lenis,p=st.progress;
       if(!L||!carry||menuOpen||window.__autoScrolling||st.direction<=0||p<=.1||p>=.95||Math.abs(L.velocity)>=50)return;
       const v=Math.abs(L.velocity),dur=Math.min(.25+Math.abs(v/50-1)+Math.abs(p-1),1.25)*(isDesk()?1:.75);
       window.__autoScrolling=true;
       L.scrollTo(st.end,{duration:dur,lock:true,force:true,easing:v<25?quadIO:quadOut,onComplete:()=>{window.__autoScrolling=false}});
       setTimeout(()=>{window.__autoScrolling=false},dur*1000+400)}}});
-  // the window's edges and corners are tweened as numbers and written out here: tweening the clip-path string itself
-  // mixed up the numbers once the browser shortened "inset(0px 0px 0px 0px round 4px)" to "inset(0px round 4px)",
-  // and the 4px radius ended up as a right inset (a white sliver down the right edge on phones)
-  const WIN={t:0,r:0,b:0,l:0,rad:4};
-  const winClip=()=>{box.style.clipPath=`inset(${WIN.t}px ${WIN.r}px ${WIN.b}px ${WIN.l}px round ${WIN.rad}px)`};
-  tl.set({},{},1)
-    .fromTo(WIN,{t:()=>geom().t,r:()=>geom().r,b:()=>geom().b,l:()=>geom().l},{t:0,r:0,b:0,l:0,ease:'power1.out',duration:.75,onUpdate:winClip},0)
-    .fromTo(WIN,{rad:4},{rad:0,ease:'power1.out',duration:.25,onUpdate:winClip,immediateRender:false},.75)
-    .fromTo(ow1,{y:()=>geom().dy},{y:0,ease:'power1.out',duration:.75},0)
-    .fromTo(ow1,{scale:()=>geom().sc},{scale:1,ease:'power4.inOut',duration:1},0);
+  // (past the intro, nothing to do once the window is the whole screen and the entrance is over)
+  gsap.ticker.add(()=>{if(IP.p>=1&&lastP>=1&&!enter.isActive())return;place(IP.p)});
 
   // manifesto: words tip in from below in 3D, hold, then tip away
   const mt=document.getElementById('maniTxt');

@@ -1,7 +1,7 @@
 # Wir Studio: studium animacji i przewodnik budowania stron z ruchem
 
 Ten plik czyta Claude na początku każdej sesji w tym repozytorium. Jest też notatką dla Grzegorza: jak budujemy takie strony i co sprawia, że wyglądają profesjonalnie.
-Stan na 10.10.2026: plik odchudzony do zasad i pętli; pomiary, lekcje, hero i szczegóły narzędzi są w osobnych plikach (§0). Następne zadanie: przeniesienie nowego hero na stronę główną (§5).
+Stan na 10.10.2026: plik odchudzony do zasad i pętli; pomiary, lekcje, hero i szczegóły narzędzi są w osobnych plikach (§0). Hero przeniesione na stronę główną; czeka na pomiar na telefonie i ocenę Grzegorza (§5).
 
 ---
 
@@ -82,8 +82,8 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 | Układ sekcji w spoczynku, różne ekrany, paski, przewijanie w poziomie, ucięty tekst | `audit.py` (`--section`) |
 | Czy układ trzyma się na każdym rozmiarze okna (grupy elementów nie wchodzą na siebie, nic nie wychodzi za ekran) | `sizes.py` (178 rozmiarów 320–1920 × 500–1080; grupy w `--groups`; lab: `?still=1`) |
 | Przejścia przy przewijaniu między sekcjami, reguły „A zgasło, zanim weszło B”, zmiana kierunku | `paths.py` (+ `audit.py` w kilku pozycjach) |
-| Coś ma stać w czymś (bryła w „O”, okno na tekście) | `center.py` (z pikseli; dziś tylko lab) |
-| Każdy ruch, w którym elementy mogą na siebie wejść (wejścia, przejścia) | `overlap.py` (pudełka co klatkę; dziś tylko lab) |
+| Coś ma stać w czymś (bryła w „O”, okno na tekście) | `center.py` (z pikseli) |
+| Każdy ruch, w którym elementy mogą na siebie wejść (wejścia, przejścia) | `overlap.py` (pudełka co klatkę) |
 | Wejścia po załadowaniu, efekty z maską, filtrem lub WebGL: przeskoki, krawędzie warstw, kolejność, przerwy (stall), przycięcia (jank) | `motion.py` (piksele co klatkę; `?dbg=` w stronie) |
 | Ciężkie efekty, płynność, pasek adresu | `phone.py` na prawdziwym telefonie (dotykać tylko karty z naszą stroną) |
 
@@ -93,6 +93,7 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 | 2 | przed oddaniem sekcji | `audit.py --section '#id' --devices all`; narzędzia ruchu z tabeli; `phone.py` z płynnością tej sekcji | kilka do kilkunastu min |
 | 3 | przed oddaniem całości | `audit.py --devices all` (11 ekranów); `phone.py tools/phone-sections.json` dwa razy (zimny i rozgrzany przejazd); porównanie z oryginałem | ok. 20 min |
 
+- **Strona główna albo lab:** `center`, `overlap`, `motion` i `sizes` sprawdzają domyślnie stronę główną; `lab` jako pierwszy argument sprawdza `lab/hero.html` (profile w `_env.PAGES`).
 - **Pasek przewijania:** Playwright domyślnie go ukrywa, a u Grzegorza (Windows, Chrome, gęstość 1,25) ma 15 px. Narzędzia do położeń uruchamiać z `_env.launch(p, scrollbars=True)`.
 - **Czego emulacja nie pokaże:** chowania paska adresu w Chrome na Androidzie i płynności. To sprawdza tylko prawdziwy telefon (Samsung Galaxy M15 5G, 360×649 z paskiem adresu, 90 Hz).
 
@@ -115,7 +116,7 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 | Sekcja | Stan | Co zostało |
 |---|---|---|
 | Nagłówek i menu | zbudowane wg pomiarów | etap końcowy |
-| Hero / intro | **w trakcie**: na stronie stary układ; nowy wybrany w `lab/hero.html` | przeniesienie (zadanie 1) |
+| Hero / intro | **przeniesione** z `lab/hero.html` (10.10): układ 2, krój A, wejście C, d3, wyjście przez rozmycie | pomiar na telefonie (`phone.py tools/phone-hero.json`) i ocena Grzegorza; wersja 5 ma przerwy (stall) 1,8–2,0 i 3,4–4,1 s, do poprawy, jeśli wejdzie na telefony |
 | Manifest | zbudowany wg pomiarów | pierwszy przejazd na telefonie ok. 45 kl./s |
 | Wybrane realizacje (przejście) | zbudowane | etap końcowy |
 | Karty realizacji | zbudowane | etap końcowy |
@@ -129,16 +130,14 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 „Zbudowana” i „etap końcowy” znaczą: nie znamy konkretnego problemu, a nie: sprawdzona na wszystkim. Wszystkie te sekcje sprawdzano dotąd bez paska przewijania, więc położenie z paskiem jest niesprawdzone (pokrywają to zadania 2 i 3).
 
 **Zadania po kolei:**
-1. **Przeniesienie hero na stronę główną** (`wiedza/hero.md`): układ 2, krój A, wejście C, tytuł d3, wyjście przez rozmycie; wersja 5 jako kandydat na telefony. Przy tym:
-   - jedna implementacja `GLCoil` na stronie głównej (kopia w zamrożonym labie zostaje);
-   - start zawsze na górze (`history.scrollRestoration='manual'`, `scrollTo(0,0)`), jak w oryginale i w labie;
-   - `overlap.py` (i `center.py`) przepięte na stronę główną, z grupami podawanymi w wywołaniu, jak w `sizes.py`;
+1. **Hero na stronie głównej: dokończenie.** Zrobione 10.10: przeniesienie (jedna `GLCoil`, start zawsze na górze, `?fx=5` i `?dbg=smoke` działają), narzędzia przepięte na stronę główną, kontrola: `center` 18/18, `overlap` czysty na 6 ekranach, `motion` d3 czysty (dym rodzi się 0–1 px od punktu pod „O”), `sizes` bez nachodzenia na 178 rozmiarach. Zostało:
    - **przed oddaniem hero: pomiar d3 na prawdziwym telefonie** (`phone.py`) po ostatniej zmianie (przekazanie liter z dymu stronie po kolei); telefon się wtedy rozłączył. Ten pomiar decyduje, czy na telefonach zostaje d3, czy wchodzi wersja 5;
    - hero to nasz własny pomysł, nie odtworzenie cappen: **nie porównujemy go z oryginałem**; wzorcem jest `lab/hero.html` (wygląd, czasy, kolejność).
 2. **Przegląd `innerWidth`/`innerHeight` w `index.html`** (42 użycia: 17 szerokość, 25 wysokość) według §6.3: szerokość liczona z paskiem przewijania to błąd, wysokość bywa w porządku. Przejrzeć, a nie zamieniać hurtem.
 3. **`audit.py` i `paths.py` z prawdziwym paskiem przewijania** (`scrollbars=True`).
-4. **Narzędzie porównania obok siebie** (przy następnej pracy nad sekcją odtwarzaną z oryginału): zrzuty oryginału i naszej strony w tych samych miejscach sekcji ułożone w pary w jednym obrazku, plus wykres przebiegu kluczowych wartości (jasność tła, położenie tytułu) w funkcji przewijania. Tak znaleźliśmy przejście do czerni przesunięte o 0,8 ekranu: z liczb, nie z wrażenia. Grzegorz ocenia efekt, Claude dostaje dokładną różnicę.
-5. **Etap końcowy: gotowość na wszystkich ekranach** (poziom 3, uzgodnione 10.10.2026):
+4. **Przewijanie w bok po zmianie szerokości okna** (było już przed hero, sprawdzone na HEAD): gdy w jednej sesji okno rośnie z szerokości telefonu (≤600) do 700–1024 px, strona przewija się w bok o 7–40 px; przy wczytaniu od razu w tej szerokości jest dobrze. `sizes.py --sizes=320x568,700x700,768x1024` pokazuje błąd.
+5. **Narzędzie porównania obok siebie** (przy następnej pracy nad sekcją odtwarzaną z oryginału): zrzuty oryginału i naszej strony w tych samych miejscach sekcji ułożone w pary w jednym obrazku, plus wykres przebiegu kluczowych wartości (jasność tła, położenie tytułu) w funkcji przewijania. Tak znaleźliśmy przejście do czerni przesunięte o 0,8 ekranu: z liczb, nie z wrażenia. Grzegorz ocenia efekt, Claude dostaje dokładną różnicę.
+6. **Etap końcowy: gotowość na wszystkich ekranach** (poziom 3, uzgodnione 10.10.2026):
    - telefon w poziomie (844×390): brak układu na niskie ekrany; w intro okno nachodzi na paski i nie mieści się tekst, w manifeście tekst i kwadraty nachodzą na spiralę;
    - płynność na telefonie (klienci, pierwszy przejazd);
    - Safari/iPhone: niesprawdzone.

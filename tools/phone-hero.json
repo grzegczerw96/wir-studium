@@ -1,0 +1,6 @@
+[
+ {"open":""},{"wait":7500},{"fps":"stop"},{"shot":"hero-d3"},
+ {"open":""},{"wait":7500},{"fps":"stop"},
+ {"open":"fx=5"},{"wait":7500},{"fps":"stop"},{"shot":"hero-5"},
+ {"open":""},{"wait":7500},{"fps":"start"},{"swipe":-1300,"speed":900},{"fps":"stop"},{"js":"'intro '+(scrollY/innerHeight).toFixed(2)"}
+]

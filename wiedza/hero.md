@@ -1,6 +1,6 @@
 # Hero: decyzje i warianty (10.10.2026)
 
-Przeniesione z CLAUDE.md (§2). Próby leżą w `lab/hero.html` (zamrożony pokaz, wszystkie warianty dostępne przez parametry adresu). Na stronę główną przenosimy tylko to, co wybrane.
+Przeniesione z CLAUDE.md (§2). Próby leżą w `lab/hero.html` (zamrożony pokaz, wszystkie warianty dostępne przez parametry adresu). Na stronę główną przenosimy tylko to, co wybrane. **Przeniesione 10.10.2026** (`index.html`, sekcja `#intro`).
 
 ## Wybrane (do przeniesienia na stronę główną)
 
@@ -14,6 +14,8 @@ Przeniesione z CLAUDE.md (§2). Próby leżą w `lab/hero.html` (zamrożony poka
 | Notka | bezszeryfowa, `text-align-last:left`, prawy dolny róg; wejście a (słowa od środka na boki) | domyślnie (przycisk notki) |
 
 **Wersja 5 (dym z „O”, maska) to kandydat na telefony**, nie wersja odrzucona: jest lżejsza niż WebGL. Jeśli d3 okaże się za ciężki na prawdziwym telefonie (`tools/phone.py`), na telefonach używamy 5 (`?fx=5`).
+
+**Różnice strony głównej względem labu:** spirala na końcu przewijania ma rozmiar, od którego zaczyna manifest (ok. 0,75 × min(0,7 wysokości, 0,8 szerokości), w labie 0,75 mniejszego boku ekranu), żeby przejście do manifestu było bez skoku; jest przesuwana przez swoją warstwę (`#orbWrap1`, właściwość `translate`), bo płótno jest kwadratem na środku sceny; długość przewijania intro 200svh (w labie 230svh), z dociąganiem jak w oryginale; nagłówek bez kreski; przycisk menu wpada z góry razem z pojawieniem się nagłówka.
 
 Jeśli „O” nie zadziała na stronie, wracamy do układu 1 (jak w oryginale, `?v=1`).
 

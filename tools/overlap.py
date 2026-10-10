@@ -1,4 +1,4 @@
-"""Do elements overlap while they move? (lab/hero.html: the entrances A/B/C and the scroll of the window)
+"""Do elements overlap while they move? (the main page's hero, or lab/hero.html and its entrances; and the scroll of the window)
 Every ~40 ms of an entrance and at 21 scroll positions it reads the live boxes and reports:
   window-letter  the black window (the moving oval, or the O growing) over a visible letter of the title
   note-title     a line of the note over a visible letter
@@ -11,15 +11,15 @@ Every ~40 ms of an entrance and at 21 scroll positions it reads the live boxes a
 'visible' = turned less than 75° (the flip), opacity of its block above .3 (times data-vis, set by effects that hide text
 with a filter or a mask). The O's own window next to its letters is
 not an overlap (tolerance 3 px), nor the window over letters that are already fading (scroll: by design, they blur away).
-usage: py -I tools/overlap.py [url] [--shots] [--w=CDEFG]   (phones and desktops, real scrollbar)"""
+usage: py -I tools/overlap.py [main|lab|url] [--shots] [--w=CDEFG]   (phones and desktops, real scrollbar)"""
 import os, sys, json, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _env
 from playwright.sync_api import sync_playwright
 args = [a for a in sys.argv[1:] if not a.startswith('--')]
-url = args[0] if args else 'file:///' + os.path.join(_env.REPO, 'lab', 'hero.html').replace('\\', '/')
+url, PR = _env.page(args[0] if args else None)
 SHOTS = '--shots' in sys.argv
-WS = next((a[4:] for a in sys.argv if a.startswith('--w=')), 'CDEFG')
+WS = next((a[4:] for a in sys.argv if a.startswith('--w=')), PR['entrances'])
 out = os.path.join(_env.OUT, 'overlap'); os.makedirs(out, exist_ok=True)
 READ = r"""()=>{
  const deg=el=>{const v=el.style.getPropertyValue('--rx');return v?Math.abs(parseFloat(v)):0};
@@ -100,22 +100,23 @@ with sync_playwright() as p:
     b = _env.launch(p, scrollbars=True)
     for dev, opts in DEV.items():
         ctx = b.new_context(**opts); pg = ctx.new_page(); errs = []
+        if PR['init']: pg.add_init_script(PR['init'])
         pg.on('pageerror', lambda e: errs.append(str(e)[:100]))
         for w in WS:
             pg.evaluate('scrollTo(0,0)')   # (a reload keeps the scroll position: start every entrance at the top)
-            pg.goto(url + ('&' if '?' in url else '?') + 'w=' + w)
-            pg.wait_for_function('window.gsap&&document.querySelector("#title .ch")&&document.getElementById("stage").style.clipPath', timeout=20000)
+            pg.goto(_env.with_q(url, PR['enter_q'](w)))
+            pg.wait_for_function(_env.adapt('window.gsap&&document.querySelector("#title .ch")&&document.getElementById("stage").style.clipPath', PR), timeout=20000)
             t0 = time.time(); found = {}
             while time.time() - t0 < float(next((a[4:] for a in sys.argv if a.startswith("--t=")), "4.8")):
-                s = pg.evaluate(READ); t = round(time.time() - t0, 2)
+                s = pg.evaluate(_env.adapt(READ, PR)); t = round(time.time() - t0, 2)
                 for kind, what in check(s, False):
                     found.setdefault(kind, []).append((t, what))
                     if SHOTS and len(found[kind]) == 1: pg.screenshot(path=os.path.join(out, f"{dev.split()[1]}_{w}_{kind}.png"))
             # the scroll: the window grows to the screen
             scr = {}
             for i in range(21):
-                pg.evaluate(f"(()=>{{const h=document.querySelector('.hero');scrollTo(0,(h.offsetHeight-innerHeight)*{i / 20})}})()"); pg.wait_for_timeout(120)
-                for kind, what in check(pg.evaluate(READ), True):
+                pg.evaluate(f"(()=>{{const h=document.querySelector('.hero');scrollTo(0,(h.offsetHeight-innerHeight)*{i / 20})}})()".replace('.hero', PR['section'])); pg.wait_for_timeout(PR['settle'])
+                for kind, what in check(pg.evaluate(_env.adapt(READ, PR)), True):
                     scr.setdefault(kind, []).append((i / 20, what))
             msg = '; '.join(f"{k}: {len(v)}× from {v[0][0]}s ({', '.join(sorted(set(x[1] for x in v)))[:30]})" for k, v in found.items()) or 'clean'
             msg2 = '; '.join(f"{k}: {len(v)}× at P {v[0][0]}–{v[-1][0]} ({', '.join(sorted(set(x[1] for x in v)))[:30]})" for k, v in scr.items()) or 'clean'

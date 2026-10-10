@@ -1,7 +1,7 @@
 """Does a layout hold at every window size? Goes through a grid of sizes (widths 320–1920 × heights 500–1080, the real
 scrollbar on desktops) in one page, resizing it, and in the settled state checks that the given groups of elements do not
 overlap each other, that nothing visible leaves the screen sideways and that nothing scrolls sideways.
-usage: py -I tools/sizes.py <url> --groups="title=#title .ch;note=#note;stripes=.stripes i;header=.logo,.dots" [--gap=4]
+usage: py -I tools/sizes.py [main|lab|url] --groups="title=#title .ch;note=#note;stripes=.stripes i;header=.logo,.dots" [--gap=4]
        [--wait=250] [--sizes=WxH,WxH…]
   groups: name=CSS selector; every pair of different groups is checked (boxes of visible elements, more than --gap px into
           each other). Good for any section: list what must stay apart.
@@ -13,8 +13,9 @@ import _env
 from playwright.sync_api import sync_playwright
 args = [a for a in sys.argv[1:] if not a.startswith('--')]
 opt = lambda k, d: next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--' + k + '=')), d)
-url = args[0]
-groups = dict(g.split('=', 1) for g in opt('groups', 'title=#title .ch;note=#note;stripes=.stripes i;header=.logo,.dots').split(';'))
+url, PR = _env.page(args[0] if args else None)
+if PR is _env.PAGES['lab'] and 'still=1' not in url: url = _env.with_q(url, 'still=1')
+groups = dict(g.split('=', 1) for g in opt('groups', f"title=#{PR['title']} .ch;note=#{PR['note']};stripes=.stripes i;header=.logo,.dots").split(';'))
 GAP, WAIT = float(opt('gap', '4')), int(opt('wait', '250'))
 if opt('sizes', ''):
     SIZES = [tuple(map(int, s.split('x'))) for s in opt('sizes', '').split(',')]
@@ -35,7 +36,9 @@ bad = 0
 with sync_playwright() as p:
     b = _env.launch(p, scrollbars=True)
     pg = b.new_page(viewport={'width': SIZES[0][0], 'height': SIZES[0][1]})
-    pg.goto(url); pg.wait_for_timeout(3500)
+    if PR['init']: pg.add_init_script(PR['init'])
+    # (the main page plays its entrance once, on load: the sizes are checked after it)
+    pg.goto(url); pg.wait_for_timeout(3500 if PR is _env.PAGES['lab'] else PR['center_wait'])
     for w, h in SIZES:
         pg.set_viewport_size({'width': w, 'height': h}); pg.wait_for_timeout(WAIT)
         r = pg.evaluate(CHK, groups)

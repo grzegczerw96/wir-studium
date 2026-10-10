@@ -18,7 +18,7 @@
          Tiles that never stop moving (a spinning coil: still changing in most frames of the last 0.8 s) are left out
   jank   frames longer than 50 ms after the animation has started (requestAnimationFrame times in the page), with the heavy
          work that ran in them (WebGL compile/link/upload, getImageData, long tasks)
-usage: py -I tools/motion.py [url] --fx=3,5,7,7b,7c,d1,d2,d3 [--dev=d|m|both] [--t=6.5] [--origin=#winIn[@bottom]]
+usage: py -I tools/motion.py [main|lab|url] --fx=3,5,7,7b,7c,d1,d2,d3 [--dev=d|m|both] [--t=6.5] [--origin=#winIn[@bottom]]
 The lab's own controls (label, switch panel) are left out. Crops of every finding go to out/motion/."""
 import os, sys, time, base64, io
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -27,11 +27,11 @@ from playwright.sync_api import sync_playwright
 from PIL import Image, ImageChops
 args = [a for a in sys.argv[1:] if not a.startswith('--')]
 opt = lambda k, d: next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--' + k + '=')), d)
-url = args[0] if args else 'file:///' + os.path.join(_env.REPO, 'lab', 'hero.html').replace('\\', '/')
-FXS = opt('fx', '3,5,7,7b,7c,d1,d2,d3').split(',')
+url, PR = _env.page(args[0] if args else None)
+FXS = opt('fx', 'd3,5' if PR is _env.PAGES['main'] else '3,5,7,7b,7c,d1,d2,d3').split(',')
 DEVS = {'d': dict(viewport={'width': 1280, 'height': 620}), 'm': dict(viewport={'width': 360, 'height': 649}, is_mobile=True, has_touch=True)}
 devs = list(DEVS) if opt('dev', 'both') == 'both' else [opt('dev', 'd')]
-DUR = float(opt('t', '6.5'))
+DUR = float(opt('t', str(PR['motion_t'])))
 out = os.path.join(_env.OUT, 'motion'); os.makedirs(out, exist_ok=True)
 TILE, POP, CALM = 16, 26, 5
 ORIGIN = opt('origin', None)
@@ -51,22 +51,23 @@ with sync_playwright() as p:
     b = _env.launch(p, scrollbars=True)
     for dev in devs:
         for fx in FXS:
-            ctx = b.new_context(**DEVS[dev]); pg = ctx.new_page(); pg.add_init_script(HOOK); cdp = ctx.new_cdp_session(pg); frames = []
+            ctx = b.new_context(**DEVS[dev]); pg = ctx.new_page(); pg.add_init_script(HOOK)
+            if PR['init']: pg.add_init_script(PR['init'])
+            cdp = ctx.new_cdp_session(pg); frames = []
             def on_frame(ev):
                 frames.append((time.time(), ev['data'])); cdp.send('Page.screencastFrameAck', {'sessionId': ev['sessionId']})
             cdp.on('Page.screencastFrame', on_frame)
-            q = f"w=C&fx={fx}" + ('&dbg=smoke' if fx.startswith('d') else '')
-            pg.goto(url + ('&' if '?' in url else '?') + q)
-            pg.wait_for_function('window.gsap&&document.querySelector("#title .ch")&&document.getElementById("stage").style.clipPath', timeout=20000)
+            pg.goto(_env.with_q(url, PR['fx_q'](fx)))
+            pg.wait_for_function(_env.adapt('window.gsap&&document.querySelector("#title .ch")&&document.getElementById("stage").style.clipPath', PR), timeout=20000)
             t0 = time.time(); ready = pg.evaluate('performance.now()'); cdp.send('Page.startScreencast', {'format': 'png', 'everyNthFrame': 1})
-            info = pg.evaluate(INFO); smoke = None
+            info = pg.evaluate(_env.adapt(INFO, PR)); smoke = None
             sel, _, at = (ORIGIN or '').partition('@')
             org = pg.evaluate(f"""(()=>{{const e=document.querySelector({sel!r});if(!e)return null;const r=e.getBoundingClientRect(),a={at!r};
               const x=a==='left'?r.left:a==='right'?r.right:r.left+r.width/2,y=a==='top'?r.top:a==='bottom'?r.bottom:r.top+r.height/2;
               return [x,y,Math.max(r.width,r.height)/2*(a?.6:1)]}})()""") if ORIGIN else None
             while time.time() - t0 < DUR:
                 if smoke is None and fx.startswith('d'):
-                    smoke = pg.evaluate(INFO)['smoke']
+                    smoke = pg.evaluate(_env.adapt(INFO, PR))['smoke']
                 pg.wait_for_timeout(150)
             cdp.send('Page.stopScreencast'); RAF, OPS = pg.evaluate('window.__raf'), pg.evaluate('window.__ops'); ctx.close()
             ims = [(t - t0, Image.open(io.BytesIO(base64.b64decode(d))).convert('RGB')) for t, d in frames]

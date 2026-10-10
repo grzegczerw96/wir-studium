@@ -2,7 +2,7 @@
 his other tabs are private. See CLAUDE.md, "Kontrola jakości".
 usage: py -I tools/phone.py <steps.json> [--local] [--tag name]
   --local: load the page from this computer (not yet pushed) through adb reverse; the server is started here
-steps: {"reload":true} | {"js":"..."} | {"swipe":-600,"speed":900} (CSS px, negative = scroll down, a real touch gesture:
+steps: {"reload":true} | {"open":"fx=5"} | {"js":"..."} | {"swipe":-600,"speed":900} (CSS px, negative = scroll down, a real touch gesture:
        the address bar hides as with a finger) | {"shot":"name"} (whole screen incl. the address bar, adb screencap)
        | {"wait":ms} | {"fps":"start"} … {"fps":"stop"} (frame times from requestAnimationFrame + main-thread cost)
 A plain text page scrolls at an even 11 ms on the Galaxy M15 (90 Hz): anything above that is our cost."""
@@ -37,6 +37,12 @@ with sync_playwright() as p:
     metrics = lambda: {m['name']: m['value'] for m in cdp.send('Performance.getMetrics')['metrics']}
     for i, s in enumerate(steps):
         if 'reload' in s: pg.goto(BASE + '?v=%d' % int(time.time()), wait_until='load'); pg.wait_for_timeout(2500)
+        # open: load the page with a query (e.g. "fx=5") and count frames from its first moment (the entrance), up to
+        # the next {"fps":"stop"}
+        elif 'open' in s:
+            if not getattr(pg, '_fps_init', False): pg.add_init_script(FPS); pg._fps_init = True
+            pg.goto(BASE + '?' + '&'.join(x for x in (s['open'], 'v=%d' % int(time.time())) if x), wait_until='commit')
+            base = metrics()
         elif 'js' in s: print(i, 'js', json.dumps(pg.evaluate(s['js']), ensure_ascii=False))
         elif 'swipe' in s: cdp.send('Input.synthesizeScrollGesture', {'x': s.get('x', 180), 'y': s.get('y', 560), 'yDistance': s['swipe'],
                                     'speed': s.get('speed', 1200), 'gestureSourceType': 'touch'})

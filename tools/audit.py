@@ -34,7 +34,10 @@ const block=e=>{while(e&&e!==document.body){const d=getComputedStyle(e).display;
 const cbm=new Map();const clipBox=e=>{let l=-1e9,r=1e9,t=-1e9,b=1e9;for(let a=e.parentElement;a&&a!==document.body;a=a.parentElement){const cs=getComputedStyle(a);if(cs.overflowX!=='visible'||cs.overflowY!=='visible'){const c=a.getBoundingClientRect();if(cs.overflowX!=='visible'){l=Math.max(l,c.left);r=Math.min(r,c.right)}if(cs.overflowY!=='visible'){t=Math.max(t,c.top);b=Math.min(b,c.bottom)}}}return {l,r,t,b}};const items=[];const tw=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
 while(n=tw.nextNode()){if(!n.textContent.trim())continue;const el=n.parentElement;if(!el||el.closest('script,style,.menu:not(.open),.toast,.motion-pill'))continue;
   if(opac(el)<.2)continue;const r=document.createRange();r.selectNodeContents(n);
-  const cb=clipBox(el);for(const q0 of r.getClientRects()){const q={left:Math.max(q0.left,cb.l),right:Math.min(q0.right,cb.r),top:Math.max(q0.top,cb.t),bottom:Math.min(q0.bottom,cb.b),raw:q0};q.width=q.right-q.left;q.height=q.bottom-q.top;
+  // (tight leading: a text rect is the font's full height, about 1.2em, while the lines stand .84em apart; the rects of
+  //  neighbouring lines then cover each other though no letters touch — the rect is cut to the line's own height)
+  const lh=parseFloat(getComputedStyle(el).lineHeight),cut=q0=>{const h=q0.bottom-q0.top;if(!(lh>0)||h<=lh)return q0;const m=(q0.top+q0.bottom)/2;return {left:q0.left,right:q0.right,top:m-lh/2,bottom:m+lh/2}};
+  const cb=clipBox(el);for(const q1 of r.getClientRects()){const q0=cut(q1),q={left:Math.max(q0.left,cb.l),right:Math.min(q0.right,cb.r),top:Math.max(q0.top,cb.t),bottom:Math.min(q0.bottom,cb.b),raw:q1};q.width=q.right-q.left;q.height=q.bottom-q.top;
     if(q.width<3||q.height<4||q.bottom<=0||q.top>=H||q.right<=0||q.left>=W)continue;items.push({q,el,b:block(el)})}}
 for(let i=0;i<items.length;i++){const A=items[i];
   if((A.q.raw.left<-1&&A.q.left<1||A.q.raw.right>W+1&&A.q.right>W-1)&&!A.el.closest('.tk-title,.tk-line'))out.cut.push((A.el.textContent||'').trim().slice(0,24)+' ['+Math.round(A.q.left)+'..'+Math.round(A.q.right)+']');
@@ -62,7 +65,7 @@ const fixedIn=e=>{for(let a=e;a&&a!==document.body;a=a.parentElement){if(getComp
 const clipped=e=>{for(let a=e.parentElement;a&&a!==document.body;a=a.parentElement){const cs=getComputedStyle(a);if(cs.overflowX!=='visible')return a}return null};
 document.querySelectorAll('body *').forEach(e=>{const r=e.getBoundingClientRect();if(r.width===0||r.right<=cw+.5)return;if(fixedIn(e))return;const c=clipped(e);if(c&&c.getBoundingClientRect().right<=cw+.5)return;
  out.push((e.id?'#'+e.id:'')+'.'+((typeof e.className==='string'?e.className:'').split(' ')[0])+'<'+e.tagName.toLowerCase()+'> '+Math.round(r.left)+'..'+Math.round(r.right))});
-return {iw:innerWidth,cw,sw:document.documentElement.scrollWidth,bodySW:document.body.scrollWidth,n:out.length,first:out.slice(0,12),clip:document.getElementById('box').style.clipPath,slot:(()=>{const s=document.getElementById('slot').getBoundingClientRect();return [Math.round(s.left),Math.round(s.right)]})()}})()"""
+return {iw:innerWidth,cw,sw:document.documentElement.scrollWidth,bodySW:document.body.scrollWidth,n:out.length,first:out.slice(0,12),clip:document.getElementById('box').style.clipPath}})()"""
 OVF_JS = '(()=>{const o=' + OVF_JS + ';return o.first})()'
 
 def lum(p): return .2126 * p[0] + .7152 * p[1] + .0722 * p[2]

@@ -41,3 +41,9 @@ Pobrany Chromium Playwrighta nie startuje na tym Windowsie (błąd „konfigurac
   - gest palca `Input.synthesizeScrollGesture` (z chowaniem paska adresu), zrzut całego ekranu przez `adb`, czasy klatek;
   - `--local` podaje telefonowi niewypchniętą wersję z tego komputera.
 - **Szukanie szarpnięć na telefonie:** zwykła strona z samym tekstem daje na nim równe 11 ms, więc wszystko powyżej to nasz koszt. Mierzyć sekcjami, zimny i rozgrzany przejazd. Winowajcę zawężać wyłączaniem: `ScrollTrigger.getAll()[i].disable()` grupami, ukrywanie elementów. Oryginał na tym telefonie: 40–175 ms na klatkę.
+
+## Strona główna i lab
+
+`center.py`, `overlap.py`, `motion.py` i `sizes.py` sprawdzają domyślnie stronę główną (lokalny `index.html` z lokalnymi bibliotekami). Pierwszy argument `lab` przełącza na `lab/hero.html`, a adres URL wybiera profil po ścieżce. Profile (`_env.PAGES`) podają identyfikatory tytułu, notki i sceny, czas ustalania się przewijania (na stronie głównej `scrub .6`, więc 800 ms), wyłączenie dociągania i parametry wejścia. JS narzędzi jest pisany z identyfikatorami labu, a `_env.adapt()` podmienia je na identyfikatory strony.
+
+`phone.py` ma krok `{"open":"fx=5"}`: wczytuje stronę z parametrem i liczy klatki od jej pierwszej chwili (wejście), do najbliższego `{"fps":"stop"}`. Kroki dla hero: `tools/phone-hero.json`.
