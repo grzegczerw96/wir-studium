@@ -7,6 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Inter+Tight:wght@400;500;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap">
+<script>
+/* before the first paint: the original keeps its content in display:none until main.js has set it up (blank page,
+   then its preloader). Here the layout class is decided now and the page stays blank until the fonts and the script
+   are ready, so the plain layout (box in the middle, thick stripes, the headline in a fallback font) never flashes */
+(function(){var d=document.documentElement,f=false;try{f=localStorage.getItem('wir-motion')==='on'}catch(e){}
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches||f)d.classList.add('motion');d.classList.add('wait')})();
+</script>
 <style>
 /* Layout: white intro with a full-width black-weight headline and a small black window that grows into the whole screen,
    then a black manifesto room with a spinning coil, staggered work cards, a project index and a closing call. */
@@ -38,6 +45,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--grot);f
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 :focus-visible{outline:2px solid var(--red);outline-offset:3px}
+/* blank until the script reveals the page; if it never runs (a library failed to load), the page shows itself after 15 s (no script at all: no "wait", a failed library: the script reveals it) */
+html.wait .hd,html.wait main{visibility:hidden;animation:wir-show 0s 15s forwards}
+@keyframes wir-show{to{visibility:visible}}
 .it{font-family:var(--serif);font-style:italic;font-weight:400}
 .mono{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 
@@ -748,7 +758,10 @@ html:not(.motion) .stage3{display:none}
   const G=!!window.gsap&&!!window.ScrollTrigger&&!reduce;
   const coarse=matchMedia('(pointer: coarse)').matches;      // touch screens: native scrolling, lighter effects
   const small=matchMedia('(max-width: 700px)').matches;
-  if(G)document.documentElement.classList.add('motion');
+  document.documentElement.classList.toggle('motion',G);
+  // the fonts of the first screen (at most 2.5 s): the headline is fitted to its real width before anyone sees it
+  const fontsIn=Promise.race([document.fonts?Promise.all(['900 100px Archivo','400 15px "Inter Tight"','italic 400 15px "Instrument Serif"'].map(f=>document.fonts.load(f))).catch(()=>{}):0,
+    new Promise(r=>setTimeout(r,2500))]);
 
   /* ================= fit the giant headlines to the width ================= */
   function fit(el,varName){
@@ -1198,8 +1211,10 @@ html:not(.motion) .stage3{display:none}
   // a late font can change the title or the note by a line, which moves the centred window: measure again then
   {let raf=0,first=true;const ro=new ResizeObserver(()=>{if(first){first=false;return}cancelAnimationFrame(raf);raf=requestAnimationFrame(relayout)});
    ro.observe(document.getElementById('mega'));ro.observe(document.querySelector('.hero-note'))}
+  // reveal: measured with the real fonts first, then the page shows and the entrance starts
+  const show=f=>fontsIn.then(()=>requestAnimationFrame(()=>{relayout();document.documentElement.classList.remove('wait');f&&f()}));
 
-  if(!G)return;
+  if(!G){show();return}
   /* ================= GSAP ================= */
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ignoreMobileResize:true});   // the iOS address bar must not re-measure the pinned sections
@@ -1216,8 +1231,10 @@ html:not(.motion) .stage3{display:none}
      original the hairline draws itself in and the button drops in on load; the middle shows which section you are in ---- */
   ScrollTrigger.create({start:0,end:'max',onUpdate:st=>{if(menuOpen)return;hd.classList.toggle('away',st.direction===1&&st.scroll()>140)}});
   addEventListener('scroll',()=>{if(scrollY<140)hd.classList.remove('away')},{passive:true});
-  gsap.fromTo(hd,{'--p':0},{'--p':1,duration:innerWidth>=600?1.5:1,delay:.5,ease:'power1.inOut'});
-  gsap.from(menuBtn,{y:()=>-menuBtn.getBoundingClientRect().bottom,rotate:-10,transformOrigin:'0% 100%',duration:1,ease:'power4.out',delay:.25});
+  // the entrance waits for the reveal (show() below); its start states are set at once, while the page is still blank
+  const enter=gsap.timeline({paused:true});
+  enter.fromTo(hd,{'--p':0},{'--p':1,duration:innerWidth>=600?1.5:1,ease:'power1.inOut'},.5)
+    .from(menuBtn,{y:()=>-menuBtn.getBoundingClientRect().bottom,rotate:-10,transformOrigin:'0% 100%',duration:1,ease:'power4.out'},.25);
   const SECS=[['#intro','Start'],['#mani','Manifest'],['#work','Realizacje'],['#projects','Projekty'],['#about','O nas'],['#contact','Kontakt']];
   const secB=document.querySelector('#hdSec b'),secS=document.querySelector('#hdSec span');let secCur=0;
   SECS.forEach(([sel,name],i)=>ScrollTrigger.create({trigger:sel==='#work'?'#wi':sel,endTrigger:sel,start:'top 50%',end:'bottom 50%',onToggle:st=>{if(!st.isActive||i===secCur)return;
@@ -1226,20 +1243,21 @@ html:not(.motion) .stage3{display:none}
       .fromTo(secS,{yPercent:110*dir},{yPercent:0,duration:.35,ease:'power3.out'})}}));
 
   // headline letters rise, a few lean, then settle
-  gsap.from('#mega .ch',{yPercent:110,rotate:()=>gsap.utils.random(-14,14),duration:1.4,ease:'expo.out',stagger:{each:.035,from:'random'},delay:.15});
+  enter.from('#mega .ch',{yPercent:110,rotate:()=>gsap.utils.random(-14,14),duration:1.4,ease:'expo.out',stagger:{each:.035,from:'random'}},.15);
   const note=document.querySelector('.hero-note');
   [...note.childNodes].forEach(n=>{const wrap=document.createElement('span');if(n.nodeType===1)wrap.className=n.className;
     // letters stay grouped per word so a line never breaks inside a word
     wrap.innerHTML=n.textContent.split(/(\s+)/).map(w=>/^\s+$/.test(w)?' ':w?`<span class="wd">${[...w].map(c=>`<span class="c">${c}</span>`).join('')}</span>`:'').join('');n.replaceWith(wrap)});
-  gsap.from('.hero-note .c',{x:()=>gsap.utils.random(-60,60),opacity:0,duration:1.1,ease:'expo.out',stagger:{each:.008,from:'random'},delay:.8});
-  gsap.from(box,{autoAlpha:0,duration:1.2,delay:.6});
+  enter.from('.hero-note .c',{x:()=>gsap.utils.random(-60,60),opacity:0,duration:1.1,ease:'expo.out',stagger:{each:.008,from:'random'}},.8)
+    .from(box,{autoAlpha:0,duration:1.2},.6);
   // the stripes rise out of their own clip, the lowest first (.75 s each, .2 s apart); as in the original the run is
   // stopped at 75 %, so the two thinnest stay a little short of the top
   {const sts=[...document.querySelectorAll('#stripes i')].filter(i=>i.offsetHeight);
    const stl=gsap.timeline({paused:true}).fromTo(sts,{'--y':'100%'},{'--y':'0%',duration:.75,ease:'none',stagger:-.2});
-   gsap.to(stl,{progress:.75,duration:stl.duration(),delay:.8,ease:'power4.inOut'})}
+   enter.to(stl,{progress:.75,duration:stl.duration(),ease:'power4.inOut'},.8)}
   lenis&&gsap.ticker.lagSmoothing(0);
   buildScroll();
+  show(()=>enter.play());
 
   function buildScroll(){
   /* window grows to full screen (the original's curve, normalised): the edges open over the first 75 % (quad out),
