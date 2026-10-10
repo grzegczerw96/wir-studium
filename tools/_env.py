@@ -26,6 +26,9 @@ def local_page(src=None, rel=False):
     p = os.path.join(ENV, 'test.html'); open(p, 'w', encoding='utf8').write(html)
     return 'file:///' + p.replace('\\', '/')
 
-def launch(p):
-    # Playwright's own Chromium does not start on this Windows ("side-by-side" error): use the installed Chrome
-    return p.chromium.launch(channel='chrome', args=['--use-gl=angle', '--ignore-gpu-blocklist'])
+def launch(p, scrollbars=False):
+    # Playwright's own Chromium does not start on this Windows ("side-by-side" error): use the installed Chrome.
+    # scrollbars=True keeps the real 15px scrollbar (Playwright hides it by default, so a layout that counts the window
+    # with the scrollbar, e.g. innerWidth, looks right in the tools and wrong in Grzegorz's browser)
+    return p.chromium.launch(channel='chrome', args=['--use-gl=angle', '--ignore-gpu-blocklist'],
+                             ignore_default_args=['--hide-scrollbars'] if scrollbars else None)

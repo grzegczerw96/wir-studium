@@ -103,6 +103,8 @@ Pobrany Chromium Playwrighta nie startuje na tym Windowsie (błąd „konfigurac
   - litery intro zasłonięte czarnym oknem.
 - **Czego emulacja nie pokaże:** chowania paska adresu w Chrome na Androidzie (w emulacji zmienia się też `svh`) i płynności. To sprawdza tylko prawdziwy telefon.
 - **`tools/paths.py` (reguły bez zrzutów):** w stronie działa rejestrator, który w każdej klatce zapisuje stan (krycie formularza, postęp liter stopki, położenie napisu kontaktu, kontrast tekstu do tła), a kółko przewija w dół, w górę i znowu w dół. Każdą klatkę sprawdzają reguły z CLAUDE.md, np. „litery stopki widoczne ⇒ formularz wygaszony”. Wyłapuje błędy, które wychodzą dopiero po zmianie kierunku albo przy szybkim przewijaniu, i jest tańsze niż zrzuty. Nowe zasady dopisuje się jako reguły w `RULES`.
+- **`tools/center.py`:** czy spirala stoi na środku „O” w `lab/hero.html`, mierzone tylko z pikseli (obrys „O” z ciemnych przebiegów, bryła z jasnych pikseli), na 5 desktopach × gęstości 1/1,25/1,5 z prawdziwym paskiem przewijania i myszą w rogu, plus tablet i 2 telefony. Próg 1% szerokości „O” (cień metalu po prawej daje stałe ok. −0,8%). Sprawdzone na wersji z błędem: 15 z 15 desktopów źle.
+- **Pasek przewijania w narzędziach:** Playwright domyślnie go ukrywa (`--hide-scrollbars`), a u Grzegorza (Windows, Chrome, gęstość 1,25) ma 15 px. `_env.launch(p, scrollbars=True)` go pokazuje. `audit.py` i `paths.py` jeszcze działają bez paska; przy przenoszeniu hero na stronę główną przestawić je na pasek.
 - **`tools/probe.py`:** pomiar oryginału albo naszej strony w wybranych miejscach. W cappen przed pomiarem `window.main.scroller.stop()` (jego przyciąganie zwraca wtedy bieżącą pozycję), u nas przyciąganie wyłączone. Litery oryginału mają `--rotateX` w `style`, nasze `--rx`. Liczby porównuje się w ekranach od początku sekcji.
 - **`tools/phone.py` na prawdziwym telefonie** (Samsung Galaxy M15 5G, Chrome, 360×649 z paskiem adresu, 705 bez niego, 90 Hz):
   - przygotowanie: kabel USB, debugowanie USB, `adb` z `Google.PlatformTools`; na telefonie otwarta nasza strona;
@@ -120,6 +122,7 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 - **Okno klientów na telefonie:** kilka szarpnięć do ok. 90 ms przy otwieraniu (`clip-path` przerysowywany co klatkę).
 - **Pierwszy przejazd po załadowaniu na telefonie:** manifest, okolice „O nas” i nagrody ok. 45 kl./s (rozgrzany: 90).
 - **Safari/iPhone:** niesprawdzone.
+- **Pasek przewijania na stronie głównej:** spirala kontaktu liczy środek jako `innerWidth/2` (`cX`), więc na desktopie z paskiem stoi ok. 7 px w prawo; przejrzeć wszystkie `innerWidth`/`innerHeight` według zasad z §6.4 i sprawdzać z paskiem.
 
 ## 4. Technologia
 
@@ -220,6 +223,11 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 - **Pozycje triggerów się starzeją**, gdy coś powyżej zmienia wysokość (np. rozwinięty wiersz listy). Po takiej zmianie wywołujemy `ScrollTrigger.refresh()`, a rzeczy krytyczne liczymy z żywego układu.
 - **Warstwy bez z-index:** `.talk` i `.footer` nie tworzą własnego kontekstu warstw, a ich treść ma z-index 5 nad stałą warstwą spirali (z-index 4).
 - **Polskie znaki w wielkich tytułach** potrzebują interlinii ok. 0,9 zamiast 0,8, bo inaczej kropka nad „Ż” i ogonki zlewają się z linią wyżej.
+- **Architektura odporna na rozmiar okna** (uzgodnione 10.10.2026, po spirali przesuniętej o 7 px przez pasek przewijania):
+  1. Gdzie co stoi, decyduje tylko CSS: flex/grid, jednostki `--r` i `em`, rozmiary liczone z kroju. JS nie wpisuje pozycji w px.
+  2. JS tylko czyta gotowe pudełka (`getBoundingClientRect`) i zawsze w układzie elementu, na którym rysuje (warstwa z `clip-path`, płótno spirali). Nigdy `innerWidth`/`innerHeight` jako „ekran”: liczą pasek przewijania (15 px na Windows), a na telefonie zmieniają się z paskiem adresu. Środek ekranu: `document.documentElement.clientWidth / 2`.
+  3. Mierzyć od nowa, gdy coś się zmienia (`ResizeObserver` na elementach, doczytane fonty), nie tylko przy `resize` okna.
+  4. Każde nowe położenie sprawdzać narzędziem na wielu szerokościach i gęstościach, z prawdziwym paskiem przewijania (`_env.launch(p, scrollbars=True)`, wzór: `tools/center.py`), a nie wzrokiem na jednym zrzucie.
 
 ### 6.5 Sposoby, które rodzą błędy (do sprawdzenia, gdy coś „przecina” albo szarpie)
 1. **Ten sam element sterowany dwa razy.** Przejście CSS i GSAP na jednej właściwości, dwa tweeny na jednej zmiennej. Jedno źródło prawdy dla każdej wartości.
@@ -269,6 +277,7 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 | Telefon: kontakt 22 ms na klatkę | Napis 7,5rem (ok. 1500 px) przesuwany co klatkę bez własnej warstwy | `will-change:translate` → 11 ms |
 | Telefon: duże koszty stylów przy zmianie koloru strony | Zmienna `--room` na `<html>` dziedziczy się do każdego elementu | Kolor ustawiany na 4 sekcjach |
 | Po załadowaniu przez kilka sekund inny układ (czarny prostokąt na środku, grube paski, tekst w zastępczym foncie), potem przeskok | Klasa `motion` (od niej zależy układ) dodawana dopiero przez skrypt na końcu strony, który czeka na GSAP i Three z CDN; wejście startowało niezależnie od tego, czy coś widać | Mały skrypt w `<head>` ustala `motion` i `wait` przed pierwszym malowaniem; `html.wait .hd, main` ukryte; główny skrypt czeka na fonty pierwszego ekranu (max 2,5 s), mierzy, odsłania i dopiero wtedy gra oś `enter`. Awaryjnie CSS odsłania po 15 s. Sprawdzać nagraniem ładowania z wolną siecią (screencast CDP + `Network.emulateNetworkConditions`) |
+| Spirala 7 px na prawo od środka „O” u Grzegorza, a w narzędziach na środku; „O” o 13 px węższe | Wycięcie okna liczone od `innerWidth`, który zawiera pasek przewijania (15 px), a warstwa z `clip-path` go nie zawiera; narzędzia ukrywały pasek, więc tego nie widziały | Wszystko w układzie warstwy (`stage.getBoundingClientRect()`), środek ekranu z `clientWidth`; testy z prawdziwym paskiem i gęstością 1,25 (`tools/center.py`) |
 | Spirala „nie na środku” litery O, choć liczby się zgadzały | Ocena na oko: światło z lewej góry przesuwa jasną masę, a rozciągnięty pierścień 2D wygląda płasko | Mierzyć pikselami w obrębie elipsy (jasne piksele kontra obrys, wynik w px, `window.__o` w `lab/hero.html`); do oceny używać prawdziwej spirali 3D, nie uproszczonej |
 | Telefon: szarpnięcie przy pierwszym pojawieniu się spirali | Kompilacja shaderów przy pierwszym rysowaniu; spirale rysowane także przy kryciu 0 | `renderer.compile` przy ładowaniu; rysowanie tylko widocznych (`coil.on`) |
 
