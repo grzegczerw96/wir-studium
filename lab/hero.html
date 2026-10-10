@@ -184,6 +184,9 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
   const XN={0:'gaśnie (jak cappen)',1:'rozmycie',2:'rozsunięcie od O',3:'rozsunięcie i rozmycie'};
   // chosen 10.10: layout 2 with face A (the others stay reachable with ?v=&f=); the switch now compares the title's exit
   const q=new URLSearchParams(location.search);let V=q.get('v')||'2',F=q.get('f')||'1',X=q.get('x')||'1',IN=(q.get('w')||'C').toUpperCase(),FX=q.get('fx')||'7',NX='a';
+  const DBG=q.get('dbg')==='smoke';
+  // (?dbg=smoke also paints the black stage dark blue, so tools/motion.py does not take the loader's oval for ink)
+  if(DBG){stage.style.background='#00186a';cv.style.visibility='hidden'}   // (and hides the coil: its dark shades read as ink)
   const FXN={3:'zawirowanie',5:'dym z „O”',7:'zbieranie a · szept','7b':'zbieranie b · podmuch','7c':'zbieranie c · kłąb',d1:'dym jasny z lewej (zwolnione tempo)',d2:'dym jak tusz z lewej',d3:'dym jasny z „O”'};
   const WN={A:'jak w oryginale',B:'najpierw O, litery falą od niego',C:'elipsa ładowania wskakuje w O',D:'nawijanie drutu, potem w O',
     E:'z wnętrza O: czerń się kurczy, napis wyostrza',F:'nawijanie w czerni, potem z wnętrza O',G:'wir wyrzuca litery po spirali'};
@@ -451,7 +454,7 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
      d1 light-grey smoke from the left · d2 ink smoke from the left · d3 light smoke spreading out of the O ---- */
   const SMOKE_VS='attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}';
   const SMOKE_FS=[
-    'precision highp float;varying vec2 v;uniform sampler2D uText;uniform float uT,uP,uFade,uMode,uAmt;uniform vec2 uRes,uO;uniform vec3 uSmoke,uInk;',
+    'precision highp float;varying vec2 v;uniform sampler2D uText;uniform float uT,uP,uFade,uMode,uAmt,uDmax;uniform vec2 uRes,uO,uTx;uniform vec3 uSmoke,uInk;',
     'float h(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}',
     'float n2(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),u.x),mix(h(i+vec2(0.,1.)),h(i+vec2(1.,1.)),u.x),u.y);}',
     'float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<5;i++){s+=a*n2(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return s;}',
@@ -459,13 +462,19 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     // domain warp: the smoke curls; everything drifts slowly (slow motion)
     '  vec2 w=vec2(fbm(q+vec2(0.,uT*.05)),fbm(q+vec2(5.2,1.3)-vec2(uT*.04,0.)));',
     '  float n=fbm(q+1.9*w+vec2(-uT*.06,uT*.015));',
-    // the front: across from the left, or out of the O; ragged where the smoke is
-    '  float c=uMode<.5?v.x:length((v-uO)*vec2(asp,1.))/length(vec2(asp,1.));',
-    '  float f=mix(-.25,1.3,uP),e=c+(n-.5)*.42;',
-    '  float rev=1.-smoothstep(f-.16,f+.02,e);',
-    '  float band=exp(-pow((e-f+.08)/.2,2.))+.35*exp(-pow((e-f+.32)/.3,2.));',
-    '  float sm=clamp(band*smoothstep(.32,.78,n)*1.5,0.,1.)*uFade*uAmt;',
-    '  vec2 d=(w-.5)*.025*band*(1.-rev*.6);',
+    // c: where this pixel is along the front's path, in the title's own units (0 at its left edge / at the O, 1 at its
+    // right edge / its farthest corner) — the layer is larger than the title
+    '  float c=uMode<.5?(v.x-uTx.x)/(uTx.y-uTx.x):length((v-uO)*vec2(asp,1.))/uDmax;',
+    // the reveal's edge is ragged with the smoke, and the smoke is built around that same edge, so wherever the title
+    // is half-shown there is smoke over it (before, the edge and the smoke came from different places: where the noise
+    // was thin the letters showed ahead of the smoke)
+    '  float f=mix(-.3,1.35,uP),edge=f+(n-.5)*.35,dd=c-edge;',
+    '  float rev=1.-smoothstep(-.1,.02,dd);',
+    '  float core=exp(-pow(dd/.11,2.)),lead=exp(-pow((dd-.12)/.16,2.)),trail=exp(-pow((dd+.28)/.26,2.)),tx=smoothstep(.28,.72,n);',
+    // (the layer's own edges never show: the smoke thins out towards them)
+    '  float vig=smoothstep(0.,.14,v.x)*smoothstep(0.,.14,1.-v.x)*smoothstep(0.,.22,v.y)*smoothstep(0.,.22,1.-v.y);',
+    '  float sm=clamp(core*(.55+.45*tx)+lead*.7*tx+trail*.45*tx,0.,1.)*uFade*uAmt*vig;',
+    '  vec2 d=(w-.5)*.025*(core+lead)*(1.-rev*.6);',
     '  float ta=texture2D(uText,v+d).a*rev;',
     '  float a=sm+ta*(1.-sm);gl_FragColor=vec4(uSmoke*sm+uInk*ta*(1.-sm),a);}'].join('\n');
   let SM=null;
@@ -477,14 +486,17 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
     if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){console.warn(gl.getProgramInfoLog(pr));return SM={fail:true}}
     gl.useProgram(pr);const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
     const la=gl.getAttribLocation(pr,'a');gl.enableVertexAttribArray(la);gl.vertexAttribPointer(la,2,gl.FLOAT,false,0,0);
-    const U={};['uText','uT','uP','uFade','uMode','uAmt','uRes','uO','uSmoke','uInk'].forEach(n=>U[n]=gl.getUniformLocation(pr,n));
+    const U={};['uText','uT','uP','uFade','uMode','uAmt','uDmax','uRes','uO','uTx','uSmoke','uInk'].forEach(n=>U[n]=gl.getUniformLocation(pr,n));
     const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.uniform1i(U.uText,0);
     return SM={cv,gl,U,tex,txt:document.createElement('canvas')}}
   function smokeIn(at){const G=smokeGL();if(G.fail){FX='7';return titleIn(at)}
     const ch=[...title.querySelectorAll('.ch')],pr=pin.getBoundingClientRect(),tb=title.getBoundingClientRect();
-    // the layer: the title's box and some room around it (not so much that it reaches the note under the title on phones)
-    const mx=tb.width*.12,my=tb.height*.2,bx={l:tb.left-pr.left-mx,t:tb.top-pr.top-my,w:tb.width+2*mx,h:tb.height+2*my};
+    // the layer: the title's box and room around it for the smoke to thin out; cut back so it never covers the note
+    const roomy=desk(),mx=tb.width*(roomy?.3:.15),my=tb.height*(roomy?.45:.25);
+    let L0=tb.left-mx,T0=tb.top-my,R0=tb.right+mx,B0=tb.bottom+my;const nb=note.getBoundingClientRect();
+    if(nb.right>L0&&nb.left<R0&&nb.bottom>T0&&nb.top<B0){if(nb.top>=tb.bottom-2)B0=Math.min(B0,nb.top-6);else if(nb.left>=tb.right-2)R0=Math.min(R0,nb.left-6);else if(nb.bottom<=tb.top+2)T0=Math.max(T0,nb.bottom+6)}
+    const bx={l:L0-pr.left,t:T0-pr.top,w:R0-L0,h:B0-T0};
     const sc=(coarse||innerWidth<700)?.75:Math.min(devicePixelRatio||1,1.5),Wd=Math.round(bx.w*sc),Hd=Math.round(bx.h*sc);
     Object.assign(G.cv.style,{left:bx.l+'px',top:bx.t+'px',width:bx.w+'px',height:bx.h+'px',opacity:1,display:'block'});G.cv.width=Wd;G.cv.height=Hd;
     // the title, drawn into a texture letter by letter at the letters' own places and baselines
@@ -494,16 +506,19 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
       ln.querySelectorAll('.ch').forEach(e=>{const r=e.getBoundingClientRect();c.fillText(e.textContent.toUpperCase(),(r.left-pr.left-bx.l)*sc,(by-pr.top-bx.t)*sc)})});
     const gl=G.gl,U=G.U;gl.viewport(0,0,Wd,Hd);gl.bindTexture(gl.TEXTURE_2D,G.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,T);
     const o=win().getBoundingClientRect(),ou=[(o.left+o.width/2-pr.left-bx.l)/bx.w,1-(o.top+o.height/2-pr.top-bx.t)/bx.h];
-    const ink=FX==='d2',mode=FX==='d3'?1:0;
-    gl.uniform2f(U.uRes,Wd,Hd);gl.uniform2f(U.uO,ou[0],ou[1]);gl.uniform1f(U.uMode,mode);gl.uniform1f(U.uAmt,ink?.75:.9);
-    gl.uniform3fv(U.uSmoke,ink?[.1,.1,.1]:[.72,.72,.72]);gl.uniform3fv(U.uInk,[.02,.02,.02]);
+    const ink=FX==='d2',mode=FX==='d3'?1:0,asp=bx.w/bx.h,tx=[(tb.left-pr.left-bx.l)/bx.w,(tb.right-pr.left-bx.l)/bx.w];
+    const tc=[[tb.left,tb.top],[tb.right,tb.top],[tb.left,tb.bottom],[tb.right,tb.bottom]].map(([x,y])=>[(x-pr.left-bx.l)/bx.w,1-(y-pr.top-bx.t)/bx.h]);
+    const dmax=Math.max(...tc.map(([x,y])=>Math.hypot((x-ou[0])*asp,y-ou[1])));
+    gl.uniform2f(U.uRes,Wd,Hd);gl.uniform2f(U.uO,ou[0],ou[1]);gl.uniform2f(U.uTx,tx[0],tx[1]);gl.uniform1f(U.uDmax,dmax);gl.uniform1f(U.uMode,mode);gl.uniform1f(U.uAmt,ink?.75:.9);
+    // (?dbg=smoke paints the smoke red, so tools/motion.py can tell smoke from ink by colour)
+    gl.uniform3fv(U.uSmoke,DBG?[1,.15,.15]:ink?[.1,.1,.1]:[.72,.72,.72]);gl.uniform3fv(U.uInk,[.02,.02,.02]);
     // (the page's own letters stay hidden meanwhile; data-vis tells tools/overlap.py how much of each one the smoke shows)
     title.style.visibility='hidden';gsap.set(ch,{'--rx':'0deg','--sy':1});   // (the page's letters must stand flat for the hand-over)
     const cen=ch.map(e=>{const r=e.getBoundingClientRect(),u=(r.left+r.width/2-pr.left-bx.l)/bx.w,w=1-(r.top+r.height/2-pr.top-bx.t)/bx.h;
-      return mode?Math.hypot((u-ou[0])*bx.w/bx.h,w-ou[1])/Math.hypot(bx.w/bx.h,1):u});
+      return mode?Math.hypot((u-ou[0])*asp,w-ou[1])/dmax:(u-tx[0])/(tx[1]-tx[0])});
     const v={p:0,fade:1},t0=performance.now();
     const draw=()=>{gl.uniform1f(U.uT,(performance.now()-t0)/1000);gl.uniform1f(U.uP,v.p);gl.uniform1f(U.uFade,v.fade);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-      const f=-.25+1.55*v.p;ch.forEach((e,i)=>e.dataset.vis=(1-clamp((cen[i]-(f-.16))/.18)).toFixed(3))};draw();
+      const f=-.3+1.65*v.p;ch.forEach((e,i)=>e.dataset.vis=(1-clamp((cen[i]-(f-.1))/.12)).toFixed(3))};draw();
     // slow motion: the front crosses in 3.3 s (sine in-out, so it eases out gently), the smoke thins out from 2.4 s over 1.5 s
     tl.to(v,{p:1,duration:3.3,ease:'sine.inOut',onUpdate:draw},at).to(v,{fade:0,duration:1.5,ease:'power1.out',onUpdate:draw},at+2.4)
       // (the page's own letters fade in on top of the identical drawn ones, then the layer goes: a cross-fade of the two
@@ -519,7 +534,8 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
         t.setAttribute('baseFrequency',((.011+.004*Math.sin(tt*5))/k).toFixed(4)+' '+((.028-.01*(1-u))/k).toFixed(4));
         ch.forEach(c=>c.style.opacity=ink(tt).toFixed(3))};put();
       tl.to(q,{t:1,duration:DUR,ease:'none',onUpdate:put,onComplete:()=>{title.style.filter='';ch.forEach(clearFx)}},at);return at+DUR}
-    if(FX==='5'){const o=win().getBoundingClientRect(),tb=title.getBoundingClientRect(),mx=o.left+o.width/2-tb.left,my=o.top+o.height/2-tb.top;
+    if(FX==='5'){title.style.padding='0 .2em';title.style.margin='0 -.2em';   // (see below: the Ł)
+      const o=win().getBoundingClientRect(),tb=title.getBoundingClientRect(),mx=o.left+o.width/2-tb.left,my=o.top+o.height/2-tb.top;
       const far=Math.max(...[[0,0],[tb.width,0],[0,tb.height],[tb.width,tb.height]].map(([x,y])=>Math.hypot(x-mx,y-my)))+2,v={r:0,b:10*k};
       const dist=ch.map(c=>{const r=c.getBoundingClientRect();return Math.hypot(r.left+r.width/2-tb.left-mx,r.top+r.height/2-tb.top-my)});
       // (the solid part catches up with the edge as the circle reaches the farthest corner: removing the mask at the end
@@ -527,16 +543,20 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
       const put=()=>{const g=v.r/far,inner=v.r*(.5+.5*Math.pow(g,3)),m='radial-gradient(circle at '+mx.toFixed(0)+'px '+my.toFixed(0)+'px, #000 '+inner.toFixed(1)+'px, transparent '+v.r.toFixed(1)+'px)';
         title.style.maskImage=title.style.webkitMaskImage=m;title.style.filter=v.b>.05?'blur('+v.b.toFixed(2)+'px)':'';
         ch.forEach((c,i)=>c.dataset.vis=clamp((v.r-dist[i])/Math.max(1,v.r-inner)).toFixed(3))};put();
-      tl.to(v,{r:far,b:0,duration:2.1,ease:'power2.out',onUpdate:put,onComplete:()=>{title.style.maskImage=title.style.webkitMaskImage=title.style.filter='';ch.forEach(c=>delete c.dataset.vis)}},at);return at+2.1}
+      // (a mask only paints inside the element's box; with -.04em tracking the last "Ł" overhangs the title's box by about
+      //  .04em, so that sliver was cut off the whole time and popped in when the mask came off — Grzegorz saw it twice.
+      //  A padding of .2em with the same negative margin gives the mask room without moving anything.)
+      tl.to(v,{r:far,b:0,duration:2.1,ease:'power2.out',onUpdate:put,onComplete:()=>{title.style.maskImage=title.style.webkitMaskImage=title.style.filter=title.style.padding=title.style.margin='';ch.forEach(c=>delete c.dataset.vis)}},at);return at+2.1}
     // 7 a/b/c
     const kind=FX==='7b'?'b':FX==='7c'?'c':'a',rnd=seeded(77),tb=title.getBoundingClientRect(),tcx=tb.left+tb.width/2,Wc=document.documentElement.clientWidth,gut=R()*1.25;
     ch.forEach(c=>{const r=c.getBoundingClientRect(),near=kind==='c';
-      let dx=(r.left+r.width/2-tcx)*(near?.04:.14)+(rnd()-.5)*(near?.06:.16)*fs;dx=Math.min(Wc-gut-r.right,Math.max(gut-r.left,dx));
-      const dy=(rnd()-.5)*(near?.08:.2)*fs,phi=rnd()*6.283,sw=(kind==='b'?.06:kind==='a'?.035:0)*fs,q={t:0};
+      let dx=(r.left+r.width/2-tcx)*(near?.04:.14)+(rnd()-.5)*(near?.06:kind==='b'?.1:.16)*fs;dx=Math.min(Wc-gut-r.right,Math.max(gut-r.left,dx));
+      // (b: one gust per line — its letters sway together, so neighbours never run into each other)
+      const li=[...title.querySelectorAll('.ln')].indexOf(c.closest('.ln')),dy=(rnd()-.5)*(near?.08:.2)*fs,phi=kind==='b'?li*2.1+rnd()*.2:rnd()*6.283,sw=(kind==='b'?.06:kind==='a'?.035:0)*fs,q={t:0};
       // (the sway dies out early in the core, before the ink: in b neighbours ran into each other — measured)
       const put=()=>{const t=q.t,u=1-form(t),core=ph(t).c,w=sw*Math.pow(1-core,2.5);
         // (b's stretch and c's puff are small by the time a letter has ink: larger, neighbours ran into each other — measured)
-        const x=dx*u+Math.sin(phi+t*7)*w,y=dy*u+Math.cos(phi*1.3+t*5)*w*.7,s=1+(near?.5*Math.pow(u,3):.12*u),sx=kind==='b'?1+.12*Math.sin(Math.PI*core):1;
+        const x=dx*u+Math.sin(phi+t*7)*w,y=dy*u+Math.cos(phi*1.3+t*5)*w*.7,s=1+(near?.5*Math.pow(u,3):.12*u),sx=kind==='b'?1+.06*Math.sin(Math.PI*core):1;   // (6 %: at 12 % a narrow I ran into A and Ł, which touch it anyway at -.04em)
         c.style.opacity=ink(t).toFixed(3);const bl=(near?30:24)*k*Math.pow(u,1.2);c.style.filter=bl>.05?'blur('+bl.toFixed(2)+'px)':'';
         c.style.translate=x.toFixed(1)+'px '+y.toFixed(1)+'px';c.style.scale=(s*sx).toFixed(4)+' '+s.toFixed(4)};put();
       tl.to(q,{t:1,duration:DUR,ease:'none',onUpdate:put,onComplete:()=>clearFx(c)},at+rnd()*.25)});
@@ -551,7 +571,7 @@ html.pre-dark .note,html.pre-dark .stripes{visibility:hidden}
   function enter(){
     tl&&tl.kill();(enter.g||[]).forEach(t=>t.kill());enter.g=[];scrollTo(0,0);title.querySelectorAll('.ch').forEach(c=>{c.style.translate=c.style.rotate=c.style.scale=c.style.opacity=c.style.filter=c.style.transformOrigin=''});
     if(SM&&SM.cv){SM.cv.style.display='none'}title.style.visibility='';
-    title.style.filter=title.style.scale=title.style.maskImage=title.style.webkitMaskImage='';delete title.dataset.vis;delete note.dataset.vis;title.querySelectorAll('.ch').forEach(c=>delete c.dataset.vis);title.querySelectorAll('.ln').forEach(l=>l.style.translate='');note.style.maskImage=note.style.webkitMaskImage='';
+    title.style.filter=title.style.scale=title.style.maskImage=title.style.webkitMaskImage=title.style.padding=title.style.margin='';delete title.dataset.vis;delete note.dataset.vis;title.querySelectorAll('.ch').forEach(c=>delete c.dataset.vis);title.querySelectorAll('.ln').forEach(l=>l.style.translate='');note.style.maskImage=note.style.webkitMaskImage='';
     Object.assign(E,{rev:0,wind:1});const ch=[...title.querySelectorAll('.ch')],nl=noteLines(),st=[...document.querySelectorAll('.stripes i')].reverse();
     // (B and C: the O is already open while the letters flip; a letter swings in from .85em below its place, so the line
     //  above the O swung through it — measured: "R" over the O for ~.3 s. There the lines above the O come from above)
