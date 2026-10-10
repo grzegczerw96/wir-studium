@@ -12,6 +12,21 @@ Słownik, z którego Claude dobiera ruch. Każda pozycja: co robi, kiedy pasuje,
 | Taśma z kolumny | Litery po każdej stronie kolumny wysuwają się z niej razem, jak taśma; widoczne dopiero po wyjściu z kolumny | 1,05 s power2.out; wiersz źródła 0, pozostałe +.12 s | Gdy coś „wydaje” tekst (wir, szczelina, maszyna) | Taśma jest sztywna, więc litery się nie zderzają; litery w samej kolumnie jadą niewidoczne i pokazują się na ostatnią ćwierć litery | hero G |
 | Wyostrzenie z rozmycia | Tekst wyłania się z rozmycia i przezroczystości | rozmycie 18px·(rem/14) → 0 | Jako lustro wyjścia przez rozmycie; spokojne, „kinowe” | Rozmycie dużych liter bywa drogie na telefonie (zmierzyć) | hero E, F; wyjście 1 |
 
+### Tekst „z dymu” (do oceny, 10.10.2026; Grzegorz chce subtelnie i delikatnie)
+
+| Nr | Ruch | Jak zrobione | Liczby |
+|---|---|---|---|
+| 1 | Mgła | każda litera: krycie, rozmycie 14px·k → 0, skala 1,06 → 1; losowa kolejność | 1,6 s power2.out, rozrzut .7 s |
+| 2 | Dym w górę | litera unosi się o .18em, rozmycie 12px·k → 0, wyższa 1,15× → 1 (od dołu); wiersze od najniższego | 1,8 s power3.out, co .18 s + losowo .25 s |
+| 3 | Zawirowanie | filtr SVG: `feTurbulence` + `feDisplacementMap` (falowanie krawędzi 45px·k → 0) + rozmycie 9px·k → 0 | 2,1 s power2.out |
+| 4 | Rozpraszanie | filtr SVG: szum (`fractalNoise`, 0,035/k) jako maska krycia, próg rośnie, maska lekko rozmyta (kłęby) | 1,9 s power1.inOut |
+| 5 | Dym z „O” | maska: miękkie koło rośnie od środka „O” + rozmycie 10px·k → 0 | 2,1 s power2.out |
+| 6 | Smugi wiru | filtr SVG: poziome rozmycie 36px·k → 0; wiersze na przemian z prawej/lewej o .35em | 1,8 s power3.out |
+| 7 | Zbieranie się | litery rozsunięte od środka tytułu (.22 odległości + losowo) i rozmyte zbierają się | 1,7 s power3.out, rozrzut .5 s |
+| 8 | Oddech | cały tytuł z mgiełki (rozmycie 6px·k), skala 1,035 → 1 | 2,4 s power1.out |
+
+k = rem/14 (rozmycie rośnie z wielkością liter). Notka po tytule: a) słowa od środka na boki z losowym opóźnieniem, b) miękka maska od środka, c) litery jak pył. Wersje 3 i 4 pierwotnie za mocne (zniekształcone litery, ostre plamy), złagodzone.
+
 ## Okna i bryła
 
 | Ruch | Co robi | Liczby | Kiedy pasuje | Ryzyko | Gdzie |

@@ -102,7 +102,7 @@ with sync_playwright() as p:
             pg.goto(url + ('&' if '?' in url else '?') + 'w=' + w)
             pg.wait_for_function('window.gsap&&document.querySelector("#title .ch")&&document.getElementById("stage").style.clipPath', timeout=20000)
             t0 = time.time(); found = {}
-            while time.time() - t0 < 4.8:
+            while time.time() - t0 < float(next((a[4:] for a in sys.argv if a.startswith("--t=")), "4.8")):
                 s = pg.evaluate(READ); t = round(time.time() - t0, 2)
                 for kind, what in check(s, False):
                     found.setdefault(kind, []).append((t, what))
