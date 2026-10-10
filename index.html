@@ -454,6 +454,9 @@ html.motion .cl-box{height:calc(100svh - var(--gut)*3 - 55px);min-height:0}
 html.motion .wi--light{background:transparent}
 .wi--light .wi-l{color:#fcfcfc}
 @media (max-width:1024px){.awards{margin-top:calc(var(--r)*12.5)}}
+/* (measured in the original, desktop and phone: when the contact section reaches the top, the last award has been gone
+   for ~.6 screens, so no dark name is left on the darkening page — the room below the list is part of the section) */
+html.motion .awards{padding-bottom:60svh}
 @media (min-width:1025px){
   html.motion .awards{gap:0;margin-top:-60svh}
   html.motion .wi--light{height:350svh;margin-top:0}
@@ -511,12 +514,15 @@ html.motion .wi--light{background:transparent}
 .tk-title{margin:0;font:900 calc(var(--r)*7.5)/.9 var(--grot);letter-spacing:-.02em;text-transform:uppercase;padding-right:.075em}
 html.motion .tk-title-wrap{height:500svh;margin-top:-30svh;padding:0}
 html.motion .tk-title-sticky{position:sticky;top:0;height:100svh;display:flex;align-items:center;padding-top:calc(var(--gut) + 37px)}
-html.motion .tk-title{white-space:nowrap;translate:calc(100vw - var(--gut) - (100vw + 100%)*var(--p,0)) 0;will-change:translate}   /* own layer: the 1500px line is moved, not repainted, every frame */
+html.motion .tk-title{white-space:nowrap;translate:calc(100vw - (100vw + 100%)*var(--p,0)) 0;will-change:translate}   /* own layer: the 1500px line is moved, not repainted, every frame */
 .tk-form-sticky{display:flex;align-items:center;padding:20px var(--gut)}
 html.motion .tk-form-wrap{height:300svh;margin-top:-250svh}
 @media (min-width:1025px){html.motion .tk-form-wrap{height:500svh}}
 html.motion .tk-form-sticky{position:sticky;top:0;height:100svh;padding:calc(var(--gut) + 55px) var(--gut) var(--gut)}
 .tk-form{display:flex;flex-direction:column;align-items:flex-end;gap:10px;width:100%;height:calc(var(--r)*33.75);min-height:340px;max-height:100%;transition:opacity .35s cubic-bezier(.45,0,.55,1)}
+/* (no CSS transition while GSAP drives the fade: the .35 s transition chased every frame and left the form at ~90%
+   while the footer title already flipped in) */
+html.motion .tk-form{transition:none}
 .tk-box{position:relative;display:flex;justify-content:flex-end;width:100%}
 .tk-box--msg{flex:1;min-height:0}
 .tk-line{position:relative;width:100%;border:1px solid #2b2b2b;border-radius:4px;overflow:clip;translate:calc((-100% - var(--gut) - 1px)*var(--start,0)) 0}
@@ -1386,9 +1392,13 @@ html:not(.motion) .stage3{display:none}
   // (set on the four sections that show it, not as a variable on <html>: a variable there is inherited by every element,
   //  so each change restyled the whole page — on the phone that was up to .6 s of style work per pass)
   const roomEls=['projects','about','contact','footer'].map(id=>document.getElementById(id));
+  // back to black measured in the original (Playwright, 1280x620): it starts when the contact section's top is 1.4 screens
+  // below the top and is black when that top reaches the top, so the coil and the line arrive on near-black, never on grey
+  const contactTop=document.getElementById('contact');
   const roomP=(edge,from,to)=>roomEase(Math.min(1,Math.max(0,(from-edge)/(from-to))));
   gsap.ticker.add(()=>{const r=aboutEl.getBoundingClientRect(),H=innerHeight;
-    const v=Math.round(5+247*(roomP(r.top,.55*H,(isDesk()?-.15:-.3)*H)-roomP(r.bottom,1.15*H,-.45*H)));const c=`rgb(${v},${v},${v})`;
+    const ct=contactTop.getBoundingClientRect().top;
+    const v=Math.round(5+247*(roomP(r.top,.55*H,(isDesk()?-.15:-.3)*H)-roomP(ct,1.4*H,0)));const c=`rgb(${v},${v},${v})`;
     if(c!==roomLast){roomLast=c;roomEls.forEach(e=>e.style.backgroundColor=c)}});
   const abF=[...document.querySelectorAll('.ab-fig')];
   const abFl=abF.map((f,k)=>fluidOK?Fluid(f,AB[k]):null);
@@ -1515,8 +1525,8 @@ html:not(.motion) .stage3{display:none}
   //  the moment its tail is 42% in from the left — and the entry still ends before the form's track lets go)
   const tkTitleWrap=document.getElementById('tkTitleWrap'),tkTitle=document.getElementById('tkTitle');
   const absTop=el=>el.getBoundingClientRect().top+scrollY;
-  const tkMob=()=>{const W=innerWidth,H=innerHeight,w=tkTitle.offsetWidth,g=remPx()*1.25;
-    const p=Math.min(1,(W*.58-g+w)/(W+w)),tail=absTop(tkTitleWrap)+p*(tkTitleWrap.offsetHeight-H),f=absTop(tkFormWrap);
+  const tkMob=()=>{const W=innerWidth,H=innerHeight,w=tkTitle.offsetWidth;
+    const p=Math.min(1,(W*.58+w)/(W+w)),tail=absTop(tkTitleWrap)+p*(tkTitleWrap.offsetHeight-H),f=absTop(tkFormWrap);
     const s=Math.max(f+.9*H,tail);return {s,e:Math.max(s+.5*H,Math.min(s+1.1*H,f+2*H))}};
   const tkIn=gsap.timeline({scrollTrigger:{trigger:tkFormWrap,start:()=>isDesk()?'top+='+innerHeight*1.2+' top':tkMob().s,end:()=>isDesk()?'+='+innerHeight*1.25:tkMob().e,scrub:isDesk()?.5:true,invalidateOnRefresh:true}})
     .fromTo(tkLines,{'--start':1},{'--start':0,ease:'power1.inOut',stagger:.1},isDesk()?0:.1);

@@ -82,6 +82,7 @@ Pobrany Chromium Playwrighta nie startuje na tym Windowsie (błąd „konfigurac
   - nagłówek w trakcie chowania;
   - litery intro zasłonięte czarnym oknem.
 - **Czego emulacja nie pokaże:** chowania paska adresu w Chrome na Androidzie (w emulacji zmienia się też `svh`) i płynności. To sprawdza tylko prawdziwy telefon.
+- **`tools/paths.py` (reguły bez zrzutów):** w stronie działa rejestrator, który w każdej klatce zapisuje stan (krycie formularza, postęp liter stopki, położenie napisu kontaktu, kontrast tekstu do tła), a kółko przewija w dół, w górę i znowu w dół. Każdą klatkę sprawdzają reguły z CLAUDE.md, np. „litery stopki widoczne ⇒ formularz wygaszony”. Wyłapuje błędy, które wychodzą dopiero po zmianie kierunku albo przy szybkim przewijaniu, i jest tańsze niż zrzuty. Nowe zasady dopisuje się jako reguły w `RULES`.
 - **`tools/probe.py`:** pomiar oryginału albo naszej strony w wybranych miejscach. W cappen przed pomiarem `window.main.scroller.stop()` (jego przyciąganie zwraca wtedy bieżącą pozycję), u nas przyciąganie wyłączone. Litery oryginału mają `--rotateX` w `style`, nasze `--rx`. Liczby porównuje się w ekranach od początku sekcji.
 - **`tools/phone.py` na prawdziwym telefonie** (Samsung Galaxy M15 5G, Chrome, 360×649 z paskiem adresu, 705 bez niego, 90 Hz):
   - przygotowanie: kabel USB, debugowanie USB, `adb` z `Google.PlatformTools`; na telefonie otwarta nasza strona;
@@ -198,6 +199,16 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 - **Warstwy bez z-index:** `.talk` i `.footer` nie tworzą własnego kontekstu warstw, a ich treść ma z-index 5 nad stałą warstwą spirali (z-index 4).
 - **Polskie znaki w wielkich tytułach** potrzebują interlinii ok. 0,9 zamiast 0,8, bo inaczej kropka nad „Ż” i ogonki zlewają się z linią wyżej.
 
+### 6.5 Sposoby, które rodzą błędy (do sprawdzenia, gdy coś „przecina” albo szarpie)
+1. **Ten sam element sterowany dwa razy.** Przejście CSS i GSAP na jednej właściwości, dwa tweeny na jednej zmiennej. Jedno źródło prawdy dla każdej wartości.
+2. **Tween napisu złożonego** (`clip-path`, `transform` jako tekst). Przeglądarka skraca zapis i liczby się przesuwają. Tweenować liczby w obiekcie, a napis składać w `onUpdate`.
+3. **Wartości policzone raz, a układ się zmienia** (fonty, pasek adresu, rozwinięty wiersz). Mierzyć na żywo albo przeliczać przy zmianie rozmiaru; po `refresh` w spoczynku wymusić przerysowanie.
+4. **Animowanie właściwości układu** (`width`, `height`, `top`, zmienna na `<html>`). Przeliczają całą stronę. Lepiej `transform`, `opacity` i zmienne na samym elemencie.
+5. **Duży element przesuwany bez własnej warstwy** (obraz z paralaksą, długi napis). Telefon przerysowuje go co klatkę. Dodać `will-change`.
+6. **Opóźnienie `scrub` w jednym z dwóch elementów**, które muszą się mijać: przy szybkim przewijaniu jeden zostaje w tyle. Elementy zależne od siebie bez opóźnienia albo z tym samym.
+7. **Jednostki ekranu na telefonie:** `svh`, `dvh` i `lvh` różnią się o pasek adresu. Stałe warstwy `lvh`, przypięte ekrany `svh`; `dvh` tylko tam, gdzie nic nie jest liczone z wysokości.
+8. **Progi dobrane do jednego ekranu** (`min-height:600px`, rozmiary z desktopu na tablecie). Każdą stałą w px sprawdzić na 320 px i na 1024 px.
+
 ## 7. Lekcje (objaw → przyczyna → rozwiązanie)
 
 | Objaw | Przyczyna | Rozwiązanie |
@@ -225,6 +236,9 @@ Uzgodnione 10.10.2026: na razie budujemy i dopracowujemy sekcje, a pełna gotowo
 | Mały telefon (568 px): przycięte kwadraty na końcu manifestu | `min-height:600px` przypiętych ekranów większe niż ekran | Minimum 600 px tylko od 1025 px |
 | Tablet: prawe zdjęcie „O nas” ucięte przy krawędzi | Boczne zdjęcia w rozmiarze z desktopu (20rem), trzy razem 928 px przy 768 | Rozmiar oryginału dla tabletów: 12 × 8,25rem |
 | Desktop: litery „Kręcimy” nad resztką formularza przy szybkim przewijaniu | Wygaszanie formularza z `scrub .5` zostawało w tyle | `scrub:true` i litery od .1 osi |
+| „Kręcimy się” nad pełnym formularzem przy przewijaniu w tę i z powrotem | CSS `transition:opacity .35s` na formularzu, a GSAP zmienia krycie co klatkę: przejście goni wartość i formularz zostaje ok. 90% widoczny | Bez przejścia CSS na elementach sterowanych przez GSAP (`html.motion .tk-form{transition:none}`) |
+| Blada spirala i napis „Pogadajmy” na szarym tle | Powrót do czerni liczony od dołu „O nas”, a nie od kontaktu: 0,8 ekranu za późno | Pomiar oryginału: ciemnienie od „góra kontaktu 1,4 ekranu pod górą ekranu” do „góra kontaktu przy górze ekranu”; po nagrodach 60svh odstępu |
+| Pierwsza litera napisu kontaktu wystaje 18 px od początku | Start `100vw − gut` | Start `100vw` (jak w oryginale) |
 | Biały pasek po prawej przy końcu otwierania okna | Tweenowany napis `clip-path`: przeglądarka skraca `inset(0px 0px 0px 0px round 4px)` do `inset(0px round 4px)` i GSAP wpisywał promień w prawy margines | Krawędzie i promień jako liczby w obiekcie, `clip-path` składany w `onUpdate` |
 | Menu → Kontakt: szare tło i ciemna spirala | Skok na górę sekcji wypada w środku przejścia koloru strony | Skok do końca wjazdu formularza (`window.__contactY`) |
 | Spirala kontaktu wystaje nad sekcję | Warstwa spirali jest stała i pokazuje się od 70% ekranu | `clip-path` warstwy przycięty do górnej krawędzi sekcji kontaktu |
