@@ -121,7 +121,7 @@ html:not(.motion) .menu.open{clip-path:none}
 /* ===== intro ===== */
 .intro{position:relative}
 /* dvh: on a phone the pinned screens follow the address bar, so nothing white shows under them when it slides away */
-.intro-pin{position:relative;height:100svh;min-height:600px;overflow-x:clip;display:flex;flex-direction:column;padding:96px var(--gut) 0}
+.intro-pin{position:relative;height:100svh;overflow-x:clip;display:flex;flex-direction:column;padding:96px var(--gut) 0}
 html.motion .intro{height:200svh}
 html.motion .intro-pin{position:sticky;top:0}
 .mega{margin:0;font-family:var(--wide);font-weight:900;font-stretch:125%;text-transform:uppercase;letter-spacing:-.045em;line-height:.84;text-align:center;font-size:var(--mega,18vw)}
@@ -173,7 +173,9 @@ html.motion .orb-wrap{bottom:auto;height:100vh;height:100dvh}
 /* ===== manifesto (black room) ===== */
 .mani{position:relative;z-index:3;background:var(--ink);color:#f2f2f2}
 html.motion .mani{background:transparent}
-.mani-pin{position:relative;height:100svh;min-height:600px;overflow:hidden}
+.mani-pin{position:relative;height:100svh;overflow:hidden}
+/* (the 600px floor only on desktop: on a 568px phone it made the pinned screens taller than the screen) */
+@media (min-width:1025px){.intro-pin,.mani-pin{min-height:600px}}
 html.motion .mani{height:647svh}   /* pinned for ~5.5 screens of scrolling */
 html.motion .mani-pin{position:sticky;top:0}
 .mani-txt{position:absolute;left:var(--gut);right:var(--gut);top:20%;z-index:2;margin:0;font:400 max(20px,3.2vw)/1 var(--serif);letter-spacing:-.01em;text-align:justify;text-align-last:left;text-indent:32%}
@@ -389,7 +391,7 @@ html:not(.motion) .pr-w::before,html:not(.motion) .pr:last-of-type::after{transf
 .ab-tx .ln2{display:inline-block;transform:translateZ(-1em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(1em);backface-visibility:hidden}
 @media (min-width:600px){
   .about{--r:2.083vw;--ms:calc(var(--r)*12.5);padding:var(--ms) var(--gut)}
-  .ab-fig:not(:nth-child(2)){display:block;width:calc(var(--r)*20);height:calc(var(--r)*13.75)}
+  .ab-fig:not(:nth-child(2)){display:block;width:calc(var(--r)*12);height:calc(var(--r)*8.25)}   /* the original on tablets (20 × 13.75rem is desktop: three of them overflowed 768px) */
   .ab-fig:nth-child(1){align-self:flex-start;margin-top:calc(var(--r)*2.5)}
   .ab-fig:nth-child(3){align-self:flex-end;margin-bottom:calc(var(--r)*1.875)}
   .ab-fig:nth-child(2){width:calc(var(--r)*18);height:calc(var(--r)*22.5);aspect-ratio:auto}
@@ -1275,7 +1277,7 @@ html:not(.motion) .stage3{display:none}
      .fromTo('#orbWrap1',{y:0,scale:1},{y:()=>innerHeight*.12,scale:.62,duration:du(.33),ease:'power1.inOut',immediateRender:false},at(.17));
   // thumbnails wait in a row above the screen, then drop one after another, swelling to ~1.6x mid-fall
   const thumbsEl=document.getElementById('thumbs');
-  const above=()=>-(thumbsEl.getBoundingClientRect().top-document.querySelector('.mani-pin').getBoundingClientRect().top+thumbsEl.offsetHeight+30);
+  const above=()=>-(thumbsEl.getBoundingClientRect().top-document.querySelector('.mani-pin').getBoundingClientRect().top+thumbsEl.offsetHeight+30+100);   // (100px spare: the squares stay hidden even if the screen grows by an address bar)
   gsap.utils.toArray('.thumb').forEach((el,i)=>{
     const a=at(.155+i*.018),d=du(.15);   // the whole row is in the air almost at once
     mtl.fromTo(el,{y:above},{y:0,duration:d,ease:'power1.inOut',immediateRender:true},a)
@@ -1536,7 +1538,8 @@ html:not(.motion) .stage3{display:none}
   gsap.timeline({scrollTrigger:{trigger:'#contact',start:'top top',end:()=>'+='+midEnd(),scrub:true,invalidateOnRefresh:true}})
     .fromTo(P3,{x:()=>cX(),y:()=>cY(),t:Math.PI/2.5},{x:()=>plc().x,y:()=>plc().y,t:Math.PI/4,duration:1,ease:'power4.inOut',immediateRender:false},0)
     .fromTo(P3,{s:()=>isDesk()?1:.6},{s:()=>isDesk()?.6:.4,duration:.75,ease:'power1.inOut',immediateRender:false},.25);
-  const tkOut=gsap.timeline({scrollTrigger:{trigger:'#contact',start:()=>'top+='+midEnd()+' top',end:'bottom bottom',scrub:.5,invalidateOnRefresh:true}})
+  // (no scrub lag: with .5 s the fade trailed a quick scroll and the footer title flipped in over the form)
+  const tkOut=gsap.timeline({scrollTrigger:{trigger:'#contact',start:()=>'top+='+midEnd()+' top',end:'bottom bottom',scrub:true,invalidateOnRefresh:true}})
     .fromTo(tkForm,{opacity:1},{opacity:()=>isDesk()?0:1,duration:1,ease:'power1.inOut',immediateRender:false});
   /* snapping, as in the original: once you stop scrolling (not dragging, not auto-scrolling)
      – inside the entry range past 10% → carried on until the whole form is in;
@@ -1574,7 +1577,7 @@ html:not(.motion) .stage3{display:none}
      so the timeline is fixed at 2.08 units (2.5 screens). Each letter: .69 units, .025 apart (= .83 / .03 screens). */
   const ftTl=gsap.timeline({scrollTrigger:{trigger:'#footer',start:'top top',end:'bottom bottom',scrub:true,invalidateOnRefresh:true}});
   ftTl.set({},{},2.08);
-  ftCh.forEach((c,i)=>ftTl.fromTo(c,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.69,ease:'power4.inOut',immediateRender:true},.025*i));
+  ftCh.forEach((c,i)=>ftTl.fromTo(c,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.69,ease:'power4.inOut',immediateRender:true},.1+.025*i));   // (+.1: only once the form has gone, also with its .5 s scrub lag)
   ftTl.fromTo(ftLine(document.querySelector('.ft-copy')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.35,ease:'power1.inOut'},.25)
     .fromTo('.ft-tag',{'--p':1.1},{'--p':0,duration:1,ease:'power4.inOut',stagger:.15},.27)
     .fromTo(ftLine(document.getElementById('mail')),{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.35,ease:'power1.inOut'},.8);
