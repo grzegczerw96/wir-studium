@@ -45,6 +45,11 @@ Stan na 10.10.2026, ostatnie zmiany: start bez mignięcia innego układu (strona
   - wejście bez losowego rozrzutu liter; punkt wyjścia to wejście oryginału (litery i linie przewracają się w 3D po kolei);
   - krój tytułu do wyboru: obecny Archivo 125% to nie krój oryginału (ten ma normalną szerokość);
   - kolejność: najpierw wygląd hero, potem wejście i przewijanie intro.
+  - **wybrane:** układ 2 z `lab/hero.html` (okno jako litera „O” w „TO”, wiersze wyśrodkowane) i krój A (Inter Tight Black, normalna szerokość);
+  - bez kreski pod nagłówkiem i bez najwyższego (1 px) paska na dole; paski wchodzą od najniższego, wyższe niewidoczne do swojej kolejki;
+  - spirala w „O” mniejsza (ok. 72% wysokości litery) i na wprost, dziura na środku; przechyla się dopiero, gdy okno rośnie;
+  - notka na desktopie: pierwsza linia na równi z górą wersalików tytułu (liczone z linii bazowej i `actualBoundingBoxAscent`);
+  - gasnący szary napis przy rośnięciu okna rozprasza: do wyboru gaśnięcie, rozmycie, rozsunięcie od „O” albo oba (`?x=0..3`).
 - **Fonty jak w oryginale:**
   - Inter Tight w roli Helvetica Now Display;
   - Instrument Serif w roli kroju szeryfowego;

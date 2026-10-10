@@ -23,7 +23,6 @@ body{margin:0;background:var(--paper);color:var(--ink);font:400 15px/1.45 "Inter
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 
 .hd{position:fixed;inset:0 0 auto;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:var(--gut) var(--gut) calc(var(--r)*1.125);color:#fff;mix-blend-mode:difference;pointer-events:none}
-.hd::after{content:"";position:absolute;left:var(--gut);right:var(--gut);bottom:0;height:1px;background:currentColor;opacity:.2;transform-origin:0 50%;transform:scaleX(var(--p,1))}
 .logo{font:var(--fw) 22px/1 var(--face),Arial,sans-serif;font-stretch:calc(var(--wdth)*1%);letter-spacing:-.02em;text-transform:uppercase}
 .dots{width:calc(var(--r)*2.5);height:calc(var(--r)*2.5);min-width:36px;min-height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:grid;place-items:center}
 .dots i{width:4px;height:4px;border-radius:50%;background:currentColor;box-shadow:-8px 0 0 currentColor,8px 0 0 currentColor}
@@ -46,11 +45,14 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .stripes{position:absolute;left:0;right:0;bottom:0;display:grid;z-index:2}
 .stripes i{display:block;overflow:hidden}
 .stripes i::before{content:"";display:block;height:100%;background:var(--ink);transform:translateY(var(--y,0%))}
-.stripes i:nth-child(1){height:1px}
-.stripes i:nth-child(2){height:calc(var(--r)*.25);margin-top:calc(var(--r)*1.1875)}
-.stripes i:nth-child(3){height:calc(var(--r)*.5);margin-top:var(--r)}
-.stripes i:nth-child(4){height:calc(var(--r)*2.5);margin-top:calc(var(--r)*.75)}
-@media (min-width:1025px){.pin{padding-top:calc(var(--gut) + 55px);padding-bottom:calc(var(--r)*9)}}
+.stripes i:nth-child(1){height:calc(var(--r)*.25)}
+.stripes i:nth-child(2){height:calc(var(--r)*.5);margin-top:var(--r)}
+.stripes i:nth-child(3){height:calc(var(--r)*2.5);margin-top:calc(var(--r)*.75)}
+/* (the original's top hairline of the stripes and the header's hairline are left out: Grzegorz, 10.10) */
+.pin{padding-bottom:calc(var(--r)*6.5)}
+@media (min-width:1025px){.pin{padding-top:calc(var(--gut) + 55px);padding-bottom:calc(var(--r)*7.8)}}
+/* desktop, layouts 1 and 2: the note's first line stands level with the top of the title's capitals (set in JS) */
+@media (min-width:1025px){[data-v="1"] .note,[data-v="2"] .note{top:var(--nt,calc(var(--gut) + 55px))!important}}
 
 /* ---- 1 · staircase (closest to the original): left-aligned lines stepping in, the window in a gap of the last line;
    phones: centred, the window under the title (the original's base layout) ---- */
@@ -110,6 +112,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .ctl{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));translate:-50% 0;z-index:30;display:flex;align-items:center;gap:4px;padding:5px;background:#fff;border:1px solid #d6d6d6;border-radius:999px;box-shadow:0 4px 18px rgba(0,0,0,.12);font:400 11px/1 "JetBrains Mono",monospace;white-space:nowrap}
 .ctl button{min-width:30px;height:30px;padding:0 8px;border-radius:999px;color:#333}
 .ctl button[aria-pressed="true"]{background:#050505;color:#fff}
+.ctl .cap{padding:0 4px 0 8px;color:#888;text-transform:uppercase;letter-spacing:.04em}
 .ctl .sep{width:1px;height:18px;background:#d6d6d6;margin:0 3px}
 .lbl{position:fixed;left:50%;bottom:calc(52px + env(safe-area-inset-bottom,0px));translate:-50% 0;z-index:30;background:#050505;color:#fff;padding:6px 10px;border-radius:999px;font:400 10px/1 "JetBrains Mono",monospace;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;transition:opacity .4s}
 .lbl.off{opacity:0}
@@ -122,14 +125,12 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   <h1 class="title fade" id="title"></h1>
   <div class="win solo" id="winSolo"></div>
   <p class="note fade" id="note">Małe, niezależne studio, które od 2014 roku projektuje i koduje strony z ruchem dla marek, które nie chcą wyglądać jak wszyscy.</p>
-  <div class="stripes fade" id="stripes"><i></i><i></i><i></i><i></i></div>
+  <div class="stripes fade" id="stripes"><i></i><i></i><i></i></div>
 </div></section>
 <section class="after">Tu zaczyna się manifest (czarna sala). Przewiń w górę, żeby wrócić do hero.</section>
 <div class="lbl" id="lbl"></div>
 <nav class="ctl" aria-label="Warianty">
-  <button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button>
-  <span class="sep"></span>
-  <button data-f="1">A</button><button data-f="2">B</button><button data-f="3">C</button><button data-f="4">D</button>
+  <span class="cap">wyjście</span><button data-x="0">0</button><button data-x="1">1</button><button data-x="2">2</button><button data-x="3">3</button>
   <span class="sep"></span>
   <button id="replay" title="Odtwórz wejście">↻</button>
 </nav>
@@ -140,7 +141,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     cv=document.getElementById('cv'),note=document.getElementById('note'),lbl=document.getElementById('lbl'),winSolo=document.getElementById('winSolo');
   const VN={1:'schodki (jak cappen)',2:'okno jako litera O',3:'rama: napis wokół okna',4:'napis na oknie (różnica)'};
   const FN={1:'Inter Tight Black (jak Helvetica Now)',2:'Archivo Black, normalna szerokość',3:'Archivo Black 125% (obecny)',4:'Schibsted Grotesk Black'};
-  const q=new URLSearchParams(location.search);let V=q.get('v')||'1',F=q.get('f')||'1';
+  const XN={0:'gaśnie (jak cappen)',1:'rozmycie',2:'rozsunięcie od O',3:'rozsunięcie i rozmycie'};
+  // chosen 10.10: layout 2 with face A (the others stay reachable with ?v=&f=); the switch now compares the title's exit
+  const q=new URLSearchParams(location.search);let V=q.get('v')||'2',F=q.get('f')||'1',X=q.get('x')||'2';
   const probe=document.createElement('i');probe.style.cssText='position:absolute;width:calc(var(--r)*1);visibility:hidden';document.body.append(probe);
   const R=()=>probe.getBoundingClientRect().width;
   const desk=()=>innerWidth>=1025;
@@ -176,11 +179,24 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     title.style.setProperty('--fs',Math.floor(fs)+'px');
   }
   function apply(){H.dataset.v=V;H.dataset.f=F;
-    document.querySelectorAll('.ctl [data-v]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===V));
-    document.querySelectorAll('.ctl [data-f]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.f===F));
-    history.replaceState(null,'','?v='+V+'&f='+F);
-    lbl.textContent=V+' · '+VN[V]+'  /  '+'ABCD'[F-1]+' · '+FN[F];lbl.classList.remove('off');clearTimeout(apply.t);apply.t=setTimeout(()=>lbl.classList.add('off'),3500);
-    build();fit();if(V==='4')placeWin4();splitNote();scrollTo(0,0);enter()}
+    document.querySelectorAll('.ctl [data-x]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.x===X));
+    history.replaceState(null,'','?v='+V+'&f='+F+'&x='+X);
+    lbl.textContent='Wyjście '+X+' · '+XN[X]+'  /  układ '+V+' · '+'ABCD'[F-1];lbl.classList.remove('off');clearTimeout(apply.t);apply.t=setTimeout(()=>lbl.classList.add('off'),3500);
+    build();fit();if(V==='4')placeWin4();splitNote();alignNote();cacheCh();scrollTo(0,0);enter()}
+  /* the note's first line level with the top of the title's capitals: the baseline of the first line (an empty
+     inline-block on it) minus the cap height, and the same for the note's own first line */
+  const capH=font=>{const c=capH.c||(capH.c=document.createElement('canvas').getContext('2d'));c.font=font;return c.measureText('H').actualBoundingBoxAscent};
+  const baseMark=()=>{const b=document.createElement('i');b.style.cssText='display:inline-block;width:0;height:0;vertical-align:baseline';return b};
+  function alignNote(){H.style.removeProperty('--nt');if(!desk()||!(V==='1'||V==='2'))return;
+    const ln=title.querySelector('.ln'),b=baseMark();ln.append(b);const base=b.getBoundingClientRect().top;b.remove();
+    const tcap=base-capH('900 '+parseFloat(getComputedStyle(title).fontSize)+'px "Inter Tight"');
+    const nb=baseMark();note.prepend(nb);
+    const noff=nb.getBoundingClientRect().top-note.getBoundingClientRect().top-capH('400 '+parseFloat(getComputedStyle(note).fontSize)+'px "Inter Tight"');nb.remove();
+    H.style.setProperty('--nt',(tcap-pin.getBoundingClientRect().top-noff)+'px')}
+  /* exit 2/3: every letter is pushed away from the O's middle (and grows a little) while the O becomes the screen */
+  let CHS=[];
+  function cacheCh(){const o=win().getBoundingClientRect(),ox=o.left+o.width/2,oy=o.top+o.height/2;
+    CHS=[...title.querySelectorAll('.ch')].map(c=>{c.style.translate='';c.style.scale='';const r=c.getBoundingClientRect();return [c,r.left+r.width/2-ox,r.top+r.height/2-oy]})}
   function placeWin4(){const ls=title.querySelectorAll('.ln');if(ls.length<3)return;const p=pin.getBoundingClientRect(),a=ls[1].getBoundingClientRect(),b=ls[2].getBoundingClientRect();
     winSolo.style.setProperty('--wy',((a.top+b.bottom)/2-p.top)+'px')}
   /* note: words, grouped into lines for the flip-in (the original's text-anim, line mode) */
@@ -204,9 +220,15 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     const rx=(oval?w0/2*(1-j)+4*j:4)*cr,ry=(oval?h0/2*(1-j)+4*j:4)*cr;
     stage.style.clipPath=`inset(${T}px ${Rt}px ${B}px ${L}px round ${rx}px / ${ry}px)`;
     // title, note and stripes fade over the first half (the original's --o, quad out)
-    const o=1-quadOut(clamp(P/.5));document.querySelectorAll('.fade,#title .ln').forEach(f=>f.style.opacity=o);   // (layout 3's title is display:contents: its lines fade themselves)
+    const o=1-quadOut(clamp(P/.5));
+    if(P!==frame.lastP){frame.lastP=P;
+      document.querySelectorAll('.fade,#title .ln').forEach(f=>f.style.opacity=o);   // (layout 3's title is display:contents: its lines fade themselves)
+      const bl=(X==='1'||X==='3')?(X==='1'?18:9)*quadOut(clamp(P/.5))*R()/14:0;
+      title.style.filter=note.style.filter=bl>.05?'blur('+bl.toFixed(2)+'px)':'';
+      const s=(X==='2'||X==='3')?quadOut(clamp(P/.55)):0;
+      CHS.forEach(([c,dx,dy])=>{c.style.translate=s?(dx*s*1.3).toFixed(1)+'px '+(dy*s*1.3).toFixed(1)+'px':'';c.style.scale=s?String(1+.35*s):''})}
     // coil: from the window's middle and size to the screen's, half a turn and tilting flat (the original's scene)
-    const m0=Math.min(w0,h0)*(oval?1.25:1.05),m1=Math.min(W,Hh)*.95;
+    const m0=Math.min(w0,h0)*(oval?.97:1.05),m1=Math.min(W,Hh)*.95;   // (in the O: the coil is ~72% of its height)
     drawCoil(now/1000,cx+(W/2-cx)*k,cy+(Hh/2-cy)*k,m0+(m1-m0)*quartOut(clamp(P)),quartOut(clamp(P/.75)));
     requestAnimationFrame(frame)}
 
@@ -217,7 +239,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   function drawCoil(t,X,Y,m,turn){
     g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,CW,CH);if(m<4)return;
     const Rr=m*.27,rr=m*.1,f=m*1.6;
-    const ax=1.05-.8*(1-turn)+Math.sin(t*.37)*.1,az=t*.3-Math.PI*turn,ay=Math.sin(t*.23)*.2;
+    // at rest face-on (the hole in the middle, a small sway), tipping to the side view as the window grows
+    const sw=.25+.75*turn,ax=1.05*turn+Math.sin(t*.37)*.1*sw,az=t*.3-Math.PI*turn,ay=Math.sin(t*.23)*.2*sw;
     const cx=Math.cos(ax),sx=Math.sin(ax),cz=Math.cos(az),sz=Math.sin(az),cy=Math.cos(ay),sy=Math.sin(ay);
     const rot=(x,y,z)=>{const x1=x*cz-y*sz,y1=x*sz+y*cz,y2=y1*cx-z*sx,z2=y1*sx+z*cx;return [x1*cy+z2*sy,y2,-x1*sy+z2*cy]};
     for(let i=0;i<=SEG;i++){const ph=i/SEG*Math.PI*2,th=ph*TURNS+t*1.2,q=Rr+rr*Math.cos(th);
@@ -235,16 +258,14 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
     tl&&tl.kill();const ch=title.querySelectorAll('.ch'),nl=noteLines(),st=[...document.querySelectorAll('.stripes i')].reverse();
     tl=gsap.timeline()
       .fromTo(ch,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:1.1,ease:'power4.inOut',stagger:.035},0)
-      .fromTo(E,{win:0},{win:1,duration:1.1,ease:'power4.inOut'},.45)
-      .fromTo('.hd',{'--p':0},{'--p':1,duration:innerWidth>=600?1.5:1,ease:'power1.inOut'},.5);
+      .fromTo(E,{win:0},{win:1,duration:1.1,ease:'power4.inOut'},.45);
     nl.forEach((l,i)=>tl.fromTo(l,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5,ease:'power1.inOut'},.35+i*.1));
-    st.forEach((s,i)=>tl.fromTo(s,{'--y':'100%'},{'--y':'0%',duration:.75,ease:'power4.out'},.6+i*.15));
+    st.forEach((s,i)=>tl.fromTo(s,{'--y':'100%',opacity:0},{'--y':'0%',duration:.75,ease:'power4.out'},.6+i*.15).set(s,{opacity:1},.6+i*.15));
   }
-  document.querySelectorAll('.ctl [data-v]').forEach(b=>b.onclick=()=>{V=b.dataset.v;apply()});
-  document.querySelectorAll('.ctl [data-f]').forEach(b=>b.onclick=()=>{F=b.dataset.f;apply()});
+  document.querySelectorAll('.ctl [data-x]').forEach(b=>b.onclick=()=>{X=b.dataset.x;apply()});
   document.getElementById('replay').onclick=()=>{scrollTo(0,0);enter()};
-  addEventListener('keydown',e=>{if(/^[1-4]$/.test(e.key)){V=e.key;apply()}const f='abcd'.indexOf(e.key.toLowerCase());if(f>-1){F=String(f+1);apply()}});
-  let lastW=innerWidth;addEventListener('resize',()=>{size();if(innerWidth!==lastW){lastW=innerWidth;fit();if(V==='4')placeWin4()}});
+  addEventListener('keydown',e=>{if(/^[0-3]$/.test(e.key)){X=e.key;apply()}});
+  let lastW=innerWidth;addEventListener('resize',()=>{size();if(innerWidth!==lastW){lastW=innerWidth;fit();if(V==='4')placeWin4();alignNote();cacheCh()}});
   size();
   // every face is loaded before the first measure, so switching never fits a line in a fallback font
   const FACES=['900 100px "Inter Tight"','400 15px "Inter Tight"','900 100px Archivo','900 100px "Schibsted Grotesk"'];
