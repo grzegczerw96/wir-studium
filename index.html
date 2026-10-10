@@ -121,7 +121,7 @@ html:not(.motion) .menu.open{clip-path:none}
 /* ===== intro ===== */
 .intro{position:relative}
 /* dvh: on a phone the pinned screens follow the address bar, so nothing white shows under them when it slides away */
-.intro-pin{position:relative;height:100svh;height:100dvh;min-height:600px;overflow:hidden;display:flex;flex-direction:column;padding:96px var(--gut) 0}
+.intro-pin{position:relative;height:100svh;min-height:600px;overflow-x:clip;display:flex;flex-direction:column;padding:96px var(--gut) 0}
 html.motion .intro{height:200svh}
 html.motion .intro-pin{position:sticky;top:0}
 .mega{margin:0;font-family:var(--wide);font-weight:900;font-stretch:125%;text-transform:uppercase;letter-spacing:-.045em;line-height:.84;text-align:center;font-size:var(--mega,18vw)}
@@ -139,7 +139,11 @@ html.motion .intro-pin{position:sticky;top:0}
 .stripes i:nth-child(1){height:1px}.stripes i:nth-child(2){height:3px}.stripes i:nth-child(3){height:6px}.stripes i:nth-child(4){height:10px}.stripes i:nth-child(5){height:22px}
 /* one black stage with one coil: a window in the intro, the whole screen in the manifesto */
 .box{position:absolute;inset:0;background:var(--ink);z-index:2;clip-path:var(--clip,inset(40% 30% 20% 30%));pointer-events:none}
-html.motion .box{position:fixed}
+/* the black stage is as tall as the screen without the address bar (lvh), so nothing white shows below it while the
+   bar slides away; the coil keeps to the visible screen (dvh). The pinned screens stay at svh: a height that changes
+   mid-scroll moved the bottom-anchored squares of the manifesto out of their hidden start */
+html.motion .box{position:fixed;bottom:auto;height:100vh;height:100lvh}
+html.motion .orb-wrap{bottom:auto;height:100vh;height:100dvh}
 .orb-wrap{position:absolute;inset:0;display:grid;place-items:center;will-change:transform}
 .orb{width:min(70vh,80vw);aspect-ratio:1;display:block}
 /* phones and tablets (the original's base layout): title, window and note form one group centred between the header
@@ -151,7 +155,7 @@ html.motion .box{position:fixed}
   .hero-note{margin:0 0 auto;width:calc(var(--r)*16.25);max-width:none;font-size:calc(var(--r)*.9375);line-height:1.2;text-align:justify;text-align-last:justify;text-indent:4.75em}
   .hero-note .wd,.hero-note .c{text-indent:0}
   .hero-note>span:first-child>.wd:first-child{margin-right:1.35em}
-  .stripes{bottom:0;gap:0}   /* flush with the bottom edge (the original leaves 3.5rem of white below; it read as a gap) */
+  .stripes{bottom:min(0px,100svh - 100dvh);gap:0}   /* flush with the real bottom edge, also when the address bar has gone (the original leaves 3.5rem of white below; it read as a gap) */
   .stripes i:nth-child(4){display:none}
   .stripes i:nth-child(2){height:calc(var(--r)*.25);margin-top:calc(var(--r)*1.1875)}
   .stripes i:nth-child(3){height:calc(var(--r)*.5);margin-top:var(--r)}
@@ -169,7 +173,7 @@ html.motion .box{position:fixed}
 /* ===== manifesto (black room) ===== */
 .mani{position:relative;z-index:3;background:var(--ink);color:#f2f2f2}
 html.motion .mani{background:transparent}
-.mani-pin{position:relative;height:100svh;height:100dvh;min-height:600px;overflow:hidden}
+.mani-pin{position:relative;height:100svh;min-height:600px;overflow:hidden}
 html.motion .mani{height:647svh}   /* pinned for ~5.5 screens of scrolling */
 html.motion .mani-pin{position:sticky;top:0}
 .mani-txt{position:absolute;left:var(--gut);right:var(--gut);top:20%;z-index:2;margin:0;font:400 max(20px,3.2vw)/1 var(--serif);letter-spacing:-.01em;text-align:justify;text-align-last:left;text-indent:32%}
@@ -569,7 +573,7 @@ html.motion .ft-wrap{position:sticky;top:0;height:100svh;height:100dvh}
   .ft-social{position:absolute;right:0;bottom:0;translate:0 70%;padding-bottom:13px}
   .ft-copy{position:absolute;left:0}.ft-mail{position:absolute;right:0}
 }
-.stage3{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;visibility:hidden}
+.stage3{position:fixed;inset:0;bottom:auto;height:100vh;height:100lvh;z-index:4;pointer-events:none;opacity:0;visibility:hidden}
 .stage3 canvas{width:100%;height:100%;display:block}
 html:not(.motion) .stage3{display:none}
 
@@ -1170,7 +1174,7 @@ html:not(.motion) .stage3{display:none}
   // measure against the black layer itself (fixed = the viewport), not the pinned section, so short windows can't misalign it
   function geom(){const p=box.getBoundingClientRect(),s=slot.getBoundingClientRect();
     return {t:s.top-p.top,r:p.right-s.right,b:p.bottom-s.bottom,l:s.left-p.left,
-      dy:(s.top+s.height/2)-(p.top+p.height/2),sc:Math.min(s.height/document.getElementById('orb1').clientHeight*1.25,1)}}
+      dy:(s.top+s.height/2)-(p.top+ow1.offsetHeight/2),sc:Math.min(s.height/document.getElementById('orb1').clientHeight*1.25,1)}}
   function setStart(){const g=geom();box.style.setProperty('--clip',`inset(${g.t}px ${g.r}px ${g.b}px ${g.l}px)`);ow1.style.transform=`translateY(${g.dy}px) scale(${g.sc})`}
   setStart();
   // fonts change the headline width, which moves the window: re-measure once they arrive and on resize
@@ -1240,9 +1244,14 @@ html:not(.motion) .stage3{display:none}
       window.__autoScrolling=true;
       L.scrollTo(st.end,{duration:dur,lock:true,force:true,easing:v<25?quadIO:quadOut,onComplete:()=>{window.__autoScrolling=false}});
       setTimeout(()=>{window.__autoScrolling=false},dur*1000+400)}}});
+  // the window's edges and corners are tweened as numbers and written out here: tweening the clip-path string itself
+  // mixed up the numbers once the browser shortened "inset(0px 0px 0px 0px round 4px)" to "inset(0px round 4px)",
+  // and the 4px radius ended up as a right inset (a white sliver down the right edge on phones)
+  const WIN={t:0,r:0,b:0,l:0,rad:4};
+  const winClip=()=>{box.style.clipPath=`inset(${WIN.t}px ${WIN.r}px ${WIN.b}px ${WIN.l}px round ${WIN.rad}px)`};
   tl.set({},{},1)
-    .fromTo(box,{clipPath:()=>{const g=geom();return `inset(${g.t}px ${g.r}px ${g.b}px ${g.l}px round 4px)`}},{clipPath:'inset(0px 0px 0px 0px round 4px)',ease:'power1.out',duration:.75},0)
-    .to(box,{clipPath:'inset(0px 0px 0px 0px round 0px)',ease:'power1.out',duration:.25},.75)
+    .fromTo(WIN,{t:()=>geom().t,r:()=>geom().r,b:()=>geom().b,l:()=>geom().l},{t:0,r:0,b:0,l:0,ease:'power1.out',duration:.75,onUpdate:winClip},0)
+    .fromTo(WIN,{rad:4},{rad:0,ease:'power1.out',duration:.25,onUpdate:winClip,immediateRender:false},.75)
     .fromTo(ow1,{y:()=>geom().dy},{y:0,ease:'power1.out',duration:.75},0)
     .fromTo(ow1,{scale:()=>geom().sc},{scale:1,ease:'power4.inOut',duration:1},0);
 
