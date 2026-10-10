@@ -9,6 +9,9 @@ Miejsce, z którego Claude czerpie, kiedy ma sam dobierać i wymyślać ruch, st
 | `marka.md` | Historia Wir Studio, ton tekstów, słowa-klucze, czego unikamy | Grzegorz (Claude pomaga ułożyć) |
 | `inspiracje.md` | Strony i ruchy, które się podobają, z jednym zdaniem „dlaczego” | Grzegorz wkleja link i zdanie, Claude dopisuje pomiary |
 | `katalog-ruchu.md` | Słownik ruchów: co robią, kiedy pasują, liczby, gdzie już użyte | Claude po każdej próbie; Grzegorz ocenia |
+| `pomiary.md` | Liczby zmierzone w oryginale (cappen) dla każdej sekcji, desktop i telefon; mechanizmy dociągania | Claude po każdym pomiarze |
+| `lekcje.md` | Błędy, które już były: objaw → przyczyna → rozwiązanie | Claude po każdym błędzie, który kosztował rundę pracy |
+| `hero.md` | Hero: co wybrane, co jest w `lab/hero.html`, uwagi Grzegorza | Claude po każdej decyzji o hero |
 | `media/` | Nagrania i zrzuty cudzych stron, szkice, zdjęcia z telefonu | Grzegorz; **nie trafia do repo** (repo jest publiczne) |
 
 ## Jak dodawać (najprościej)
