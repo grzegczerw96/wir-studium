@@ -170,7 +170,18 @@ html:not(.motion) .menu.open{clip-path:none}
 html.motion .intro{height:200svh}
 html.motion .intro-pin{position:sticky;top:0}
 .hero-t{position:relative;z-index:3;margin:0;font-family:var(--grot);font-weight:900;letter-spacing:-.04em;
-  line-height:.84;text-transform:uppercase;text-align:center;white-space:nowrap;font-size:var(--fs,4rem)}
+  line-height:.84;text-transform:uppercase;text-align:center;white-space:nowrap;font-size:var(--fs,4rem);
+  /* the O of Inter Tight Black (what measureO() reads from the face) */
+  --ow:.7715em;--ol:.03em;--od:-.01em;--obw:.715em;--obh:.75em;
+  /* the size fitHero() computes, in CSS: the widest line ("MATERIAŁ", 4.88em) at 97 % of the width between the gutters,
+     never taller than the room (3 lines of .84 in the screen without the paddings, the note and 2.5rem; 600px at least
+     on desktops); desktops 9.75rem at most. The script keeps writing --fs; this is for the first paint */
+  --fsc:min((100vw - 2*var(--gut))*.19877,(100svh - var(--r)*18.375 - env(safe-area-inset-top,0px))/2.52)}
+@supports (width:round(down,1.5px,1px)){.hero-t{font-size:var(--fs,round(down,var(--fsc),1px))}}
+@supports not (width:round(down,1.5px,1px)){.hero-t{font-size:var(--fs,var(--fsc))}}
+@media (min-width:1025px){.hero-t{--fsc:min(var(--r)*9.75,(max(100svh,600px) - var(--r)*10.55 - 55px)/2.52)}}
+/* phones and tablets: the title is centred in the room above the note (4 lines: 4.5rem) and 2.5rem (as fitHero()) */
+@media (max-width:1024px){.hero-t{margin-bottom:calc(var(--r)*7)}}
 .hero-t .ln{display:block;perspective:calc(var(--r)*31.25)}
 .hero-t .ch{display:inline-block;backface-visibility:hidden;
   transform:translateZ(-.85em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(.85em)}
@@ -680,9 +691,10 @@ html:not(.motion) .stage3{display:none}
 <main id="top">
   <section class="intro" id="intro">
     <div class="intro-pin" id="introPin">
-      <!-- the letters and the O (the window) are built by the script; without it the plain title stays -->
-      <h1 class="hero-t" id="heroT" aria-label="Ruch to nasz materiał">Ruch to nasz materiał</h1>
-      <p class="hero-note" id="heroNote">Małe, niezależne studio, które od 2014 roku projektuje i koduje strony z ruchem dla marek, które nie chcą wyglądać jak wszyscy.</p>
+      <!-- the letters, one span each, and the O of "TO": an empty gap carrying the window (in the page itself, not built
+           by the script, so the first screen is complete at the first paint) -->
+      <h1 class="hero-t" id="heroT" aria-label="Ruch to nasz materiał"><span class="ln" aria-hidden="true"><span class="ch">R</span><span class="ch">u</span><span class="ch">c</span><span class="ch">h</span></span><span class="ln" aria-hidden="true"><span class="ch">T</span><span class="gap"><span class="win" id="winIn"></span></span><span class="sp"> </span><span class="ch">n</span><span class="ch">a</span><span class="ch">s</span><span class="ch">z</span></span><span class="ln" aria-hidden="true"><span class="ch">M</span><span class="ch">a</span><span class="ch">t</span><span class="ch">e</span><span class="ch">r</span><span class="ch">i</span><span class="ch">a</span><span class="ch">ł</span></span></h1>
+      <p class="hero-note" id="heroNote"><span class="w">Małe,</span> <span class="w">niezależne</span> <span class="w">studio,</span> <span class="w">które</span> <span class="w">od</span> <span class="w">2014</span> <span class="w">roku</span> <span class="w">projektuje</span> <span class="w">i</span> <span class="w">koduje</span> <span class="w">strony</span> <span class="w">z</span> <span class="w">ruchem</span> <span class="w">dla</span> <span class="w">marek,</span> <span class="w">które</span> <span class="w">nie</span> <span class="w">chcą</span> <span class="w">wyglądać</span> <span class="w">jak</span> <span class="w">wszyscy.</span></p>
       <div class="stripes" id="stripes" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="box" id="box" aria-hidden="true"><div class="orb-wrap" id="orbWrap1"><canvas class="orb" id="orb1"></canvas></div></div>
     </div>
@@ -1338,13 +1350,8 @@ function main(){
   if('scrollRestoration' in history)history.scrollRestoration='manual';
   scrollTo(0,0);
 
-  // the letters, one span each; {o} is the O of "TO": an empty gap carrying the window
-  const LINES=['Ruch','T{o} nasz','Materiał'];
-  const chars=t=>[...t].map(c=>c===' '?'<span class="sp"> </span>':`<span class="ch">${c}</span>`).join('');
-  heroT.innerHTML=LINES.map(l=>'<span class="ln" aria-hidden="true">'
-    +l.split('{o}').map(chars).join('<span class="gap"><span class="win" id="winIn"></span></span>')+'</span>').join('');
+  // (the letters, the O's gap with the window and the note's words are in the page: see #heroT)
   const winIn=document.getElementById('winIn');
-  heroNote.innerHTML=heroNote.textContent.split(' ').map(w=>`<span class="w">${w}</span>`).join(' ');
 
   /* the O of the face: advance, ink box and counter (the white inside), in em, from a canvas rendering */
   let OC={w:.3,h:.45,dx:0,dy:0},FS=100;
