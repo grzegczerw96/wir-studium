@@ -1644,12 +1644,19 @@ function main(){
   // (the direction is that of the whole gesture, from where the finger came down: the last scroll events of a swipe
   //  can step back by a fraction of a pixel on a 3× screen)
   if(coarse&&lenis){let down=false,idle=0,y0=scrollY,dir=0;
-    const go=()=>{const p=introST.progress;
-      window.__carry={p:+p.toFixed(3),dir,down,auto:!!window.__autoScrolling};   // (for tools/phone.py)
-      if(down||menuOpen||window.__autoScrolling||dir<=0||p<=.05||p>=.995)return;
-      const dur=Math.min(1.25+Math.abs(p-1),1.25)*.75;
+    // (and the footer, Grzegorz 11.10: once "Kręcimy się" has started to come in, the rest of the page — ~1.3 screens
+    //  with nothing new — is carried to the end, as the original snaps it with a mouse: past 10 % of the footer's
+    //  timeline, 2 s quad in-out)
+    const go=()=>{const p=introST.progress,ft=window.__ftST,max=document.documentElement.scrollHeight-innerHeight;
+      const pf=ft?(scrollY-ft.start)/(ft.end-ft.start):0;
+      window.__carry={p:+p.toFixed(3),pf:+pf.toFixed(3),dir,down,auto:!!window.__autoScrolling};   // (for tools/phone.py)
+      if(down||menuOpen||window.__autoScrolling||dir<=0)return;
+      let to=null,dur=0;
+      if(p>.05&&p<.995){to=introST.end;dur=Math.min(1.25+Math.abs(p-1),1.25)*.75}
+      else if(ft&&pf>.1&&scrollY<max-2){to=max;dur=2}
+      if(to===null)return;
       window.__autoScrolling=true;
-      lenis.scrollTo(introST.end,{duration:dur,force:true,easing:quadIO,onComplete:()=>{window.__autoScrolling=false}});
+      lenis.scrollTo(to,{duration:dur,force:true,easing:quadIO,onComplete:()=>{window.__autoScrolling=false}});
       setTimeout(()=>{window.__autoScrolling=false},dur*1000+400)};
     const wait=()=>{clearTimeout(idle);if(!down)idle=setTimeout(go,250)};
     addEventListener('touchstart',()=>{down=true;y0=scrollY;clearTimeout(idle);
@@ -1944,6 +1951,11 @@ function main(){
   const plc=()=>{const p=document.getElementById('tkPlace'),st=document.getElementById('tkFormSticky');if(!isDesk()||!p.offsetWidth)return {x:innerWidth*1.1,y:isDesk()?cY():innerHeight*.37};
     return {x:p.offsetLeft+p.offsetWidth/2,y:p.offsetTop+p.offsetHeight/2}};
   const midEnd=()=>tkFormWrap.offsetTop+2.5*innerHeight;
+  // (phones, at the end of the page: the middle of the free band between the footer title and the social list, from the
+  //  live layout — at 30 % of the screen the coil ran under "Kręcimy się" (Grzegorz's phone, 11.10). The footer's
+  //  content fills the screen from its top at the end, so the offsets from its wrapper are the screen positions)
+  const ftGapY=()=>{const w=document.querySelector('.ft-wrap').getBoundingClientRect().top,t=document.getElementById('ftTitle').getBoundingClientRect().bottom-w,
+    so=document.querySelector('.ft-social'),b=so?so.getBoundingClientRect().top-w:innerHeight*.6;return (t+b)/2};
   // (starts at 70% rather than the bottom edge: our coil layer sits above the white section, so it must not show over the list)
   // (from 45%: the coil comes out of the dark only once the page has turned dark grey, never pale on light grey)
   gsap.timeline({scrollTrigger:{trigger:'#contact',start:'top 45%',end:'top top',scrub:true,invalidateOnRefresh:true}})
@@ -1970,7 +1982,7 @@ function main(){
       setTimeout(()=>{window.__autoScrolling=false},2150)};
     L.on('scroll',()=>{clearTimeout(snapT);if(!window.__autoScrolling)snapT=setTimeout(snap,180)})}
   gsap.timeline({scrollTrigger:{trigger:'#contact',start:()=>'top+='+midEnd()+' top',endTrigger:'#footer',end:()=>'bottom-='+innerHeight*1.75+' top',scrub:true,invalidateOnRefresh:true}})
-    .fromTo(P3,{x:()=>plc().x,y:()=>plc().y,t:Math.PI/4},{x:()=>isDesk()?plc().x*.97:innerWidth,y:()=>isDesk()?plc().y:innerHeight*.3,t:Math.PI/2,duration:1,ease:'power4.inOut',immediateRender:false},0)
+    .fromTo(P3,{x:()=>plc().x,y:()=>plc().y,t:Math.PI/4},{x:()=>isDesk()?plc().x*.97:innerWidth,y:()=>isDesk()?plc().y:ftGapY(),t:Math.PI/2,duration:1,ease:'power4.inOut',immediateRender:false},0)
     .fromTo(P3,{s:()=>isDesk()?.6:.4},{s:()=>isDesk()?.85:.65,duration:.75,ease:'power1.inOut',immediateRender:false},.25);
   // (the coil layer is cut at the contact section's top edge, so it never shows over the light end of "about")
   const stage3=document.getElementById('stage3'),contactEl=document.getElementById('contact');let s3clip='',s3op=-1;
@@ -1978,7 +1990,12 @@ function main(){
   //  was ~.55 of it — 246 px against 450 at the end of the footer at 1280×620, 216 against ~370 at the contact on a
   //  phone; measured with tools/coil.py, 11.10)
   const k3=()=>1.1;
-  if(coil3)gsap.ticker.add(()=>{if(!visible.has(coil3))return;coil3.setPos(P3.x,P3.y);coil3.setPose(P3.t,P3.s*k3());coil3.setShade(P3.d,1.6-2.8*P3.d);
+  // (its box on the screen, estimated from the pose — a face-on ring is as tall as wide, edge-on about half of it with
+  //  the perspective and the wire, measured on Grzegorz's phone screenshot — for
+  //  tools/paths.py: the coil must not run under the footer's text)
+  const p3box=()=>{const D=.7464*stage3.clientHeight*P3.s*k3(),h=D/2*(Math.abs(Math.cos(P3.t))+.55*Math.abs(Math.sin(P3.t)));
+    window.__P3box=[P3.x-D/2,P3.y-h,P3.x+D/2,P3.y+h]};
+  if(coil3)gsap.ticker.add(()=>{if(!visible.has(coil3))return;coil3.setPos(P3.x,P3.y);coil3.setPose(P3.t,P3.s*k3());p3box();coil3.setShade(P3.d,1.6-2.8*P3.d);
     if(P3.o!==s3op){s3op=P3.o;stage3.style.opacity=s3op}});
   window.__contactY=()=>tkIn.scrollTrigger.end;
   /* footer (the original's timeline, scrubbed from the footer's top at the top to its bottom at the bottom — so nothing

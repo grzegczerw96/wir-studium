@@ -5,7 +5,10 @@ usage: py -I tools/paths.py [d|m] [--src file]
 Rules (add new ones to RULES):
   footer-over-form  a letter of the footer title visible (more than 10% turned in) while the form is still above 5% opacity
   title-over-form   phones: the contact line visible while a form box is in
-  low-contrast      the contact line, the footer title or an award name on a background with contrast below 3:1"""
+  low-contrast      the contact line, the footer title or an award name on a background with contrast below 3:1
+  coil-over-text    the contact coil (its box estimated by the page, window.__P3box) more than 6 px into the footer's
+                    visible text (title letters turned in, the social list, the end line): the text stands on bright metal
+                    (Grzegorz's phone, 11.10). The page's own coil box needs index.html from 11.10 on"""
 import os, sys, json, argparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _env
@@ -26,6 +29,9 @@ REC = r"""(()=>{const R=window.__rec=[];const form=document.getElementById('tkFo
    awC:(()=>{const v=[...document.querySelectorAll('.aw-name')].filter(n=>{const r=n.getBoundingClientRect();return r.bottom>0&&r.top<H&&r.height>4});return v.length?+Math.min(...v.map(contrast)).toFixed(2):99})(),
    awGrey:(()=>{const v=[...document.querySelectorAll('.aw-name')].some(n=>{const r=n.getBoundingClientRect();return r.bottom>8&&r.top<H&&r.height>4});
      const g=+(bgAt(document.querySelector('.aw-name')).match(/\d+/)||[252])[0];return v&&g>70&&g<200})(),
+   coilText:(()=>{const B=window.__P3box,P=window.__P3;if(!B||!P||P.o<.5||P.d>.5)return '';const hit=(r,n)=>Math.min(B[2],r.right)-Math.max(B[0],r.left)>6&&Math.min(B[3],r.bottom)-Math.max(B[1],r.top)>6&&r.bottom>0&&r.top<H?n:'';
+     const ts=ch.filter(c=>{const v=parseFloat(c.style.getPropertyValue('--rx'));return Math.abs(isNaN(v)?90:v)<81}).map(c=>hit(c.getBoundingClientRect(),'title')).find(Boolean);
+     return ts||['.ft-social','.ft-end'].map(q=>{const e=document.querySelector(q);return e?hit(e.getBoundingClientRect(),q):''}).find(Boolean)||''})(),
    coilGrey:(()=>{const s=document.getElementById('stage3'),o=+(s.style.opacity||0),g=+(bgAt(document.getElementById('contact')).match(/\d+/)||[0])[0];return o>.25&&g>70})()});requestAnimationFrame(f)})()})()"""
 RULES = [
     ('footer-over-form', lambda s: s['letters'] > .1 and s['formOp'] > .05 and s['fb'] > s['ftTop']),   # the form still reaching into the title
@@ -33,6 +39,7 @@ RULES = [
     ('low-contrast', lambda s: (s['tVis'] and s['tC'] < 3) or (s['letters'] > .1 and s['fC'] < 3) or s.get('awC', 99) < 3),
     ('list-on-grey', lambda s: s.get('awGrey')),     # Grzegorz 10.10.2026: the award list must not sit on the mid-grey of the change
     ('coil-on-grey', lambda s: s.get('coilGrey')),   # the contact coil must not show (over 25%) on a light/mid-grey page
+    ('coil-over-text', lambda s: s.get('coilText')),   # Grzegorz 11.10: the coil ran under "Kręcimy się" on his phone
 ]
 VIEW = dict(viewport={'width': 1280, 'height': 620}) if A.mode == 'd' else dict(viewport={'width': 360, 'height': 649}, is_mobile=True, has_touch=True)
 with sync_playwright() as p:
@@ -51,6 +58,7 @@ with sync_playwright() as p:
     wheel(-100, int(1.8 * H / 100)); pg.wait_for_timeout(1500)   # back up to the form
     wheel(100, int(1.2 * H / 100), 60); pg.wait_for_timeout(2500)   # down again, slower
     wheel(-100, int(1.0 * H / 100)); wheel(100, int(1.0 * H / 100)); pg.wait_for_timeout(2500)   # a quick flick up and down
+    wheel(100, int(4 * H / 100), 60); pg.wait_for_timeout(2500)   # on to the very end of the page (the footer's last state)
     pg.evaluate('window.__recOn=false'); rec = pg.evaluate('window.__rec'); b.close()
 bad = {}
 for i, s in enumerate(rec):
