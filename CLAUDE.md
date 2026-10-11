@@ -1,7 +1,7 @@
 # Wir Studio: studium animacji i przewodnik budowania stron z ruchem
 
 Ten plik czyta Claude na początku każdej sesji w tym repozytorium. Jest też notatką dla Grzegorza: jak budujemy takie strony i co sprawia, że wyglądają profesjonalnie.
-Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór testów do ryzyka w §3a, tabela reguł w §6.3 p. 6; pomiary, lekcje, hero i szczegóły narzędzi są w osobnych plikach (§0). Hero przeniesione na stronę główną; czeka na pomiar na telefonie i ocenę Grzegorza (§5).
+Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór testów do ryzyka w §3a, tabela reguł w §6.3 p. 6; pomiary, lekcje, hero i szczegóły narzędzi są w osobnych plikach (§0).
 
 ---
 
@@ -19,7 +19,7 @@ Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór te
 
 1. **Ustal sekcję i ścieżkę:** odtwarzanie z oryginału czy własna sekcja (nowa albo przeróbka), i na którym etapie jesteśmy (§3a). Gdy nie wynika to z wiadomości Grzegorza, zapytaj jednym pytaniem.
 2. **Czytaj tylko to, co do etapu potrzebne** (§0): odtwarzanie → `wiedza/pomiary.md` (ta sekcja) i kod oryginału; własna sekcja → `marka.md`, `inspiracje.md`, `katalog-ruchu.md`; szukanie błędu → `lekcje.md`. Dużych plików nie czytać w całości (`index.html` ok. 150 KB): szukać po nazwach klas sekcji.
-3. **Dobierz sprawdzanie do ryzyka, nie z rytuału** (§3a, trzy pytania). Zwykła sekcja to kilka minut sprawdzania; komplet tylko dla nowej techniki, raz, przy przeniesieniu; pełna responsywność raz, na końcu całości.
+3. **Dobierz sprawdzanie do ryzyka, nie z rytuału** (§3a).
 4. **Nowy czat na każdy etap.** Długa rozmowa drożeje z każdą rundą; wszystko, co ważne, jest w repo.
 5. **Na koniec etapu:** stan w §5, nowy błąd do `wiedza/lekcje.md` (tylko taki, który kosztował rundę), commit i push.
 
@@ -36,10 +36,10 @@ Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór te
 
 ## 2. Jak Grzegorz lubi pracować
 
-- **Wzorcem jest oryginał, a nie ocena Claude.** Najpierw pomiar (`probe.py`), potem budowa, a sprawdzanie głównie jako porównanie z oryginałem. Opis Grzegorza bywa nieprecyzyjny i sam to zaznacza, a liczy się źródło.
+- **Wzorcem jest oryginał, a nie ocena Claude** (przy odtwarzaniu, ścieżka A; przy własnej sekcji wzorcem jest zatwierdzony wariant w `lab/`, ścieżka B, §3a). Najpierw pomiar (`probe.py`), potem budowa, a sprawdzanie głównie jako porównanie z oryginałem. Opis Grzegorza bywa nieprecyzyjny i sam to zaznacza, a liczy się źródło.
 - **Kod oryginału** (`/wp-content/themes/cappen/js/main.js`) to najlepsze źródło liczb. Filmy Grzegorza pokazują to, czego kod nie mówi wprost, np. kolejność warstw albo to, co faktycznie widać.
 - **Automatycznie sprawdzamy tylko rzeczy obiektywne i widoczne dla człowieka:** nachodzenie, tekst za ekranem, przeskoki, przerwy, przycięcia, krawędzie warstw, rozmiary okna. Rzeczy smakowe (np. w którą stronę leci dym) ocenia Grzegorz; nie budować dla nich reguł.
-- **Budżet sprawdzania:** według etapu pracy (§3a): po zmianie szybka kontrola (kilka minut, tylko narzędzia pasujące do zmiany); przy przenoszeniu sekcji komplet dla tej sekcji; pełna responsywność raz, na końcu całości. Pół godziny do godziny na samo sprawdzanie jednej sekcji to za dużo, chyba że sekcja ma dużo ruchu na różnych szerokościach.
+- **Budżet sprawdzania:** §3a (jedyne miejsce, gdzie jest opisany).
 - **Jedna sekcja na raz.** Uwagi przychodzą ponumerowane („* …”). Każdą trzeba odhaczyć w odpowiedzi.
 - **Najważniejsza jest czytelność.** Tekst nigdy nie może stać na tle, na którym go nie widać, ani nachodzić na inny tekst.
 - **Reguły to pomoc, nie gorset** (Grzegorz, 10.10.2026). Jeśli jest sposób szybszy albo dokładniejszy, którego nie ma w tym pliku (nowe narzędzie, program do zainstalowania, agent, polecenie), zaproponuj go i użyj. Zasady czytelności i wierności oryginałowi zostają.
@@ -63,7 +63,7 @@ Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór te
 
 ## 3. Sposób pracy (pętla)
 
-1. **Zmierz w oryginale.** W przeglądarce aplikacji Claude otwórz `https://cappen.com/`, pobierz `main.js` przez `fetch()` w konsoli strony i szukaj po nazwach klas sekcji (np. `about__clients`, `talk__form`, `footer__title`, `snap`, `scrollTo`). Geometrię mierz przez `getBoundingClientRect()` w oknie **1280×620** (jak na filmach Grzegorza), albo `tools/probe.py`. Wcześniejsze pomiary: `wiedza/pomiary.md`.
+1. **Zmierz w oryginale** (ścieżka A; przy ścieżce B start w `lab/`, §3a). W przeglądarce aplikacji Claude otwórz `https://cappen.com/`, pobierz `main.js` przez `fetch()` w konsoli strony i szukaj po nazwach klas sekcji (np. `about__clients`, `talk__form`, `footer__title`, `snap`, `scrollTo`). Geometrię mierz przez `getBoundingClientRect()` w oknie **1280×620** (jak na filmach Grzegorza), albo `tools/probe.py`. Wcześniejsze pomiary: `wiedza/pomiary.md`.
    - Oryginał przewijaj przez `window.main.scroller.scrollTo(y,{immediate:true,force:true})`.
    - **Panel przeglądarki musi być widoczny.** Gdy jest schowany, `requestAnimationFrame` staje: preloader oryginału się nie kończy, a skrypty czekające na klatki wiszą.
    - W przeglądarce aplikacji system ma włączone ograniczanie ruchu: na naszej stronie trzeba ustawić `localStorage['wir-motion']='on'`.
@@ -75,6 +75,7 @@ Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór te
 7. **Po testach przywróć widok przeglądarki** do ustawienia „desktop”.
 
 Drobne pułapki środowiska:
+- **Telefon Grzegorza (`phone.py`, `phone_load.py`, adb): dotykać wyłącznie karty z naszą stroną**; inne karty i pliki są prywatne (ze zrzutów tylko dzisiejsze z Chrome).
 - Skrypty z wieloma odwróconymi apostrofami (Markdown, JS) zapisuje się narzędziami do edycji plików, nie przez `bash -c "…"`: bash wykonuje tekst w odwróconych apostrofach jako polecenia.
 - Materiały od Grzegorza: zrzuty z telefonu w `/sdcard/DCIM/Screenshots` (`adb pull` tylko dzisiejszych z Chrome); filmy (`.mp4`) rozkłada się na klatki przez `ffmpeg`. Nagrania cudzych stron w `wiedza/media/` (poza repo).
 
@@ -103,7 +104,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 
 **Ścieżka A: odtwarzanie oryginału.** Sprawdzanie to porównanie z oryginałem.
 1. Pomiar: `main.js` i `probe.py` (liczby, krzywe, progi). Responsywności nie wymyślamy: przepisujemy progi oryginału, on je rozwiązał.
-2. Budowa; po każdej zmianie układu `node --check` i `audit.py --section '#id'` na `quick` (ok. 1 min, łapie najwięcej typowych błędów).
+2. Budowa; po każdej zmianie układu `node --check` i `audit.py --section '#id'` na `quick` (ok. 1 min, łapie najwięcej typowych błędów). Gdy sekcja zmienia kolor strony albo dzieli warstwę z sąsiadem, także `paths.py`: prawie wszystkie błędy, które dotarły do Grzegorza, siedziały na styku sekcji (szare tło pod listą, napis nad formularzem, ucięta spirala), a `audit.py` ich nie łapie.
 3. Porównanie liczb w tych samych miejscach (a gdy powstanie, obraz obok siebie: §5, zadanie 6).
 4. Telefon raz, na płynność. Grzegorz na końcu ocenia, „czy czuć oryginał”.
 
@@ -122,6 +123,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 - **Bez reguł dla rzeczy smakowych** (np. kierunek dymu): to ocenia Grzegorz.
 - **Koszty:** samo uruchomienie narzędzia jest tanie (minuty pracy komputera, kilka linijek wyniku). Drogie są badanie zgłoszeń, rundy „zmiana, test, obrazek, wniosek” w długiej rozmowie, oglądanie zrzutów i czytanie dużych plików.
 
+**Uwagi techniczne:**
 - **Strona główna albo lab:** `center`, `overlap`, `motion` i `sizes` sprawdzają domyślnie stronę główną; `lab` jako pierwszy argument sprawdza `lab/hero.html` (profile w `_env.PAGES`).
 - **Pasek przewijania:** Playwright domyślnie go ukrywa, a u Grzegorza (Windows, Chrome, gęstość 1,25) ma 15 px. Narzędzia do położeń uruchamiać z `_env.launch(p, scrollbars=True)`.
 - **Czego emulacja nie pokaże:** chowania paska adresu w Chrome na Androidzie i płynności. To sprawdza tylko prawdziwy telefon (Samsung Galaxy M15 5G, 360×649 z paskiem adresu, 90 Hz).
@@ -160,7 +162,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 
 **Zadania po kolei:**
 1. **Narzędzia: porównanie z poprzednią wersją** (najwięcej daje, 11.10.2026): każde narzędzie uruchamia się na bieżącej wersji i na ostatnim commicie i zgłasza tylko nowe problemy; zgłoszenia niestabilne powtarza samo i oznacza. `center.py` i `overlap.py` (pisane pod hero) przy następnym użyciu uogólnić (selektory w wywołaniu, jak `--groups` w `sizes.py`) albo usunąć z repo: narzędzia mają być ogólne, nie muzeum.
-2. **Przegląd `innerWidth`/`innerHeight` w `index.html`** (42 użycia: 17 szerokość, 25 wysokość) według §6.3: szerokość liczona z paskiem przewijania to błąd, wysokość bywa w porządku. Przejrzeć, a nie zamieniać hurtem.
+2. **Przegląd `innerWidth`/`innerHeight` w `index.html`** (41 użyć: 16 szerokość, 25 wysokość) według §6.3: szerokość liczona z paskiem przewijania to błąd, wysokość bywa w porządku. Przejrzeć, a nie zamieniać hurtem.
 3. **`audit.py` i `paths.py` z prawdziwym paskiem przewijania** (`scrollbars=True`).
 4. **Przewijanie w bok po zmianie szerokości okna** (było już przed hero, sprawdzone na HEAD): gdy w jednej sesji okno rośnie z szerokości telefonu (≤600) do 700–1024 px, strona przewija się w bok o 7–40 px; przy wczytaniu od razu w tej szerokości jest dobrze. `sizes.py --sizes=320x568,700x700,768x1024` pokazuje błąd.
 5. **`sizes.py --critical`**: rozmiary krytyczne z progów i linii przełączenia (§6.3 p. 6) zamiast siatki 178; przy pierwszej sekcji z tabelą reguł. (Jedno polecenie na etap, `check.py`, na razie nie: tabela etapów wystarcza, a każde narzędzie trzeba utrzymywać.)
@@ -179,7 +181,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 4. **Ciągłość.** Nic się nie podmienia między stanami. To, co rośnie, to ten sam obiekt, a jedna bryła przechodzi przez wiele sekcji na stałej warstwie.
 5. **Fale zamiast kolejki.** Wiele elementów rusza się naraz z małym przesunięciem (.035 s między literami, .1 s między liniami).
 6. **Warstwy nie walczą.** Następna treść pojawia się dopiero, gdy poprzednia zniknęła. Tekst nigdy nie stoi na tle bez kontrastu.
-7. **Strona prowadzi użytkownika.** Dociąganie i automatyczne przewijanie sprawiają, że nie da się „utknąć” w połowie przejścia (liczby: `wiedza/pomiary.md`). U nas tylko z myszą lub gładzikiem.
+7. **Strona prowadzi użytkownika.** Dociąganie i automatyczne przewijanie sprawiają, że nie da się „utknąć” w połowie przejścia (liczby: `wiedza/pomiary.md`). U nas z myszą lub gładzikiem; na dotyku tylko intro (po zdjęciu palca, §2).
 8. **60 kl./s także na telefonie.** Rysujemy tylko to, co widać (IntersectionObserver), na dotyku lżejsze efekty i natywne przewijanie.
 9. **Wersja bez animacji też wygląda dobrze** (`prefers-reduced-motion`, klasa `html.motion`).
 10. **Detale:** stany najechania, widoczny focus, Esc zamyka menu, linki działają z klawiatury.
@@ -203,7 +205,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
   1. Gdzie co stoi, decyduje tylko CSS: flex/grid, jednostki `--r` i `em`, rozmiary liczone z kroju. JS nie wpisuje pozycji w px.
   2. JS tylko czyta gotowe pudełka (`getBoundingClientRect`) i zawsze w układzie elementu, na którym rysuje (warstwa z `clip-path`, płótno spirali). Nigdy `innerWidth` jako szerokość ekranu: liczy pasek przewijania (15 px na Windows). Środek ekranu: `document.documentElement.clientWidth / 2`. `innerHeight` zmienia się na telefonie z paskiem adresu.
   3. Mierzyć od nowa, gdy coś się zmienia (`ResizeObserver` na elementach, doczytane fonty), nie tylko przy `resize` okna.
-  4. Każde nowe położenie sprawdzać narzędziem na wielu szerokościach i gęstościach, z prawdziwym paskiem przewijania (wzór: `tools/center.py`), a nie wzrokiem na jednym zrzucie.
+  4. Nowe położenie sprawdzać narzędziem na rozmiarach krytycznych z tabeli reguł (p. 6), z prawdziwym paskiem przewijania i gęstością 1,25, a nie wzrokiem na jednym zrzucie.
   5. **Tekst, który z założenia nie wychodzi** (taniej niż sprawdzanie; `sizes.py` ma tylko potwierdzać):
      - duże tytuły mają wielkość ograniczoną i szerokością, i wysokością (`min(…vw, …svh)` albo `clamp`; `svh`, nie `vh`, bo na telefonie `vh` zmienia się z paskiem adresu, §6.4 p. 7), lokalnie w danym tytule, bez zmiany globalnego `--r`;
      - teksty w układzie flex/grid z odstępami, a nie w pozycjach absolutnych obok innych elementów;
