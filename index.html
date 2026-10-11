@@ -3,7 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Wir Studio</title>
+<title>Wir Studio – strony z ruchem</title>
+<meta name="description" content="Małe, niezależne studio, które od 2014 roku projektuje i koduje strony z ruchem dla marek, które nie chcą wyglądać jak wszyscy.">
+<link rel="canonical" href="https://grzegczerw96.github.io/wir-studium/">
+<meta name="theme-color" content="#fcfcfc">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pl_PL">
+<meta property="og:site_name" content="Wir Studio">
+<meta property="og:title" content="Wir Studio – strony z ruchem">
+<meta property="og:description" content="Małe, niezależne studio, które od 2014 roku projektuje i koduje strony z ruchem dla marek, które nie chcą wyglądać jak wszyscy.">
+<meta property="og:url" content="https://grzegczerw96.github.io/wir-studium/">
+<!-- the icon: the black O of the title, inline (no request) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='16' rx='13' ry='14' fill='%23050505'/%3E%3C/svg%3E">
 <!-- fonts from this site (Google's own files and @font-face rules; Archivo cut to the weights and widths in use). Each
      face has small files in front of Google's: "core" (ASCII and the few other characters the page uses) and "pl" (the
      Polish letters); the full latin and latin-ext files load only for a character outside them (e.g. typed in the form).
@@ -51,9 +62,10 @@
    are ready, so the plain layout (box in the middle, thick stripes, the headline in a fallback font) never flashes */
 (function(){var d=document.documentElement,f=false;try{f=localStorage.getItem('wir-motion')==='on'}catch(e){}
   var m=!matchMedia('(prefers-reduced-motion: reduce)').matches||f;
-  /* ?w=S, the quick start: the first screen is complete at the first paint (laid out by CSS alone), the libraries come
-     after it and three.js with the coil at the first move (or after a few seconds); no loader, no smoke */
-  var fast=m&&/[?&]w=S(&|$)/.test(location.search);
+  /* the quick start (default since 11.10, for the page's speed): the first screen is complete at the first paint (laid
+     out by CSS alone), the libraries come after it and three.js with the coil at the first move (or after a few
+     seconds); no loader, no smoke. ?w=C: the entrance with the loader and the smoke (wiedza/hero.md) */
+  var fast=m&&!/[?&]w=C(&|$)/.test(location.search);
   if(m)d.classList.add('motion',fast?'fast':'pre');if(!fast)d.classList.add('wait');
   var load=function(s){return new Promise(function(r){var e=document.createElement('script');e.src=s;e.async=false;e.onload=e.onerror=r;document.head.appendChild(e)})};
   var L=['lib/gsap-3.12.5.min.js','lib/ScrollTrigger-3.12.5.min.js','lib/lenis-1.1.13.min.js'],T='lib/three-0.149.0-wir.min.js';
@@ -101,7 +113,7 @@ html.wait .hd,html.wait main{visibility:hidden;animation:wir-show 0s 15s forward
    preloader, without its pictures); the script takes it over at exactly this size and place and carries it into the O */
 html.pre .box{clip-path:ellipse(calc(var(--r)*5) calc(var(--r)*5.25) at 50% 50svh)}
 html.wait.pre .box{visibility:visible;animation:none}
-/* the quick start (?w=S): no loader; until the script takes the black stage over, the O is its own black oval */
+/* the quick start (default; ?w=C: the loader's entrance): no loader; until the script takes the black stage over, the O is its own black oval */
 html.fast:not(.live) .box{visibility:hidden}
 html.fast:not(.live) .hero-t .win{background:var(--ink);border-radius:50%}
 .it{font-family:var(--serif);font-style:italic;font-weight:400}
@@ -464,10 +476,10 @@ html:not(.motion) .pr-w::before,html:not(.motion) .pr:last-of-type::after{transf
 .ab-col{display:flex;flex-direction:column;gap:calc(var(--r)*2.5)}
 .ab-col:first-child{width:calc(var(--r)*18.125)}
 .ab-col:nth-child(2){align-self:flex-end;width:calc(var(--r)*16.25)}
-.ab-art h4{margin:0;font:400 calc(var(--r)*1.375)/1 var(--grot);padding-right:calc(var(--r)*1.25)}
+.ab-art .ab-lead{margin:0;font:400 calc(var(--r)*1.375)/1 var(--grot);padding-right:calc(var(--r)*1.25)}
 .ab-art p,.ab-art ul{margin:0;font:400 max(13px,calc(var(--r)*.9375))/1.2 var(--grot)}
 .ab-art ul{list-style:none;padding:0}
-.ab-art h5{margin:0;font:400 max(13px,calc(var(--r)*.9375))/1.2 var(--grot);color:#989a96}
+.ab-art .ab-cat{margin:0;font:400 max(13px,calc(var(--r)*.9375))/1.2 var(--grot);color:#989a96}
 .ab-item{display:flex;flex-direction:column;gap:calc(var(--r)*1.25)}
 .ab-tx .ln2{display:inline-block;transform:translateZ(-1em) rotateX(var(--rx,0deg)) scaleY(var(--sy,1)) translateZ(1em);backface-visibility:hidden}
 @media (min-width:600px){
@@ -484,7 +496,7 @@ html:not(.motion) .pr-w::before,html:not(.motion) .pr:last-of-type::after{transf
   .ab-col{gap:calc(var(--r)*6.25)}
   .ab-col:nth-child(2){align-self:auto}
   .ab-col>*{min-height:calc(var(--r)*9.0625)}
-  .ab-art h4{font-size:calc(var(--r)*1.5625);line-height:1.16}
+  .ab-art .ab-lead{font-size:calc(var(--r)*1.5625);line-height:1.16}
 }
 @media (min-width:1025px){
   .about{--r:min(1.111vw,2.556vh)}
@@ -756,12 +768,12 @@ html:not(.motion) .stage3{display:none}
       <figure class="ab-vid" id="abVid"><div class="img"><i></i></div></figure>
       <div class="ab-art">
         <div class="ab-col">
-          <h4 class="ab-tx">Jesteśmy małą pracownią, która łączy projektowanie, ruch i technologię.</h4>
+          <h3 class="ab-tx ab-lead">Jesteśmy małą pracownią, która łączy projektowanie, ruch i technologię.</h3>
           <p class="ab-tx">Pracujemy we trójkę: projektant, programistka i ktoś, kto pilnuje, żeby wszystko działało także na starym telefonie.</p>
         </div>
         <div class="ab-col">
-          <div class="ab-item"><h5 class="ab-tx">Strony i produkty</h5><ul class="ab-tx"><li>Strony firmowe</li><li>Mikrostrony premier</li><li>Aplikacje webowe</li><li>Sklepy</li><li>Animacje i WebGL</li></ul></div>
-          <div class="ab-item"><h5 class="ab-tx">Marka i ruch</h5><ul class="ab-tx"><li>Identyfikacja</li><li>Projekt UX i UI</li><li>Prototypy</li><li>Systemy projektowe</li><li>Motion design</li></ul></div>
+          <div class="ab-item"><h4 class="ab-tx ab-cat">Strony i produkty</h4><ul class="ab-tx"><li>Strony firmowe</li><li>Mikrostrony premier</li><li>Aplikacje webowe</li><li>Sklepy</li><li>Animacje i WebGL</li></ul></div>
+          <div class="ab-item"><h4 class="ab-tx ab-cat">Marka i ruch</h4><ul class="ab-tx"><li>Identyfikacja</li><li>Projekt UX i UI</li><li>Prototypy</li><li>Systemy projektowe</li><li>Motion design</li></ul></div>
         </div>
       </div>
     </div>
@@ -816,7 +828,7 @@ html:not(.motion) .stage3{display:none}
 <div class="motion-pill" id="mp" hidden><span>System ogranicza animacje.</span><button type="button" id="mpBtn">Włącz animacje</button></div>
 
 <!-- the libraries (from this site: the same files as on cdnjs, unpkg and jsdelivr) are loaded by the small script in
-     <head>: at once with the loader's entrance, after the first paint with the quick start (?w=S) -->
+     <head>: after the first paint (the quick start), or at once with the loader's entrance (?w=C) -->
 <script>
 /* the main script runs once the document is parsed and a frame with the loader's oval is on the screen (two frames
    later), so the oval shows at once — run straight away, it held the first paint for ~2 s on a phone (measured with
@@ -1943,7 +1955,10 @@ function main(){
     const ct=contactTop.getBoundingClientRect().top,lb=lastAward.getBoundingClientRect().bottom,a=.15*H-lb;
     const out=roomEase(Math.min(1,Math.max(0,a/Math.max(1,a+Math.max(0,ct)))))*(a>0?1:0);
     const v=Math.round(5+247*(roomP(r.top,.55*H,(isDesk()?-.15:-.3)*H)-out));const c=`rgb(${v},${v},${v})`;
-    if(c!==roomLast){roomLast=c;roomEls.forEach(e=>e.style.backgroundColor=c);awardsEl.classList.toggle('inv',v<118)}});
+    // (the about room keeps its own white while it is more than two screens below the view, where none of it shows:
+    //  painted black there, its dark text read as unreadable to accessibility checks)
+    const farA=r.top>2*H,key=c+farA;
+    if(key!==roomLast){roomLast=key;roomEls.forEach(e=>e.style.backgroundColor=farA&&e===aboutEl?'':c);awardsEl.classList.toggle('inv',v<118)}});
   const abF=[...document.querySelectorAll('.ab-fig')];
   const abFl=abF.map((f,k)=>fluidOK?Fluid(f,AB[k]):null);
   abFl.forEach(f=>f&&fluids.push(f));
