@@ -812,6 +812,15 @@ function main(){
   const fontsIn=Promise.race([document.fonts?Promise.all(['900 100px "Inter Tight"','900 100px Archivo','400 15px "Inter Tight"','italic 400 15px "Instrument Serif"'].map(f=>document.fonts.load(f))).catch(()=>{}):0,
     new Promise(r=>setTimeout(r,2500))]);
 
+  /* work that nothing on the first screen needs (pictures and coils further down): queued until the hero's entrance is
+     over or the page is first scrolled (stillGo), then done one piece per idle moment, so it never sits between the
+     page and its first paint nor in the middle of the entrance */
+  const LATER=[];let laterOn=false;
+  const idle=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:500}):setTimeout(f,40);
+  function later(f){LATER.push(f);if(laterOn&&LATER.length===1)idle(laterNext)}
+  function laterNext(){const f=LATER.shift();if(f)f();if(LATER.length)idle(laterNext)}
+  function laterRun(){if(laterOn)return;laterOn=true;if(LATER.length)idle(laterNext)}
+
   /* ================= coil renderer (torus with a helix wound round it) ================= */
   function Coil(canvas,opt={}){
     const o=Object.assign({turns:26,seg:1300,tint:[255,255,255],bg:null,tilt:1.05},opt);
@@ -919,12 +928,28 @@ function main(){
   const visible=new Set();const live=new Set();
   const io=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?live.add(e.target):live.delete(e.target));live.size?visible.add(coils[0]):visible.delete(coils[0])});
   io.observe(document.getElementById('intro'));io.observe(document.getElementById('mani'));io.observe(document.getElementById('wi'));
+  /* the coils of the clients' window and of the contact section are far down the page: they are made once the hero's
+     entrance is over (later(), one per idle moment), or as soon as their section comes within a screen and a half.
+     Made at load they cost ~.4 s of a phone's main thread before the page could show (Lighthouse, 4x slower CPU).
+     Until then a stand-in keeps the last pose, shade and place it was given and draws nothing */
+  function lazyGL(canvas,opt){
+    let real;const last={};
+    const fw=k=>(...a)=>{if(real)return real[k](...a);last[k]=a};
+    const c={make(){if(real!==undefined)return;real=GLCoil(canvas,opt);if(real)for(const k in last)real[k](...last[k])},
+      draw:t=>{real&&real.draw(t)},size:()=>{real&&real.size()},kick:v=>{real&&real.kick(v)},
+      setPose:fw('setPose'),setShade:fw('setShade'),setPos:fw('setPos'),setDark:fw('setDark'),setProgress:fw('setProgress'),dpr:fw('dpr')};
+    later(c.make);
+    return c;
+  }
+  const near=(el,c)=>{const o=new IntersectionObserver(es=>{if(es[0].isIntersecting){o.disconnect();c.make()}},{rootMargin:'150% 0px'});o.observe(el)};
   const orb2=document.getElementById('orb2');
-  const coil2=GLCoil(orb2);
-  if(coil2){new IntersectionObserver(es=>es[0].isIntersecting?visible.add(coil2):visible.delete(coil2)).observe(document.getElementById('clients'));
+  const coil2=window.THREE?lazyGL(orb2):null;
+  if(coil2){near(document.getElementById('clients'),coil2);
+    new IntersectionObserver(es=>es[0].isIntersecting?visible.add(coil2):visible.delete(coil2)).observe(document.getElementById('clients'));
     new ResizeObserver(()=>coil2.size()).observe(orb2)}
   const orb3=document.getElementById('orb3');
-  const coil3=GLCoil(orb3,{mouse:2.5});
+  const coil3=window.THREE?lazyGL(orb3,{mouse:2.5}):null;
+  if(coil3)near(document.getElementById('contact'),coil3);
   window.__wirCoils={intro:coils[0],clients:coil2,contact:coil3};   // for measuring on a real phone
   if(coil3){const vis3=new Set();const io3=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?vis3.add(e.target):vis3.delete(e.target));vis3.size?visible.add(coil3):visible.delete(coil3);document.getElementById('stage3').style.visibility=vis3.size?'visible':'hidden'});
     io3.observe(document.getElementById('contact'));io3.observe(document.getElementById('footer'));addEventListener('resize',()=>coil3.size())}
@@ -968,7 +993,7 @@ function main(){
   // (the drawing itself waits too: done next to the hero's smoke, even on another thread, it cost frames — measured,
   //  tools/motion.py found jumps in the letters' hand-over in 2 of 4 runs, none in 3 runs without it)
   const stillJobs=[];
-  function stillGo(){if(stillOn)return;stillOn=true;stillJobs.forEach(j=>stillW.postMessage(j));stillJobs.length=0;stillApply()}
+  function stillGo(){if(stillOn)return;stillOn=true;laterRun();stillJobs.forEach(j=>stillW.postMessage(j));stillJobs.length=0;stillApply()}
   setTimeout(stillGo,12000);
   function still(w,h,opt){
     if(!stillW)return stillDraw(w,h,opt);
@@ -995,7 +1020,9 @@ function main(){
     }
     return `url(${c.toDataURL('image/jpeg',.85)})`;
   }
-  document.getElementById('thumbs').innerHTML=[...Array(8).keys()].map(i=>`<div class="thumb" style="background-image:${tile(i)}"></div>`).join('');
+  // (the squares of the manifesto, the clients' marks and the award posters are drawn later(): ~.25 s on a phone)
+  document.getElementById('thumbs').innerHTML=[...Array(8).keys()].map(()=>`<div class="thumb"></div>`).join('');
+  later(()=>[...document.getElementById('thumbs').children].forEach((d,i)=>d.style.backgroundImage=tile(i)));
 
   /* ================= content ================= */
   const CASES=[
@@ -1081,7 +1108,8 @@ function main(){
   fitAbTitle();if(document.fonts)document.fonts.ready.then(fitAbTitle);addEventListener('resize',fitAbTitle);
   // a small mark for every client (shown top right while its name is hovered)
   const clNames=[...document.querySelectorAll('#clText .client')];
-  document.getElementById('clImgs').innerHTML=clNames.map((_,k)=>`<i style="background-image:${tile(k%8,200)}"></i>`).join('');
+  document.getElementById('clImgs').innerHTML=clNames.map(()=>`<i></i>`).join('');
+  later(()=>[...document.getElementById('clImgs').children].forEach((d,k)=>d.style.backgroundImage=tile(k%8,200)));
   const clMarks=[...document.querySelectorAll('#clImgs i')];
   clNames.forEach((n,k)=>{const on=v=>()=>{if(!window.gsap){clMarks[k].style.opacity=v;return}gsap.killTweensOf(clMarks[k]);
       gsap.to(clMarks[k],{opacity:v,duration:.35,ease:v?'power1.out':'power1.inOut',delay:v?0:.125})};
@@ -1096,7 +1124,7 @@ function main(){
     if(k%3===0){g.globalAlpha=.25;for(let i=0;i<6;i++){g.fillRect(x+12,y+64+i*14,cw*(.4+((i*37+k*13)%50)/100),6)}g.globalAlpha=1}
     else{g.strokeStyle=P[1];g.globalAlpha=.6;g.lineWidth=3;g.beginPath();g.arc(x+cw/2,y+ch*.55,cw*.24,0,Math.PI*(1+k%2));g.stroke();g.globalAlpha=1}
     return `url(${c.toDataURL('image/jpeg',.88)})`}
-  document.querySelectorAll('.aw-fig i').forEach((i,k)=>i.style.backgroundImage=poster(k));
+  later(()=>document.querySelectorAll('.aw-fig i').forEach((i,k)=>i.style.backgroundImage=poster(k)));
   // chat form: Enter (or a click) opens the question, typing enables the button; nothing is sent anywhere
   {const form=document.getElementById('tkForm'),field=document.getElementById('tkField'),inp=document.getElementById('tkInput'),send=document.getElementById('tkSend'),done=document.getElementById('tkDone');
    const open=()=>{if(!field.hidden)return;field.hidden=false;form.querySelector('.tk-go').style.opacity=.4;inp.focus({preventScroll:true})};
