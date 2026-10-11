@@ -45,7 +45,9 @@ RED = lambda r, g, b_: r - g > 30   # the debug smoke (red over white or over th
 INFO = """()=>{const R=e=>{const r=e.getBoundingClientRect();return [r.left,r.top,r.right,r.bottom]};
  const sm=document.querySelector('.smoke'),skip=[...document.querySelectorAll('.ctl,.lbl')].map(R);
  return {letters:[...document.querySelectorAll('#title .ch')].map(c=>({t:c.textContent,b:R(c)})),
-   smoke:sm&&getComputedStyle(sm).display!=='none'?R(sm):null,skip}}"""
+   smoke:sm&&getComputedStyle(sm).display!=='none'?R(sm):null,skip,
+   // (the page's own moving parts, which come in during the effect: their edges are not the layer's)
+   others:[document.getElementById('stripes'),document.getElementById('note')].filter(Boolean).map(R)}}"""
 total = 0
 with sync_playwright() as p:
     b = _env.launch(p, scrollbars=True)
@@ -105,14 +107,20 @@ with sync_playwright() as p:
                 for t, im in ims:
                     px = im.convert('L').load(); bad = []
                     def side(name, pts):
-                        pts = [(a, c) for a, c in pts if 0 <= a[0] < W and 0 <= c[0] < W and 0 <= a[1] < H and 0 <= c[1] < H]
+                        pts = [(a, c) for a, c in pts if 0 <= a[0] < W and 0 <= c[0] < W and 0 <= a[1] < H and 0 <= c[1] < H
+                               and not any(o[0] * k - 3 <= q[0] <= o[2] * k + 3 and o[1] * k - 3 <= q[1] <= o[3] * k + 3 for o in info['others'] for q in (a, c))]
                         ds = [abs(px[a] - px[c]) > 6 and abs(p0[a] - p0[c]) <= 6 for a, c in pts]
                         if len(ds) > 20 and sum(ds) / len(ds) > .25: bad.append(name)
                     side('left', [((int(L) + 2, y), (int(L) - 3, y)) for y in range(int(T), int(B))])
                     side('right', [((int(R_) - 3, y), (int(R_) + 2, y)) for y in range(int(T), int(B))])
                     side('top', [((x, int(T) + 2), (x, int(T) - 3)) for x in range(int(L), int(R_))])
                     side('bottom', [((x, int(B) - 3), (x, int(B) + 2)) for x in range(int(L), int(R_))])
-                    if bad: edges.append((round(t, 2), bad))
+                    if bad:
+                        edges.append((round(t, 2), bad))
+                        # (a close-up of the first frame with a border: the layer's bottom/top/side ±40 px)
+                        if len(edges) == 1:
+                            im.crop((max(0, int(L) - 40), max(0, int(T) - 40), min(W, int(R_) + 40), min(H, int(B) + 40))).save(
+                                os.path.join(out, f'edge_{dev}_{fx}_{t:.2f}.png'))
             # ---- order: ink before smoke, per letter (red smoke)
             order = []
             if fx.startswith('d') and fx != 'd2':

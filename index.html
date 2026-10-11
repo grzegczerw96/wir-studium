@@ -1512,11 +1512,13 @@ function main(){
         glyphs.push([e.textContent.toUpperCase(),(r.left-pr.left-bx.l)*sc,(by-pr.top-bx.t)*sc])})});
     const gl=G2.gl,U=G2.U;
     gl.viewport(0,0,Wd,Hd);gl.bindTexture(gl.TEXTURE_2D,G2.tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-    // (once a page letter is whole, the softer drawn one under it goes, so nothing is left to disappear at the end —
-    //  on phones its halo did, as a last sharpening)
-    const gone=glyphs.map(()=>false);
+    // (once a page letter is whole, the softer drawn one under it fades away (.35 s), so nothing is left to disappear at
+    //  the end — on phones its halo did, as a last sharpening. Fading, not gone in one frame: the drawn layer is at 75 %
+    //  on phones, and its soft edge vanishing at once made each letter look as if it jumped into place — measured on
+    //  Grzegorz's phone with tools/phone_load.py --letters, 11.10)
+    const ga=glyphs.map(()=>1);let texDirty=false;
     const textTex=()=>{c.clearRect(0,0,Wd,Hd);c.fillStyle='#fff';c.font='900 '+(parseFloat(cs.fontSize)*sc)+'px '+cs.fontFamily;
-      glyphs.forEach((g,i)=>{if(!gone[i])c.fillText(g[0],g[1],g[2])});
+      glyphs.forEach((g,i)=>{if(ga[i]>0){c.globalAlpha=ga[i];c.fillText(g[0],g[1],g[2])}});c.globalAlpha=1;
       gl.bindTexture(gl.TEXTURE_2D,G2.tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,T)};
     textTex();
     // (the smoke comes out from under the O — born in its middle, it greyed the O out first)
@@ -1530,14 +1532,20 @@ function main(){
     //  passed it — all at once at the end it showed as the whole title sharpening)
     gsap.set(ch,{'--rx':'0deg','--sy':1,opacity:0});
     const shown=ch.map(()=>false);
-    const cen=ch.map(e=>{const r=e.getBoundingClientRect(),u=(r.left+r.width/2-pr.left-bx.l)/bx.w,w=1-(r.top+r.height/2-pr.top-bx.t)/bx.h;
-      return Math.hypot((u-ou[0])*asp,w-ou[1])/dmax});
+    // (each letter's farthest corner from the O: a page letter starting when the front had passed only its middle showed
+    //  crisp, hard edges through the smoke still over the rest of it — measured on the phone, 11.10)
+    const cen=ch.map(e=>{const r=e.getBoundingClientRect();
+      return Math.max(...[[r.left,r.top],[r.right,r.top],[r.left,r.bottom],[r.right,r.bottom]].map(([x,y])=>{
+        const u=(x-pr.left-bx.l)/bx.w,w=1-(y-pr.top-bx.t)/bx.h;return Math.hypot((u-ou[0])*asp,w-ou[1])/dmax}))});
     ch.forEach((e,i)=>e.style.transform=tf[i]);
     const v={p:0,fade:1},t0=performance.now();
-    const handOver=i=>{shown[i]=true;gsap.to(ch[i],{opacity:1,duration:.45,ease:'power1.out',onComplete:()=>{gone[i]=true;textTex()}})};
-    const draw=()=>{gl.uniform1f(U.uT,(performance.now()-t0)/1000);gl.uniform1f(U.uP,v.p);gl.uniform1f(U.uFade,v.fade);
+    const handOver=i=>{shown[i]=true;const q={a:1};
+      gsap.to(ch[i],{opacity:1,duration:.45,ease:'power1.out',onComplete:()=>gsap.to(q,{a:0,duration:.35,ease:'power1.inOut',
+        onUpdate:()=>{ga[i]=q.a;texDirty=true;if(!smokeOn)draw()}})})};
+    let smokeOn=true;
+    const draw=()=>{if(texDirty){texDirty=false;textTex()}gl.uniform1f(U.uT,(performance.now()-t0)/1000);gl.uniform1f(U.uP,v.p);gl.uniform1f(U.uFade,v.fade);
       gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-      const f=-.3+1.65*v.p;ch.forEach((e,i)=>{if(!shown[i]&&cen[i]<f-.14)handOver(i)})};
+      const f=-.3+1.65*v.p;ch.forEach((e,i)=>{if(!shown[i]&&cen[i]<f-.3)handOver(i)})};   // (.3: past the front's ragged edge, ±.175)
     draw();
     // the front crosses in 3.6 s (power2 out: it moves at once and slows only at the end — with sine in-out it hung still
     // for ~.7 s after the oval landed), the smoke thins out from 2.4 s over 1.5 s
@@ -1546,6 +1554,7 @@ function main(){
       .to(v,{fade:0,duration:1.5,ease:'power1.out',onUpdate:draw},at+2.4)
       // (any letter not yet handed over by then comes in; then the layer, now under whole page letters, fades away)
       .call(()=>ch.forEach((e,i)=>{if(!shown[i])handOver(i)}),null,at+3.4)
+      .call(()=>{smokeOn=false},null,at+3.9)
       .to(G2.cv,{opacity:0,duration:.4,ease:'none',onComplete:()=>{G2.cv.style.display='none';ch.forEach(e=>e.style.opacity='')}},at+3.9);
     return at+4.25;
   }

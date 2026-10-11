@@ -47,3 +47,9 @@ Pobrany Chromium Playwrighta nie startuje na tym Windowsie (błąd „konfigurac
 `center.py`, `overlap.py`, `motion.py` i `sizes.py` sprawdzają domyślnie stronę główną (lokalny `index.html` z lokalnymi bibliotekami). Pierwszy argument `lab` przełącza na `lab/hero.html`, a adres URL wybiera profil po ścieżce. Profile (`_env.PAGES`) podają identyfikatory tytułu, notki i sceny, czas ustalania się przewijania (na stronie głównej `scrub .6`, więc 800 ms), wyłączenie dociągania i parametry wejścia. JS narzędzi jest pisany z identyfikatorami labu, a `_env.adapt()` podmienia je na identyfikatory strony.
 
 `phone.py` ma krok `{"open":"fx=5"}`: wczytuje stronę z parametrem i liczy klatki od jej pierwszej chwili (wejście), do najbliższego `{"fps":"stop"}`. Kroki dla hero: `tools/phone-hero.json`.
+
+## Ładowanie i litery na telefonie: `phone_load.py`
+
+Nagrywa ekran telefonu klatka po klatce od pierwszego wejścia (przez `about:blank`, bez „paint holding”), wypisuje znaczniki (pierwsze malowanie, odsłonięcie strony `wir-reveal`) i zapisuje pasek klatek co 0,25 s. `--letters`: dla każdej litery tytułu zmiana obrazu między kolejnymi klatkami; skok to klatka ze zmianą wiele razy większą niż klatki obok, tylko tam, gdzie jest tusz litery. Wypisuje najsilniejsze i zapisuje zbliżenia (klatka przed, skok, po). `--local` podaje niewypchniętą wersję.
+
+`motion.py` zapisuje też wycinek pierwszej klatki z krawędzią warstwy (`edge_*.png`) i pomija przy krawędziach miejsca ruchomych elementów strony (paski, notka).

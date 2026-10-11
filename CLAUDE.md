@@ -123,7 +123,7 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 | Sekcja | Stan | Co zostało |
 |---|---|---|
 | Nagłówek i menu | zbudowane wg pomiarów | etap końcowy |
-| Hero / intro | **przeniesione** z `lab/hero.html` (10.10): układ 2, krój A, wejście C, d3, wyjście przez rozmycie | ocena Grzegorza. Zmierzone na telefonie (10.10): d3 po odsłonięciu średnio 11,3 ms; wersja 5 klatki do 311 ms, więc na telefonach zostaje d3. `motion.py` czasem (ok. 1 na 3 przebiegi) zgłasza skok na krawędziach liter przy przekazywaniu z dymu (ok. 3,4 s), do zbadania: wersja `51b458d` czysta 6/6, bieżąca bez wątku obrazów czysta 3/3, z wątkiem (zlecenia po wejściu) 1 na 3 desktopy ze skokiem; podejrzane: samo tworzenie wątku albo przesunięcie startu skryptu |
+| Hero / intro | **przeniesione** z `lab/hero.html` (10.10): układ 2, krój A, wejście C, d3, wyjście przez rozmycie | ocena Grzegorza. Zmierzone na telefonie (10.10): d3 po odsłonięciu średnio 11,3 ms; wersja 5 klatki do 311 ms, więc na telefonach zostaje d3. Wskakiwanie ostatnich liter (Grzegorz, 11.10) naprawione: rysowana litera gaśnie pod literą strony przez 0,35 s, zamiana dopiero, gdy czoło dymu minie cały znak; na telefonie (`phone_load.py --letters`) 0 skoków liter w 2 przebiegach (przed: 10). `motion.py` czysty w 9 z 10 przebiegów; pozostały 1 (emulacja telefonu, nagranie z gubionymi klatkami) do obserwacji |
 | Manifest | zbudowany wg pomiarów | pierwszy przejazd na telefonie ok. 45 kl./s |
 | Wybrane realizacje (przejście) | zbudowane | etap końcowy |
 | Karty realizacji | zbudowane | etap końcowy |
