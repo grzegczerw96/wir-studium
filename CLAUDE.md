@@ -14,7 +14,7 @@ Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór te
 | `wiedza/hero.md` | praca nad hero: co wybrane, co jest w labie, wszystkie uwagi Grzegorza |
 | `wiedza/marka.md`, `inspiracje.md`, `katalog-ruchu.md` | przed propozycjami dla sekcji, którą projektujemy (a nie odtwarzamy); dopisywać do katalogu po każdej decyzji. `marka.md` także przy pisaniu tekstów każdej sekcji (ton, słowa) |
 | `tools/README.md` | instalacja narzędzi, ich opcje, znane fałszywe alarmy |
-| `start/` | zestaw startowy dla nowych projektów i etapów: wnioski przenośne (`zasady-ogolne.md`), szablon `CLAUDE.md`, prompty (nowa strona, sekcja, PageSpeed); wniosek pasujący do każdej strony dopisywać do `start/zasady-ogolne.md` |
+| `C:\Projekty\warsztat` | warsztat wspólny dla projektów: zasady ogólne, szablon CLAUDE.md, prompty, narzędzia uniwersalne (ustawienia tego projektu w `projekt.json`); wniosek pasujący do każdej strony proponować do `warsztat/zasady-ogolne.md` |
 
 ## 0a. Na start pracy nad sekcją (każda nowa sesja)
 

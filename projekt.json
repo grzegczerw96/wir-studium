@@ -1,0 +1,20 @@
+{
+  "name": "wir-studium",
+  "page": "index.html",
+  "base_url": "https://grzegczerw96.github.io/wir-studium/",
+  "no_carry": "Object.defineProperty(window,'__autoScrolling',{get(){return true},set(v){}})",
+  "audit": {
+    "clip": ".thumb,.case .pic,.ab-fig,.ab-vid,.aw-fig,.pr-fig,.cl-box,.tk-line",
+    "cut_exempt": ".tk-title,.tk-line",
+    "dense_screens": 2.5
+  },
+  "sizes": {
+    "groups": "title=#heroT .ch;note=#heroNote;stripes=.stripes i;header=.logo,.dots",
+    "load_wait": 7500
+  },
+  "phone": {
+    "reveal_mark": "wir-reveal",
+    "effect_mark": "wir-smoke",
+    "letters": "#heroT .ch"
+  }
+}
