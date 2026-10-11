@@ -22,7 +22,14 @@ def local_page(src=None, rel=False):
         out = os.path.join(ENV, 'srv'); os.makedirs(out, exist_ok=True)
         import shutil
         if not os.path.exists(os.path.join(out, 'lib')): shutil.copytree(LIB, os.path.join(out, 'lib'))
+        # (the page's own fonts/ and lib/ — self-hosted since 11.10 — next to the copy)
+        for d in ('fonts', 'lib'):
+            s = os.path.join(os.path.dirname(os.path.abspath(src or PAGE)), d)
+            if os.path.isdir(s): shutil.copytree(s, os.path.join(out, d), dirs_exist_ok=True)
         open(os.path.join(out, 'index.html'), 'w', encoding='utf8').write(html); return out
+    # (a <base> keeps the page's relative files — fonts/, lib/, lab pages — resolving against the page's own folder)
+    base = 'file:///' + os.path.dirname(os.path.abspath(src or PAGE)).replace('\\', '/') + '/'
+    html = re.sub(r'<head([^>]*)>', lambda m: f'<head{m.group(1)}><base href="{base}">', html, count=1)
     p = os.path.join(ENV, 'test.html'); open(p, 'w', encoding='utf8').write(html)
     return 'file:///' + p.replace('\\', '/')
 
@@ -30,7 +37,8 @@ def launch(p, scrollbars=False):
     # Playwright's own Chromium does not start on this Windows ("side-by-side" error): use the installed Chrome.
     # scrollbars=True keeps the real 15px scrollbar (Playwright hides it by default, so a layout that counts the window
     # with the scrollbar, e.g. innerWidth, looks right in the tools and wrong in Grzegorz's browser)
-    return p.chromium.launch(channel='chrome', args=['--use-gl=angle', '--ignore-gpu-blocklist'],
+    # (--allow-file-access-from-files: the page's own fonts load from file://, which Chrome otherwise refuses)
+    return p.chromium.launch(channel='chrome', args=['--use-gl=angle', '--ignore-gpu-blocklist', '--allow-file-access-from-files'],
                              ignore_default_args=['--hide-scrollbars'] if scrollbars else None)
 
 # The pages the hero tools (center, overlap, motion) know: the main page (index.html, the default) and the hero lab
