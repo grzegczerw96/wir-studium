@@ -1,7 +1,7 @@
 # Wir Studio: studium animacji i przewodnik budowania stron z ruchem
 
 Ten plik czyta Claude na początku każdej sesji w tym repozytorium. Jest też notatką dla Grzegorza: jak budujemy takie strony i co sprawia, że wyglądają profesjonalnie.
-Stan na 11.10.2026: etapy pracy i sprawdzania w §3a, tabela reguł w §6.3 p. 6; pomiary, lekcje, hero i szczegóły narzędzi są w osobnych plikach (§0). Hero przeniesione na stronę główną; czeka na pomiar na telefonie i ocenę Grzegorza (§5).
+Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór testów do ryzyka w §3a, tabela reguł w §6.3 p. 6; pomiary, lekcje, hero i szczegóły narzędzi są w osobnych plikach (§0). Hero przeniesione na stronę główną; czeka na pomiar na telefonie i ocenę Grzegorza (§5).
 
 ---
 
@@ -14,6 +14,14 @@ Stan na 11.10.2026: etapy pracy i sprawdzania w §3a, tabela reguł w §6.3 p. 6
 | `wiedza/hero.md` | praca nad hero: co wybrane, co jest w labie, wszystkie uwagi Grzegorza |
 | `wiedza/marka.md`, `inspiracje.md`, `katalog-ruchu.md` | przed propozycjami dla sekcji, którą projektujemy (a nie odtwarzamy); dopisywać do katalogu po każdej decyzji. `marka.md` także przy pisaniu tekstów każdej sekcji (ton, słowa) |
 | `tools/README.md` | instalacja narzędzi, ich opcje, znane fałszywe alarmy |
+
+## 0a. Na start pracy nad sekcją (każda nowa sesja)
+
+1. **Ustal sekcję i ścieżkę:** odtwarzanie z oryginału czy własna sekcja (nowa albo przeróbka), i na którym etapie jesteśmy (§3a). Gdy nie wynika to z wiadomości Grzegorza, zapytaj jednym pytaniem.
+2. **Czytaj tylko to, co do etapu potrzebne** (§0): odtwarzanie → `wiedza/pomiary.md` (ta sekcja) i kod oryginału; własna sekcja → `marka.md`, `inspiracje.md`, `katalog-ruchu.md`; szukanie błędu → `lekcje.md`. Dużych plików nie czytać w całości (`index.html` ok. 150 KB): szukać po nazwach klas sekcji.
+3. **Dobierz sprawdzanie do ryzyka, nie z rytuału** (§3a, trzy pytania). Zwykła sekcja to kilka minut sprawdzania; komplet tylko dla nowej techniki, raz, przy przeniesieniu; pełna responsywność raz, na końcu całości.
+4. **Nowy czat na każdy etap.** Długa rozmowa drożeje z każdą rundą; wszystko, co ważne, jest w repo.
+5. **Na koniec etapu:** stan w §5, nowy błąd do `wiedza/lekcje.md` (tylko taki, który kosztował rundę), commit i push.
 
 ## 1. Czym jest ten projekt
 
@@ -74,31 +82,45 @@ Drobne pułapki środowiska:
 
 Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir-tools`, instalacja i opcje w `tools/README.md`). **Zasada:** szukać błędów automatycznie i tanio, a oczami oglądać tylko to, co narzędzie zgłosi. Każdą nową regułę narzędzia najpierw sprawdzić na wersji z błędem.
 
-**Które narzędzie przy czym** (nie wszystkie zawsze; dobierać do tego, co się zmienia):
+**Ile sprawdzać: trzy pytania o ryzyko** (11.10.2026). Liczba testów wynika z ryzyka, nie z rytuału:
+1. Czy technika jest nowa lub krucha? (WebGL, przekazanie obrazu z płótna do strony, stałe warstwy, zależność od wysokości ekranu i paska adresu.) Zwykły układ flex/grid taki nie jest.
+2. Ile stanów dotyka? (Kierunek przewijania, pasek adresu, ładowanie, sąsiednie sekcje.)
+3. Czy oko zdąży to zobaczyć? Jeśli tak, wystarczy oko Grzegorza albo zwolnione nagranie; narzędzie ma sens tam, gdzie człowiek nie da rady (piksele, ułamki sekundy, jedna klatka, milisekundy na telefonie).
 
-| Co budujemy albo zmieniamy | Narzędzia |
-|---|---|
-| Liczby z oryginału, porównanie naszej sekcji z cappen | `probe.py` |
-| Układ sekcji w spoczynku, różne ekrany, paski, przewijanie w poziomie, ucięty tekst | `audit.py` (`--section`) |
-| Czy układ trzyma się na każdym rozmiarze okna (grupy elementów nie wchodzą na siebie, nic nie wychodzi za ekran) | `sizes.py` (178 rozmiarów 320–1920 × 500–1080; grupy w `--groups`; lab: `?still=1`) |
-| Przejścia przy przewijaniu między sekcjami, reguły „A zgasło, zanim weszło B”, zmiana kierunku | `paths.py` (+ `audit.py` w kilku pozycjach) |
-| Coś ma stać w czymś (bryła w „O”, okno na tekście) | `center.py` (z pikseli) |
-| Każdy ruch, w którym elementy mogą na siebie wejść (wejścia, przejścia) | `overlap.py` (pudełka co klatkę) |
-| Wejścia po załadowaniu, efekty z maską, filtrem lub WebGL: przeskoki, krawędzie warstw, kolejność, przerwy (stall), przycięcia (jank) | `motion.py` (piksele co klatkę; `?dbg=` w stronie) |
-| Ciężkie efekty, płynność, pasek adresu | `phone.py` na prawdziwym telefonie (dotykać tylko karty z naszą stroną) |
+Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja odtwarzana z oryginału ma zwykle „nie” na dwa pierwsze: pomiar, `audit.py` na 3 ekranach i jeden przejazd na telefonie.
 
-**Etapy pracy i sprawdzanie** (uzgodnione 11.10.2026: błędy łapać tam, gdzie powstają; pełne sprawdzanie raz, na końcu):
+**Narzędzia** (szczegóły w `tools/README.md`):
 
-| Etap | Kto i co | Sprawdzanie |
+| Rodzaj | Narzędzie | Do czego |
 |---|---|---|
-| 1. Odtwarzanie sekcji z oryginału | pomiar (`probe.py`), budowa | po zmianie `node --check` i `audit.py --section '#id'` na `quick` (ok. 1 min); porównanie liczb z oryginałem; narzędzia ruchu tylko, gdy zmienia się ruch |
-| 2. Projekt nowej lub podmienianej sekcji (`lab/`) | Grzegorz wybiera oczami, warianty | jeden arkusz: ekran Grzegorza, telefon, tablet; z narzędzi tylko to, co rozstrzyga o wariancie. Bez pełnych kontroli wariantów, które mogą odpaść |
-| 3. Reguły (po wyborze, przed przeniesieniem) | Claude zapisuje tabelę reguł (§6.3 p. 6), Grzegorz decyduje o zachowaniu na skrajnych ekranach | `sizes.py` na rozmiarach krytycznych wyliczonych z reguł (20–30, ok. 1 min) |
-| 4. Przeniesienie na stronę główną | Claude | raz dla tej sekcji to, czego lab nie pokaże: ładowanie, przejścia do sąsiednich sekcji, ruch co klatkę (`overlap`, `motion`) na 3 ekranach, telefon (płynność, dotyk) |
-| 5. Drobne poprawki po uwagach | Claude | tylko narzędzie pasujące do poprawki |
-| 6. Koniec całości | Claude | `sizes.py` pełne 178 rozmiarów raz dla całej strony (siatka bezpieczeństwa), `audit.py --devices all`, telefon w poziomie, `phone.py tools/phone-sections.json` (zimny i rozgrzany przejazd), PageSpeed (Lighthouse) i ładowanie na telefonie (`phone_load.py`) |
+| uniwersalne | `probe.py` | liczby z oryginału i z naszej strony w tych samych miejscach |
+| uniwersalne | `audit.py --section '#id'` | układ w kilku pozycjach przewijania: nachodzenie tekstu, ucięty tekst, przewijanie w bok, prześwit przy krawędzi; 3 ekrany ok. 1 min |
+| uniwersalne | `paths.py` | przejścia między sekcjami przy prawdziwym kółku, w obie strony; reguły „A zgasło, zanim weszło B” (dopisywać w `RULES`) |
+| uniwersalne | `sizes.py` | grupy elementów nie wchodzą na siebie na wielu rozmiarach okna (`--groups`, `--sizes`) |
+| uniwersalne | `phone.py`, `phone_load.py` | prawdziwy telefon: płynność, dotyk, pasek adresu; nagranie ładowania (`--letters`: skoki liter efektu tytułu) |
+| pod konkretny efekt | `motion.py` | wejście po załadowaniu z pikseli: przeskoki, przerwy, przycięcia; krawędzie i kolejność warstwy efektu (`?dbg=`, `--origin`) — tylko gdy sekcja ma wejście albo efekt maski, filtra, WebGL |
+| pod hero (do uogólnienia albo usunięcia) | `center.py`, `overlap.py` | bryła w „O”; nachodzenie liter, notki i okna w ruchu |
 
-- **Koszty:** samo uruchomienie narzędzia jest tanie (minuty pracy komputera, kilka linijek wyniku). Drogie są: badanie zgłoszeń (zwłaszcza niestabilnych), rundy „zmiana, test, obrazek, wniosek” w długiej rozmowie, oglądanie zrzutów i czytanie dużych plików. Dlatego: nowy czat na każdy etap, zrzuty tylko tego, co narzędzie zgłosi, zgłoszenie niestabilne powtórzyć i porównać z poprzednią wersją, zanim się je bada.
+**Ścieżka A: odtwarzanie oryginału.** Sprawdzanie to porównanie z oryginałem.
+1. Pomiar: `main.js` i `probe.py` (liczby, krzywe, progi). Responsywności nie wymyślamy: przepisujemy progi oryginału, on je rozwiązał.
+2. Budowa; po każdej zmianie układu `node --check` i `audit.py --section '#id'` na `quick` (ok. 1 min, łapie najwięcej typowych błędów).
+3. Porównanie liczb w tych samych miejscach (a gdy powstanie, obraz obok siebie: §5, zadanie 6).
+4. Telefon raz, na płynność. Grzegorz na końcu ocenia, „czy czuć oryginał”.
+
+**Ścieżka B: własna sekcja (nowa albo przeróbka).** Sprawdzanie to projektowanie reguł.
+1. Lab (`lab/`): warianty; Grzegorz wybiera oczami. Z narzędzi tylko to, co rozstrzyga o wyborze wariantu, i jeden arkusz: ekran Grzegorza, telefon, tablet. Bez pełnych kontroli wariantów, które mogą odpaść.
+2. Tabela reguł po wyborze (§6.3 p. 6): Grzegorz decyduje, co ustępuje na skrajnych ekranach; reguły od razu w CSS; `sizes.py` na rozmiarach krytycznych (20–30, ok. 1 min).
+3. Przeniesienie na stronę główną: raz komplet dla tej sekcji, to czego lab nie pokaże: ładowanie, przejścia do sąsiednich sekcji, ruch co klatkę na 3 ekranach (gdy ruch jest nowy), telefon (płynność, dotyk).
+4. Drobne poprawki po uwagach: tylko narzędzie pasujące do poprawki, z porównaniem z poprzednią wersją.
+
+**Koniec całości (raz):** `sizes.py` pełne 178 rozmiarów dla całej strony (siatka bezpieczeństwa), `audit.py --devices all`, telefon w poziomie, `phone.py tools/phone-sections.json` (zimny i rozgrzany przejazd), PageSpeed (Lighthouse) i ładowanie na telefonie (`phone_load.py`).
+
+**Zasady sprawdzania:**
+- **Najpierw pytanie, czy człowiek to zobaczy.** Przy zgłoszeniu niestabilnym najpierw jedno zwolnione nagranie; kolejne przebiegi dopiero, gdy na nagraniu coś widać.
+- **Zgłoszenie najpierw porównać z poprzednią wersją:** stary błąd w trakcie nowej pracy zapisać w §5, nie badać.
+- **Zestaw testów sam się dostraja:** test, który przez 3 sekcje z rzędu nic nie znalazł, przechodzi na koniec całości; błąd, który dotarł do Grzegorza, dostaje swój test; każdy nowy test najpierw musi złapać błąd na starej wersji. Nowe narzędzie tylko dla błędu, który wróci w innych sekcjach; jednorazowy błąd: zwolnione nagranie i jedno spojrzenie. Jednorazowe skrypty nie trafiają do repo.
+- **Bez reguł dla rzeczy smakowych** (np. kierunek dymu): to ocenia Grzegorz.
+- **Koszty:** samo uruchomienie narzędzia jest tanie (minuty pracy komputera, kilka linijek wyniku). Drogie są badanie zgłoszeń, rundy „zmiana, test, obrazek, wniosek” w długiej rozmowie, oglądanie zrzutów i czytanie dużych plików.
 
 - **Strona główna albo lab:** `center`, `overlap`, `motion` i `sizes` sprawdzają domyślnie stronę główną; `lab` jako pierwszy argument sprawdza `lab/hero.html` (profile w `_env.PAGES`).
 - **Pasek przewijania:** Playwright domyślnie go ukrywa, a u Grzegorza (Windows, Chrome, gęstość 1,25) ma 15 px. Narzędzia do położeń uruchamiać z `_env.launch(p, scrollbars=True)`.
@@ -123,7 +145,7 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 | Sekcja | Stan | Co zostało |
 |---|---|---|
 | Nagłówek i menu | zbudowane wg pomiarów | etap końcowy |
-| Hero / intro | **przeniesione** z `lab/hero.html` (10.10): układ 2, krój A, wejście C, d3, wyjście przez rozmycie | ocena Grzegorza. Zmierzone na telefonie (10.10): d3 po odsłonięciu średnio 11,3 ms; wersja 5 klatki do 311 ms, więc na telefonach zostaje d3. Wskakiwanie liter (Grzegorz, 11.10) naprawione, trzy przyczyny: rysowana litera znikała naraz (teraz gaśnie 0,35 s pod literą strony), zamiana ruszała przy środku litery (teraz po najdalszym rogu), falowanie w dymie znikało w kilku klatkach (teraz falują tylko części jeszcze odsłaniane); spirala w elipsie nie wyskakuje (wejście startuje klatkę po odsłonięciu). Telefon (`phone_load.py --letters`): przed 10 skoków ×9–19, po: 0 albo pojedyncze ×4–6, które w zbliżeniu są zwykłym odsłanianiem; `motion.py` czysty 4/4 |
+| Hero / intro | **oddane** 11.10 (własna sekcja: układ 2, krój A, wejście C, dym d3, wyjście przez rozmycie; szczegóły i pomiary w `wiedza/hero.md`) | etap końcowy |
 | Manifest | zbudowany wg pomiarów | pierwszy przejazd na telefonie ok. 45 kl./s |
 | Wybrane realizacje (przejście) | zbudowane | etap końcowy |
 | Karty realizacji | zbudowane | etap końcowy |
@@ -137,15 +159,13 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 „Zbudowana” i „etap końcowy” znaczą: nie znamy konkretnego problemu, a nie: sprawdzona na wszystkim. Wszystkie te sekcje sprawdzano dotąd bez paska przewijania, więc położenie z paskiem jest niesprawdzone (pokrywają to zadania 2 i 3).
 
 **Zadania po kolei:**
-1. **Hero na stronie głównej: dokończenie.** Zrobione 10.10: przeniesienie (jedna `GLCoil`, start zawsze na górze, `?fx=5` i `?dbg=smoke` działają), narzędzia przepięte na stronę główną, kontrola: `center` 18/18, `overlap` czysty na 6 ekranach, `motion` d3 czysty (dym rodzi się 0–1 px od punktu pod „O”), `sizes` bez nachodzenia na 178 rozmiarach. Zostało:
-   - zrobione też 10.10 po uwagach z telefonu: paski rozmywają się jak tytuł i na telefonie stoją przy prawdziwej dolnej krawędzi; dociąganie intro palcem; elipsa ładowania widoczna po 0,33 s zamiast pustej strony przez 2 s (główny skrypt po pierwszej klatce, obrazy sekcji w wątku pobocznym po wejściu); `tools/phone_load.py` nagrywa ładowanie na telefonie;
-   - hero to nasz własny pomysł, nie odtworzenie cappen: **nie porównujemy go z oryginałem**; wzorcem jest `lab/hero.html` (wygląd, czasy, kolejność).
+1. **Narzędzia: porównanie z poprzednią wersją** (najwięcej daje, 11.10.2026): każde narzędzie uruchamia się na bieżącej wersji i na ostatnim commicie i zgłasza tylko nowe problemy; zgłoszenia niestabilne powtarza samo i oznacza. `center.py` i `overlap.py` (pisane pod hero) przy następnym użyciu uogólnić (selektory w wywołaniu, jak `--groups` w `sizes.py`) albo usunąć z repo: narzędzia mają być ogólne, nie muzeum.
 2. **Przegląd `innerWidth`/`innerHeight` w `index.html`** (42 użycia: 17 szerokość, 25 wysokość) według §6.3: szerokość liczona z paskiem przewijania to błąd, wysokość bywa w porządku. Przejrzeć, a nie zamieniać hurtem.
 3. **`audit.py` i `paths.py` z prawdziwym paskiem przewijania** (`scrollbars=True`).
 4. **Przewijanie w bok po zmianie szerokości okna** (było już przed hero, sprawdzone na HEAD): gdy w jednej sesji okno rośnie z szerokości telefonu (≤600) do 700–1024 px, strona przewija się w bok o 7–40 px; przy wczytaniu od razu w tej szerokości jest dobrze. `sizes.py --sizes=320x568,700x700,768x1024` pokazuje błąd.
-5. **Narzędzia tańsze w użyciu** (11.10.2026): (a) każde porównuje bieżącą wersję z poprzednim commitem i zgłasza tylko nowe problemy; (b) `motion.py` domyślnie 3 przebiegi, zgłoszenia stałe osobno od niestabilnych; (c) `sizes.py --critical`: rozmiary krytyczne z progów i linii przełączenia zamiast siatki 178; (d) jedno polecenie na etap (np. `check.py --stage=przeniesienie --section=#intro`).
+5. **`sizes.py --critical`**: rozmiary krytyczne z progów i linii przełączenia (§6.3 p. 6) zamiast siatki 178; przy pierwszej sekcji z tabelą reguł. (Jedno polecenie na etap, `check.py`, na razie nie: tabela etapów wystarcza, a każde narzędzie trzeba utrzymywać.)
 6. **Narzędzie porównania obok siebie** (przy następnej pracy nad sekcją odtwarzaną z oryginału): zrzuty oryginału i naszej strony w tych samych miejscach sekcji ułożone w pary w jednym obrazku, plus wykres przebiegu kluczowych wartości (jasność tła, położenie tytułu) w funkcji przewijania. Tak znaleźliśmy przejście do czerni przesunięte o 0,8 ekranu: z liczb, nie z wrażenia. Grzegorz ocenia efekt, Claude dostaje dokładną różnicę.
-7. **Etap końcowy: gotowość na wszystkich ekranach** (poziom 3, uzgodnione 10.10.2026):
+7. **Koniec całości: gotowość na wszystkich ekranach** (§3a, uzgodnione 10.10.2026):
    - telefon w poziomie (844×390): brak układu na niskie ekrany; w intro okno nachodzi na paski i nie mieści się tekst, w manifeście tekst i kwadraty nachodzą na spiralę;
    - płynność na telefonie (klienci, pierwszy przejazd);
    - Safari/iPhone: niesprawdzone.
@@ -188,7 +208,7 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
      - duże tytuły mają wielkość ograniczoną i szerokością, i wysokością (`min(…vw, …svh)` albo `clamp`; `svh`, nie `vh`, bo na telefonie `vh` zmienia się z paskiem adresu, §6.4 p. 7), lokalnie w danym tytule, bez zmiany globalnego `--r`;
      - teksty w układzie flex/grid z odstępami, a nie w pozycjach absolutnych obok innych elementów;
      - wielkość liczona względem pudełka, w którym tekst stoi (jednostki kontenera `cqi`/`cqh`; rodzic potrzebuje `container-type: size` albo `inline-size`), a nie całego okna.
-  6. **Tabela reguł przed przeniesieniem sekcji** (11.10.2026). Grzegorz projektuje oczami na swoim ekranie, bez ograniczeń; po wyborze Claude zapisuje dla każdego elementu: do czego jest przyczepiony (krawędź, inny element, odstęp), jak rośnie (`--r`, `min(vw, svh)`, z kroju) i czego nie może dotknąć (nierówności, np. „dół tytułu + 1,5rem ≤ góra notki”). Grzegorz decyduje, co ustępuje na skrajnych ekranach (np. notka znika albo tytuł maleje). W każdym przedziale (telefon 320–599, tablet 600–1024, desktop od 1025) wielkości w `vw`/`svh` zmieniają się liniowo, więc nierówność, która trzyma w rogach przedziału, trzyma w środku. Sprawdza się tylko **rozmiary krytyczne**: rogi przedziałów (najwęższy i najszerszy, najniższy i najwyższy), linie przełączenia `min()` (dla `--r` desktopu szerokość/wysokość ≈ 2,3) i miejsca skoków (zmiana liczby linii tekstu, progi w JS).
+  6. **Tabela reguł przed przeniesieniem sekcji** (11.10.2026). Grzegorz projektuje oczami na swoim ekranie, bez ograniczeń; po wyborze Claude zapisuje dla każdego elementu: do czego jest przyczepiony (krawędź, inny element, odstęp), jak rośnie (`--r`, `min(vw, svh)`, z kroju) i czego nie może dotknąć (nierówności, np. „dół tytułu + 1,5rem ≤ góra notki”). Grzegorz decyduje, co ustępuje na skrajnych ekranach (np. notka znika albo tytuł maleje). W każdym przedziale (telefon 320–599, tablet 600–1024, desktop od 1025) wielkości w `vw`/`svh` zmieniają się liniowo, więc nierówność, która trzyma w rogach przedziału, trzyma w środku. **Reguły zapisywać od razu w CSS tak, żeby nie dało się ich złamać** (`clamp()`, `min()`, `aspect-ratio`, flex/grid z odstępami, zapytania o rozmiar kontenera): wtedy test sprawdza, czy reguła działa, a nie szuka miejsc, gdzie się psuje. Sprawdza się tylko **rozmiary krytyczne**: rogi przedziałów (najwęższy i najszerszy, najniższy i najwyższy), linie przełączenia `min()` (dla `--r` desktopu szerokość/wysokość ≈ 2,3) i miejsca skoków (zmiana liczby linii tekstu, progi w JS).
 
 ### 6.4 Sposoby, które rodzą błędy (pamiętać przy pisaniu kodu; pełne przypadki w `wiedza/lekcje.md`)
 1. **Ten sam element sterowany dwa razy.** Przejście CSS i GSAP na jednej właściwości, dwa tweeny na jednej zmiennej. Jedno źródło prawdy dla każdej wartości.
@@ -204,10 +224,10 @@ Narzędzia są w `tools/` (Python 3.8, `py -I`, biblioteki w `%LOCALAPPDATA%\wir
 ## 7. Lista kontrolna przed oddaniem sekcji
 
 - [ ] Liczby (długość sekcji, progi, czasy, krzywe) wzięte z kodu oryginału albo zmierzone, nie zgadnięte; nowe pomiary dopisane do `wiedza/pomiary.md`.
-- [ ] Sekcja odtwarzana: porównanie z oryginałem w tych samych miejscach (liczby, a gdy powstanie narzędzie z zadania 4, także obraz obok siebie). Sekcja własna (np. hero): porównanie z jej wzorcem w `lab/`.
+- [ ] Sekcja odtwarzana: porównanie z oryginałem w tych samych miejscach (liczby, a gdy powstanie narzędzie z zadania 6, także obraz obok siebie). Sekcja własna (np. hero): porównanie z jej wzorcem w `lab/`.
 - [ ] Przewinięte prawdziwym kółkiem: wolno, szybko, z zatrzymaniem w połowie przejścia, w górę i z powrotem.
 - [ ] Nic nie nachodzi na tekst; kontrast w każdej klatce przejścia kolorów.
-- [ ] Ruch sprawdzony narzędziem co klatkę (`overlap.py`, `motion.py`), na telefonach, tablecie i desktopach z paskiem przewijania; w spoczynku to za mało.
+- [ ] Sprawdzanie dobrane do ryzyka (§3a, trzy pytania): nowy ruch sprawdzony co klatkę na telefonie, tablecie i desktopie z paskiem przewijania; zwykły układ: `audit.py` na 3 ekranach.
 - [ ] Sekcja projektowana: tabela reguł zapisana (`wiedza/`), rozmiary krytyczne sprawdzone.
 - [ ] Telefon 375×812: brak przewijania w poziomie, proporcje z oryginału dla <1025 px, brak nakładania warstw.
 - [ ] 60 kl./s (średnio ok. 16,7 ms na klatkę), zero błędów w konsoli.
