@@ -48,7 +48,7 @@ Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór te
   - lista projektów zostaje dłużej na czarnym tle (przejście w biel startuje, gdy góra „O nas” jest na 55% ekranu, a nie przy dolnej krawędzi);
   - w kartach realizacji nie ma wybrzuszania obrazu po najechaniu ani wypływającego tekstu, tylko płynięcie obrazu z tekstem przy przewijaniu;
   - formularz kontaktowy wjeżdża później niż w cappen, dopiero gdy wielki napis prawie zniknął;
-  - na telefonie tytuł stopki składa się szybciej niż w oryginale: oś stopki od góry stopki 10% nad ekranem przez jeden ekran (zamiast 2,5); litery ruszają przy ok. 0,3 ekranu, gdy formularz zszedł już z obszaru tytułu, całość gotowa przy ok. 0,6 (10.10.2026);
+  - na telefonie tytuł stopki składa się szybciej niż w oryginale: oś stopki od góry stopki 10% nad ekranem przez jeden ekran (zamiast 2,5); litery ruszają przy ok. 0,3 ekranu, gdy formularz zszedł już z obszaru tytułu, całość gotowa przy ok. 0,6 (10.10.2026); stopka na telefonie i tablecie ma 225svh zamiast 350svh, żeby strona kończyła się 0,15 ekranu po pełnym napisie (11.10.2026);
   - spirala przed kontaktem zaczyna się pojawiać od 45% wysokości ekranu, a nie od dolnej krawędzi (najpierw tło ma być ciemne);
   - powrót do czerni po nagrodach jest krótszy niż w oryginale: od ostatniej nazwy na 15% ekranu do góry kontaktu przy górze ekranu (telefon ok. 0,6 ekranu, desktop ok. 0,95), żeby lista schodziła na białym, a nie stała na szarym (10.10.2026);
   - brak kursora „DISCOVER” i brak dociągania w manifeście;
