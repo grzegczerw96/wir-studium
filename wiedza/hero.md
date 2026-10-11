@@ -49,3 +49,10 @@ Oddane: Grzegorz zaakceptował wersję z poprawkami liter w dymie (11.10). Przen
 - zrobione też 10.10 po uwagach z telefonu: paski rozmywają się jak tytuł i na telefonie stoją przy prawdziwej dolnej krawędzi; dociąganie intro palcem; elipsa ładowania widoczna po 0,33 s zamiast pustej strony przez 2 s (główny skrypt po pierwszej klatce, obrazy sekcji w wątku pobocznym po wejściu); `tools/phone_load.py` nagrywa ładowanie na telefonie;
 - hero to nasz własny pomysł, nie odtworzenie cappen: **nie porównujemy go z oryginałem**; wzorcem jest `lab/hero.html` (wygląd, czasy, kolejność).
 
+## Szybki start (11.10.2026, etap wydajności; gałąź `wydajnosc`, do oceny Grzegorza)
+
+Na prośbę Grzegorza („95+ na telefonie, nawet kosztem animacji wstępnej”) domyślne wejście jest prostsze; wejście C z dymem d3 zostaje pod `?w=C`.
+- **Pierwsza klatka = gotowe hero, bez skryptu:** litery i słowa notki są w HTML, rozmiar tytułu liczy CSS (`--fsc`: najszersza linia 4,88em na 97% szerokości, pokój 3 × 0,84; desktop do 9,75rem), wymiary O w CSS (Inter Tight Black: `--ow .7715em`, `--ol .03em`, `--od -.01em`, `--obw .715em`, `--obh .75em`), notka 4 linie = 4,5rem, margines tytułu na telefonie 7rem. Zgodne ze skryptem co do piksela na 13 rozmiarach (np. 64 px na 360×649, 138 px na 1280×620).
+- **O:** do przejęcia przez skrypt czarną elipsą jest sam `.win` (`html.fast:not(.live)`), potem czarna scena (`.box`) w tym samym kształcie, w tej samej klatce.
+- **Bryła:** three.js ładuje się przy pierwszym ruchu (mysz, dotyk, kółko, klawisz, przewinięcie) albo po 6 s; bryła powstaje w 4 krótkich krokach i wyrasta w O (0,8 s power3.out, zawirowanie 2,5 → 0 w 1,4 s), jak w wejściu C, ale bez przelotu owalu i bez dymu.
+- **Wynik:** Lighthouse telefon 96 (wejście C: ok. 45), desktop 100; CLS 0.

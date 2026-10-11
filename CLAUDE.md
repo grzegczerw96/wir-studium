@@ -1,7 +1,7 @@
 # Wir Studio: studium animacji i przewodnik budowania stron z ruchem
 
 Ten plik czyta Claude na początku każdej sesji w tym repozytorium. Jest też notatką dla Grzegorza: jak budujemy takie strony i co sprawia, że wyglądają profesjonalnie.
-Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór testów do ryzyka w §3a, tabela reguł w §6.3 p. 6; pomiary, lekcje, hero i szczegóły narzędzi są w osobnych plikach (§0).
+Stan na 11.10.2026: hero oddane; etap wydajności na gałęzi `wydajnosc` (do decyzji Grzegorza, §5); na start pracy §0a, dwie ścieżki i dobór testów do ryzyka w §3a, tabela reguł w §6.3 p. 6; pomiary, lekcje, hero i szczegóły narzędzi są w osobnych plikach (§0).
 
 ---
 
@@ -101,6 +101,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 | uniwersalne | `audit.py --section '#id'` | układ w kilku pozycjach przewijania: nachodzenie tekstu, ucięty tekst, przewijanie w bok, prześwit przy krawędzi; 3 ekrany ok. 1 min |
 | uniwersalne | `paths.py` | przejścia między sekcjami przy prawdziwym kółku, w obie strony; reguły „A zgasło, zanim weszło B” (dopisywać w `RULES`) |
 | uniwersalne | `sizes.py` | grupy elementów nie wchodzą na siebie na wielu rozmiarach okna (`--groups`, `--sizes`) |
+| uniwersalne | `lighthouse.py` (warsztat) | Lighthouse lokalnie, mediana z N przebiegów; ruch wymuszony i rozmiary plików poprawione o ESET (bez tego wyniki są fałszywe); `--cats`: dostępność, metody, SEO |
 | uniwersalne | `phone.py`, `phone_load.py` | prawdziwy telefon: płynność, dotyk, pasek adresu; nagranie ładowania (`--letters`: skoki liter efektu tytułu) |
 | pod konkretny element | `coil.py` | spirala: rozmiar i położenie w oryginale i u nas, w tych samych miejscach strony |
 | pod konkretny efekt | `motion.py` | wejście po załadowaniu z pikseli: przeskoki, przerwy, przycięcia; krawędzie i kolejność warstwy efektu (`?dbg=`, `--origin`) — tylko gdy sekcja ma wejście albo efekt maski, filtra, WebGL |
@@ -134,7 +135,8 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 
 ## 4. Technologia
 
-- **GSAP 3.12.5 + ScrollTrigger** (cdnjs) do wszystkich animacji. Osie czasu są podpięte pod przewijanie (`scrub`).
+- **Biblioteki i fonty z własnego serwera** (`lib/`, `fonts/`; od 11.10, etap wydajności): te same pliki co na CDN, ładuje je mały skrypt w `<head>` (`window.__wirLoad`): przy szybkim starcie po pierwszym malowaniu, three.js dopiero przy pierwszym ruchu; przy `?w=C` od razu. Three.js to wersja tylko z używanymi klasami (`lib/README.md`: nowa klasa `THREE.X` = przebudować). Fonty: małe pliki „core” i „pl” przed plikami Google (zakresy rozłączne), krój pierwszego ekranu z `font-display:block`.
+- **GSAP 3.12.5 + ScrollTrigger** do wszystkich animacji. Osie czasu są podpięte pod przewijanie (`scrub`).
 - **Lenis 1.1.13** (`lerp: .1`) działa wszędzie, tak jak w oryginale: od 1025 px z płynnym kółkiem, poniżej z `smoothWheel:false` i `syncTouch:false`. Telefon przewija się natywnie; Lenis służy tam tylko do blokowania przewijania przy otwartym menu i skoków z menu. Instancja: `window.__lenis`.
 - **Three.js r149** do spirali 3D (`GLCoil`, na stronie głównej ma być jedna implementacja):
   - geometria: `TubeGeometry` po helisie, materiał `MeshPhysicalMaterial`, otoczenie PMREM („ciemne studio z paskami softboxów”);
@@ -151,7 +153,8 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 | Sekcja | Stan | Co zostało |
 |---|---|---|
 | Nagłówek i menu | zbudowane wg pomiarów | etap końcowy |
-| Hero / intro | **oddane** 11.10 (własna sekcja: układ 2, krój A, wejście C, dym d3, wyjście przez rozmycie; szczegóły i pomiary w `wiedza/hero.md`) | etap końcowy |
+| Hero / intro | **oddane** 11.10 (własna sekcja: układ 2, krój A, wejście C, dym d3, wyjście przez rozmycie; szczegóły i pomiary w `wiedza/hero.md`). Na gałęzi `wydajnosc` domyślnie **szybki start** (hero gotowe od pierwszego malowania, czarne O, bryła wyrasta przy pierwszym ruchu; wejście C pod `?w=C`) | do oceny Grzegorza: szybki start oczami; telefon (`phone_load.py`, `phone.py`) po podłączeniu |
+| Wydajność (11.10) | gałąź `wydajnosc`, nie scalona. Lighthouse lokalnie (`lighthouse.py`): telefon 42 → 96, desktop 86 → 100, dostępność 97, metody 100, SEO 100; telefon (Galaxy M15, wejście C, kroki 1–2): odsłonięcie 1,6–1,9 s → 0,75 s | decyzje Grzegorza: scalenie, szary #989a96 (kontrast 2,76; ciemniejszy = dostępność 100), PageSpeed na Pages po scaleniu |
 | Manifest | zbudowany wg pomiarów | pierwszy przejazd na telefonie ok. 45 kl./s |
 | Wybrane realizacje (przejście) | zbudowane | etap końcowy |
 | Karty realizacji | zbudowane | etap końcowy |
