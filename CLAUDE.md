@@ -153,8 +153,8 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 | Sekcja | Stan | Co zostało |
 |---|---|---|
 | Nagłówek i menu | zbudowane wg pomiarów | etap końcowy |
-| Hero / intro | **oddane** 11.10 (własna sekcja: układ 2, krój A, wejście C, dym d3, wyjście przez rozmycie; szczegóły i pomiary w `wiedza/hero.md`). Na gałęzi `wydajnosc` domyślnie **szybki start** (hero gotowe od pierwszego malowania, czarne O, bryła wyrasta przy pierwszym ruchu; wejście C pod `?w=C`) | do oceny Grzegorza: szybki start oczami; telefon (`phone_load.py`, `phone.py`) po podłączeniu |
-| Wydajność (11.10) | gałąź `wydajnosc`, nie scalona. Lighthouse lokalnie (`lighthouse.py`): telefon 42 → 96, desktop 86 → 100, dostępność 97, metody 100, SEO 100; telefon (Galaxy M15, wejście C, kroki 1–2): odsłonięcie 1,6–1,9 s → 0,75 s | decyzje Grzegorza: scalenie, szary #989a96 (kontrast 2,76; ciemniejszy = dostępność 100), PageSpeed na Pages po scaleniu |
+| Hero / intro | **oddane** 11.10 (własna sekcja: układ 2, krój A, wejście C, dym d3, wyjście przez rozmycie; szczegóły i pomiary w `wiedza/hero.md`). Na gałęzi `wydajnosc`: telefony i tablety **szybki start** (hero gotowe od pierwszego malowania, czarne O, bryła wyrasta przy pierwszym ruchu), desktop od 1025 px z myszą wejście C z dymem (shadery kompilowane w tle); `?w=S` / `?w=C` wymuszają | do oceny Grzegorza: szybki start oczami na telefonie; `phone_load.py`, `phone.py` po podłączeniu |
+| Wydajność (11.10) | gałąź `wydajnosc`, nie scalona. Lighthouse lokalnie (`lighthouse.py`): telefon 42 → 96, desktop z dymem 86 → 90 (bez karty graficznej, jak PageSpeed: 86), dostępność 97, metody 100, SEO 100; telefon (Galaxy M15, wejście C, kroki 1–2): odsłonięcie 1,6–1,9 s → 0,75 s | decyzje Grzegorza: scalenie, szary #989a96 (kontrast 2,76; ciemniejszy = dostępność 100), PageSpeed na Pages po scaleniu |
 | Manifest | zbudowany wg pomiarów | pierwszy przejazd na telefonie ok. 45 kl./s |
 | Wybrane realizacje (przejście) | zbudowane | etap końcowy |
 | Karty realizacji | zbudowane | etap końcowy |
