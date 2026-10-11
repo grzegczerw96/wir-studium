@@ -53,3 +53,8 @@ Pobrany Chromium Playwrighta nie startuje na tym Windowsie (błąd „konfigurac
 Nagrywa ekran telefonu klatka po klatce od pierwszego wejścia (przez `about:blank`, bez „paint holding”), wypisuje znaczniki (pierwsze malowanie, odsłonięcie strony `wir-reveal`) i zapisuje pasek klatek co 0,25 s. `--letters`: dla każdej litery tytułu zmiana obrazu między kolejnymi klatkami; skok to klatka ze zmianą wiele razy większą niż klatki obok, tylko tam, gdzie jest tusz litery. Wypisuje najsilniejsze i zapisuje zbliżenia (klatka przed, skok, po). Litery bada od 0,5 s po starcie efektu (znacznik strony `wir-smoke`; wcześniej elipsa przejeżdża nad miejscami liter). Zgłoszenia ×4–6 trzeba obejrzeć: czoło dymu odsłaniające literę też daje skok zmiany; prawdziwe wskakiwanie to ×9 i więcej i zmiana z miękkiej litery na ostrą w jednej klatce. `--local` podaje niewypchniętą wersję.
 
 `motion.py` zapisuje też wycinek pierwszej klatki z krawędzią warstwy (`edge_*.png`) i pomija przy krawędziach miejsca ruchomych elementów strony (paski, notka).
+
+## Spirala: `coil.py`
+
+Rozmiar i położenie spirali w oryginale (cappen.com) i u nas, z pikseli: wszystko poza warstwą spirali jest ukryte, czytane jest pudełko jasnych pikseli (bez paska przewijania). Miejsca: koniec hero, początek manifestu, góra kontaktu, kontakt +1,5 i +3 ekrany, stopka (koniec − 1 i − 0,5 ekranu, koniec). Przewija co ćwierć ekranu: skoki zostawiały scenę oryginału w nieaktualnym stanie. `--dev=d|m|both`. Strona udostępnia stan spirali kontaktu w `window.__P3`.
+

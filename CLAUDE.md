@@ -99,6 +99,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 | uniwersalne | `paths.py` | przejścia między sekcjami przy prawdziwym kółku, w obie strony; reguły „A zgasło, zanim weszło B” (dopisywać w `RULES`) |
 | uniwersalne | `sizes.py` | grupy elementów nie wchodzą na siebie na wielu rozmiarach okna (`--groups`, `--sizes`) |
 | uniwersalne | `phone.py`, `phone_load.py` | prawdziwy telefon: płynność, dotyk, pasek adresu; nagranie ładowania (`--letters`: skoki liter efektu tytułu) |
+| pod konkretny element | `coil.py` | spirala: rozmiar i położenie w oryginale i u nas, w tych samych miejscach strony |
 | pod konkretny efekt | `motion.py` | wejście po załadowaniu z pikseli: przeskoki, przerwy, przycięcia; krawędzie i kolejność warstwy efektu (`?dbg=`, `--origin`) — tylko gdy sekcja ma wejście albo efekt maski, filtra, WebGL |
 | pod hero (do uogólnienia albo usunięcia) | `center.py`, `overlap.py` | bryła w „O”; nachodzenie liter, notki i okna w ruchu |
 

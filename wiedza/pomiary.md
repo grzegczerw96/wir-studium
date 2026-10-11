@@ -55,3 +55,15 @@ Przeniesione z CLAUDE.md (§5 i §6.3) 10.10.2026. Czytać przy pracy nad daną 
 
   U nas działa to na zdarzeniu `scroll` Lenisa: 180 ms po zatrzymaniu, tylko gdy nic nie jedzie automatycznie (`window.__autoScrolling`), z zabezpieczeniem czasowym na zdjęcie tej flagi. Wszystko to działa tylko z myszą lub gładzikiem (`carry = !coarse`); na ekranach dotykowych przewijanie jest w pełni natywne (decyzja z 9.10.2026, w oryginale działa też na telefonie).
 
+## Spirala: rozmiar i położenie (zmierzone 11.10.2026, `tools/coil.py`, przewijanie co ćwierć ekranu)
+
+Spirala oryginału to model Spline; jej szerokość „przodem” to ok. **0,68 × wysokość ekranu × skala** (desktop 316 px przy 620 px i skali 0,75; telefon 282 px przy 812 px i skali 0,5). Skale z `main.js`: koniec hero 0,75 (do tabletu 0,5), manifest 0,75 → 0,6 (0,5 → 0,35), kontakt 0,65 → 1 (0,35 → 0,6), formularz → 0,6 (0,4), stopka 0,6 → 0,85 (0,4 → 0,65).
+
+| Miejsce | Desktop 1280×620 (cappen / nasza) | Telefon 375×812 (cappen / nasza) |
+|---|---|---|
+| Koniec hero | 314×306 przodem, środek / 314×192 bokiem, środek | 282×271 przodem / 282×173 bokiem |
+| Góra kontaktu | 536×362, środek / 498×240 | 365×511 (szersza niż ekran) / 370×190 |
+| Stopka, koniec | 462×174 przy 72%, 52% / 432×186 przy 74%, 54% | widoczna część 182×359 przy 75%, 26% (wysuwa się zza prawej krawędzi) / 208×161 przy 72%, 44% |
+
+Różnice, które zostały: na końcu hero cappen ma spiralę przodem (`rotation.x` −45° → 0), nasza jest przechylona bokiem (60°), bo tak zaczyna manifest; na telefonie w stopce pierścień cappen stoi bardziej pionowo i wyżej.
+

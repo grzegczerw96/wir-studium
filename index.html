@@ -756,9 +756,10 @@ html:not(.motion) .stage3{display:none}
 /* the main script runs once the document is parsed and a frame with the loader's oval is on the screen (two frames
    later), so the oval shows at once — run straight away, it held the first paint for ~2 s on a phone (measured with
    tools/phone_load.py). If no frame comes (a hidden tab), it runs anyway .5 s later */
-{let ran=false;const run=()=>{if(ran)return;ran=true;main()};
+(function(){   // (inside a function: a global main() made the tools take our page for the original, which has window.main)
+let ran=false;const run=()=>{if(ran)return;ran=true;main()};
  const start=()=>{requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(run,0)));setTimeout(run,500)};
- if(document.readyState==='loading')addEventListener('DOMContentLoaded',start);else start()}
+ if(document.readyState==='loading')addEventListener('DOMContentLoaded',start);else start();
 function main(){
   /* ================= motion preference ================= */
   const sysReduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1369,7 +1370,9 @@ function main(){
     const tr=f2((ccx-cvx)*(1-k))+'px '+f2((ccy-cvy)*(1-k))+'px';
     if(tr!==lastTr){ow1.style.translate=tr;lastTr=tr}
     const u=C.setPose?3.6*orbCanvas.clientHeight/4.823:.74*Math.min(orbCanvas.clientWidth,orbCanvas.clientHeight);
-    const D0=OC.w*FS*sc*e*.9*E.coil,D=D0+(u-D0)*quartOut(clamp(P));
+    // (phones: 1.13 × — the original's coil there is 282 px wide at the end of the hero against our 250, measured with
+    //  tools/coil.py, 11.10; the manifesto keeps this scale)
+    const D1=u*(matchMedia('(max-width:700px)').matches?1.13:1),D0=OC.w*FS*sc*e*.9*E.coil,D=D0+(D1-D0)*quartOut(clamp(P));
     if(C.setPose){if(E.spin>.01)C.kick(E.spin);C.setPose(1.05*turn,Math.max(D,.01)/u,-Math.PI*turn,turn,0)}
     else ow1.style.scale=(Math.max(D,.01)/u).toFixed(4);
     window.__o={cx,cy,ccx,ccy,OC,FS,r:[r.left,r.top,r.width,r.height]};   // (tools/center.py)
@@ -1931,6 +1934,7 @@ function main(){
   // (and the boxes follow the scroll without lag, so a quick flick up cannot leave them over the returning line)
   if(!isDesk())tkIn.fromTo(tkTitle,{opacity:1},{opacity:0,duration:.1,ease:'none'},0);
   const P3={o:0,d:1,x:.5,y:.5,s:.65,t:Math.PI/10};if(coil3)coil3.on=()=>P3.o>.005;
+  window.__P3=P3;   // (tools/coil.py)
   // the coil sits on the middle of the line (the line is centred below the sticky box's top padding)
   const tkSticky=document.getElementById('tkTitleSticky');
   const cX=()=>innerWidth/2,cY=()=>{const pad=parseFloat(getComputedStyle(tkSticky).paddingTop)||0;return pad+.5*(tkSticky.clientHeight-pad)};
@@ -1967,7 +1971,11 @@ function main(){
     .fromTo(P3,{s:()=>isDesk()?.6:.4},{s:()=>isDesk()?.85:.65,duration:.75,ease:'power1.inOut',immediateRender:false},.25);
   // (the coil layer is cut at the contact section's top edge, so it never shows over the light end of "about")
   const stage3=document.getElementById('stage3'),contactEl=document.getElementById('contact');let s3clip='',s3op=-1;
-  if(coil3)gsap.ticker.add(()=>{if(!visible.has(coil3))return;coil3.setPos(P3.x,P3.y);coil3.setPose(P3.t,P3.s*.62);coil3.setShade(P3.d,1.6-2.8*P3.d);
+  // (the original's coil is .68 × screen height × its scale wide, face-on, on desktops and phones alike; with .62 ours
+  //  was ~.55 of it — 246 px against 450 at the end of the footer at 1280×620, 216 against ~370 at the contact on a
+  //  phone; measured with tools/coil.py, 11.10)
+  const k3=()=>1.1;
+  if(coil3)gsap.ticker.add(()=>{if(!visible.has(coil3))return;coil3.setPos(P3.x,P3.y);coil3.setPose(P3.t,P3.s*k3());coil3.setShade(P3.d,1.6-2.8*P3.d);
     if(P3.o!==s3op){s3op=P3.o;stage3.style.opacity=s3op}});
   window.__contactY=()=>tkIn.scrollTrigger.end;
   /* footer (the original's timeline, scrubbed from the footer's top at the top to its bottom at the bottom — so nothing
@@ -2006,6 +2014,7 @@ function main(){
     ScrollTrigger.create({trigger:rowsEl,start:'top 70%',end:'bottom top',onEnter:tryOpen,onEnterBack:tryOpen})}
 
 }
+})();
 </script>
 
 </body>
