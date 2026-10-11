@@ -878,27 +878,43 @@ function main(){
     const studio=new THREE.Scene();studio.background=new THREE.Color(0x000000);
     const box=(w,h,x,y,z,v)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(v,v,v),side:THREE.DoubleSide}));m.position.set(x,y,z);m.lookAt(0,0,0);studio.add(m)};
     box(7,1.1,0,5,2,4.2);box(.9,8,-6,0,1.5,2.6);box(.9,8,6,1,-2,1.4);box(9,.5,0,-5,3,.7);box(2.5,2.5,3,3,6,1.1);
-    const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(studio,.03).texture;pm.dispose();
+    // (opt.lazy: the expensive part — the studio's reflections, the tube and the shaders' compile — waits for warm();
+    //  until then nothing is drawn. The hero's coil is still invisible when the page is shown, so it is built right after)
+    let built=false,geo=null,full=0;
+    const grp=new THREE.Group();scene.add(grp);
+    const shadeU={uY:{value:3},uW:{value:.75},uAmt:{value:0}};
+    let W=0,H=0;
+    function size(){W=canvas.clientWidth;H=canvas.clientHeight;if(!W||!H)return;renderer.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix()}
+    // (in three steps — reflections, tube, compile — so a coil made in idle moments never costs one long frame;
+    //  warm() takes the next step, warm(true) all that are left)
+    let step=0;
+    function build(all){if(built)return;
+    if(step===0){step=1;const pm=new THREE.PMREMGenerator(renderer);scene.environment=pm.fromScene(studio,.03).texture;pm.dispose();if(!all)return}
+    if(step===1){step=2;
     class Helix extends THREE.Curve{constructor(R,r,n){super();this.R=R;this.r=r;this.n=n}
       getPoint(t,o=new THREE.Vector3()){const p=t*Math.PI*2,th=p*this.n,rr=this.R+this.r*Math.cos(th);return o.set(rr*Math.cos(p),rr*Math.sin(p),this.r*Math.sin(th))}}
     const turns=coarse?22:28;
-    const geo=new THREE.TubeGeometry(new Helix(1.22,.5,turns),turns*(coarse?22:36),.078,coarse?10:16,true);
+    geo=new THREE.TubeGeometry(new Helix(1.22,.5,turns),turns*(coarse?22:36),.078,coarse?10:16,true);
     const mat=new THREE.MeshPhysicalMaterial({color:0xdedede,metalness:1,roughness:.2,clearcoat:.5,clearcoatRoughness:.25});
     // shade from above: everything above height uY (±uW) goes dark by uAmt, like the light falling off at the top
-    const shadeU={uY:{value:3},uW:{value:.75},uAmt:{value:0}};
     mat.onBeforeCompile=sh=>{Object.assign(sh.uniforms,shadeU);
       sh.vertexShader='varying float vWY;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\n  vWY=(modelMatrix*vec4(transformed,1.0)).y;');
       sh.fragmentShader='uniform float uY;uniform float uW;uniform float uAmt;varying float vWY;\n'+sh.fragmentShader.replace('#include <dithering_fragment>','gl_FragColor.rgb*=1.0-uAmt*smoothstep(uY-uW,uY+uW,vWY);\n#include <dithering_fragment>')};
-    const grp=new THREE.Group();grp.add(new THREE.Mesh(geo,mat));scene.add(grp);
-    const key=new THREE.DirectionalLight(0xffffff,.9);key.position.set(-3,4,5);scene.add(key);
-    let W=0,H=0;
-    function size(){W=canvas.clientWidth;H=canvas.clientHeight;if(!W||!H)return;renderer.setSize(W,H,false);cam.aspect=W/H;cam.updateProjectionMatrix()}
+    grp.add(new THREE.Mesh(geo,mat));
+    full=geo.index.count;
+    if(!all)return}
     size();
     // compile the metal's shaders now, while the page loads (on a phone the first draw otherwise froze the scroll for ~.2 s)
     try{renderer.compile(scene,cam)}catch(e){}
+    built=true;
+    }
+    const key=new THREE.DirectionalLight(0xffffff,.9);key.position.set(-3,4,5);scene.add(key);
+    size();
+    if(!opt.lazy)build(true);
     let spin=0,last=0,vel=0,mx=0,my=0,tmx=0,tmy=0,tilt=1.05,pscale=1,dark=0;
     if(!coarse)addEventListener('pointermove',e=>{tmx=e.clientX/innerWidth-.5;tmy=e.clientY/innerHeight-.5},{passive:true});
     function draw(t){
+      if(!built)return;
       if(!W)size();if(!W)return;
       const dt=Math.min(.05,Math.max(0,t-last));last=t;
       spin+=dt*(.32+Math.min(vel,4)*.8);vel*=.93;            // scroll speed spins it faster, then it calms down
@@ -908,7 +924,6 @@ function main(){
       grp.rotation.set(tilt+(Math.sin(t*.37)*.1+my*.3*mk)*sway,yaw+(Math.sin(t*.23)*.2+mx*.4*mk)*sway,spin+zr);grp.scale.setScalar(pscale*(1-.15*dark));
       renderer.render(scene,cam);
     }
-    const full=geo.index.count;
     const setShade=(amt,y)=>{shadeU.uAmt.value=amt;shadeU.uY.value=y};
     // at the end the shadow line keeps sliding down until the whole coil is in the dark, while it recedes a little
     // the shadow line slides down slowly, so a faint lower rim is still there when the texts start to leave;
@@ -919,11 +934,11 @@ function main(){
     let zr=0,sway=1,yaw=0;const setPose=(tl,sc,z=0,sw=1,y=0)=>{tilt=tl;pscale=sc;zr=z;sway=sw;yaw=y};
     // place the coil centre at screen pixel (px,py) of its canvas (camera at z 9, 30° fov → 4.823 units of height)
     const setPos=(px,py)=>{if(!W)size();if(!H)return;const k=2*9*Math.tan(Math.PI/12)/H;grp.position.set((px-W/2)*k,-(py-H/2)*k,0)};
-    return {draw,size,canvas,setDark,setShade,setPose,setPos,dpr:v=>{renderer.setPixelRatio(v);size()},kick:v=>{vel=Math.max(vel,Math.abs(v))},
-      setProgress:v=>geo.setDrawRange(0,Math.floor(full*Math.min(1,Math.max(0,v))/6)*6)};   // the wire is drawn along its length
+    return {draw,size,canvas,setDark,setShade,setPose,setPos,warm:all=>{build(all);return built},dpr:v=>{renderer.setPixelRatio(v);size()},kick:v=>{vel=Math.max(vel,Math.abs(v))},
+      setProgress:v=>{geo&&geo.setDrawRange(0,Math.floor(full*Math.min(1,Math.max(0,v))/6)*6)}};   // the wire is drawn along its length
   }
   const orbCanvas=document.getElementById('orb1');
-  const coils=[GLCoil(orbCanvas)||Coil(orbCanvas)];
+  const coils=[GLCoil(orbCanvas,{lazy:G})||Coil(orbCanvas)];
   // draw only while the intro or the manifesto is on screen (the coil lives on a fixed layer)
   const visible=new Set();const live=new Set();
   const io=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?live.add(e.target):live.delete(e.target));live.size?visible.add(coils[0]):visible.delete(coils[0])});
@@ -935,10 +950,13 @@ function main(){
   function lazyGL(canvas,opt){
     let real;const last={};
     const fw=k=>(...a)=>{if(real)return real[k](...a);last[k]=a};
-    const c={make(){if(real!==undefined)return;real=GLCoil(canvas,opt);if(real)for(const k in last)real[k](...last[k])},
+    // (made in three idle moments — the renderer, then its steps — or all at once when its section comes near)
+    const step=all=>{if(real===undefined){real=GLCoil(canvas,Object.assign({lazy:true},opt));if(real)for(const k in last)real[k](...last[k]);if(!all)return}
+      if(real)real.warm(all)};
+    const c={make(){step(true)},
       draw:t=>{real&&real.draw(t)},size:()=>{real&&real.size()},kick:v=>{real&&real.kick(v)},
       setPose:fw('setPose'),setShade:fw('setShade'),setPos:fw('setPos'),setDark:fw('setDark'),setProgress:fw('setProgress'),dpr:fw('dpr')};
-    later(c.make);
+    for(let i=0;i<4;i++)later(()=>step(false));
     return c;
   }
   const near=(el,c)=>{const o=new IntersectionObserver(es=>{if(es[0].isIntersecting){o.disconnect();c.make()}},{rootMargin:'150% 0px'});o.observe(el)};
@@ -1330,8 +1348,11 @@ function main(){
 
   /* the O of the face: advance, ink box and counter (the white inside), in em, from a canvas rendering */
   let OC={w:.3,h:.45,dx:0,dy:0},FS=100;
+  const OM={};   // (measured once per face and its loaded state: it read the pixels back at every re-layout)
   function measureO(){
-    const fam=getComputedStyle(heroT).fontFamily,Z=200,c=document.createElement('canvas'),g2=c.getContext('2d');
+    const fam=getComputedStyle(heroT).fontFamily,Z=200,key=fam+'|'+(document.fonts?document.fonts.check('900 '+Z+'px '+fam):1);
+    if(OM[key]){const [v,oc]=OM[key];Object.entries(v).forEach(([k,x])=>heroT.style.setProperty(k,x));OC=oc;return}
+    const c=document.createElement('canvas'),g2=c.getContext('2d',{willReadFrequently:true});
     g2.font='900 '+Z+'px '+fam;
     const m=g2.measureText('O'),l=m.actualBoundingBoxLeft,r=m.actualBoundingBoxRight;
     const a=m.actualBoundingBoxAscent,d=m.actualBoundingBoxDescent;
@@ -1349,6 +1370,7 @@ function main(){
     while(y0>0&&!ink(mx,y0-1))y0--;
     while(y1<c.height-1&&!ink(mx,y1+1))y1++;
     OC={w:(x1-x0+1)/Z,h:(y1-y0+1)/Z,dx:((x0+x1)/2-(10+(l+r)/2))/Z,dy:((y0+y1)/2-(10+(a+d)/2))/Z};
+    OM[key]=[Object.fromEntries(['--ow','--ol','--od','--obw','--obh'].map(k=>[k,heroT.style.getPropertyValue(k)])),OC];
   }
   /* the title's size: 9.75rem on desktops, otherwise as wide as the screen allows; never taller than the room it has
      (on a tablet-wide but low window the width alone made it too tall and the note ran onto the stripes). Desktop: the
@@ -1676,12 +1698,16 @@ function main(){
   buildScroll();
   // (the entrance's start states are set when the page is shown, after the measuring, so the letters' boxes are cached flat)
   enter.eventCallback('onComplete',stillGo);
-  // (the smoke's shaders are compiled now, while the loader's oval stands still: at the start of the entrance the
-  //  compile cost a 56 ms frame on the phone)
-  if(FX==='d3')smokeGL();
+  // (the smoke's shaders are compiled while the loader's oval stands still — at the start of the entrance the compile
+  //  cost a 56 ms frame on the phone — now just after the page is shown, with the coil's build, below)
   // (the entrance starts one frame after the reveal: the first frame of the shown page is a long one, and with lag
   //  smoothing off (Lenis) the coil, meant to grow into the oval over .8 s, appeared whole at once — measured on the phone)
-  show(()=>{heroEnter(enter);requestAnimationFrame(()=>requestAnimationFrame(()=>enter.play()))});
+  // The hero's coil (its reflections and shaders: ~.1 s on a phone) and the smoke's shaders are made just after the shown
+  // frame, each in its own task: that frame looks the same as the loader before it (the oval alone: the coil is still
+  // at size 0, the letters and the note turned away), so the page counts as shown ~.1-.3 s earlier and nothing waits
+  // longer for the entrance than before
+  show(()=>{heroEnter(enter);setTimeout(()=>{coils[0].warm&&coils[0].warm(true);
+    setTimeout(()=>{if(FX==='d3')smokeGL();requestAnimationFrame(()=>requestAnimationFrame(()=>enter.play()))},0)},0)});
 
   function buildScroll(){
   /* window grows to full screen (the original's curve, normalised): the edges open over the first 75 % (quad out),
