@@ -9,39 +9,49 @@
 <link rel="preload" href="fonts/inter-tight-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/inter-tight-pl.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/instrument-serif-it-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-@font-face{font-family:'Archivo';font-style:normal;font-weight:800 900;font-stretch:100% 118%;font-display:swap;src:url(fonts/archivo-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
-@font-face{font-family:'Archivo';font-style:normal;font-weight:800 900;font-stretch:100% 118%;font-display:swap;src:url(fonts/archivo-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
-@font-face{font-family:'Archivo';font-style:normal;font-weight:800 900;font-stretch:100% 118%;font-display:swap;src:url(fonts/archivo-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family:'Archivo';font-style:normal;font-weight:800 900;font-stretch:100% 118%;font-display:block;src:url(fonts/archivo-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
+@font-face{font-family:'Archivo';font-style:normal;font-weight:800 900;font-stretch:100% 118%;font-display:block;src:url(fonts/archivo-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
+@font-face{font-family:'Archivo';font-style:normal;font-weight:800 900;font-stretch:100% 118%;font-display:block;src:url(fonts/archivo-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
 @font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;font-display:swap;src:url(fonts/instrument-serif-it-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
 @font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;font-display:swap;src:url(fonts/instrument-serif-it-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
 @font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;font-display:swap;src:url(fonts/instrument-serif-it-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
 @font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/instrument-serif-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
 @font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/instrument-serif-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
 @font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/instrument-serif-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
-@font-face{font-family:'Inter Tight';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-tight-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
-@font-face{font-family:'Inter Tight';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-tight-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
-@font-face{font-family:'Inter Tight';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-tight-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
-@font-face{font-family:'Inter Tight';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/inter-tight-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
-@font-face{font-family:'Inter Tight';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/inter-tight-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
-@font-face{font-family:'Inter Tight';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/inter-tight-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
-@font-face{font-family:'Inter Tight';font-style:normal;font-weight:900;font-display:swap;src:url(fonts/inter-tight-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
-@font-face{font-family:'Inter Tight';font-style:normal;font-weight:900;font-display:swap;src:url(fonts/inter-tight-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
-@font-face{font-family:'Inter Tight';font-style:normal;font-weight:900;font-display:swap;src:url(fonts/inter-tight-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
-@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/jetbrains-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
-@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/jetbrains-mono-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
-@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/jetbrains-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
-@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/jetbrains-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
-@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/jetbrains-mono-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
-@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/jetbrains-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:400;font-display:block;src:url(fonts/inter-tight-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:400;font-display:block;src:url(fonts/inter-tight-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:400;font-display:block;src:url(fonts/inter-tight-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:500;font-display:block;src:url(fonts/inter-tight-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:500;font-display:block;src:url(fonts/inter-tight-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:500;font-display:block;src:url(fonts/inter-tight-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:900;font-display:block;src:url(fonts/inter-tight-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:900;font-display:block;src:url(fonts/inter-tight-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
+@font-face{font-family:'Inter Tight';font-style:normal;font-weight:900;font-display:block;src:url(fonts/inter-tight-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:block;src:url(fonts/jetbrains-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:block;src:url(fonts/jetbrains-mono-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:block;src:url(fonts/jetbrains-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:block;src:url(fonts/jetbrains-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:block;src:url(fonts/jetbrains-mono-pl.woff2) format('woff2');unicode-range:U+0104-0107,U+0118-0119,U+0141-0144,U+015A-015B,U+0179-017C;}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:block;src:url(fonts/jetbrains-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
 </style>
 <script>
 /* before the first paint: the original keeps its content in display:none until main.js has set it up (blank page,
    then its preloader). Here the layout class is decided now and the page stays blank until the fonts and the script
    are ready, so the plain layout (box in the middle, thick stripes, the headline in a fallback font) never flashes */
 (function(){var d=document.documentElement,f=false;try{f=localStorage.getItem('wir-motion')==='on'}catch(e){}
-  if(!matchMedia('(prefers-reduced-motion: reduce)').matches||f)d.classList.add('motion','pre');d.classList.add('wait')})();
+  var m=!matchMedia('(prefers-reduced-motion: reduce)').matches||f;
+  /* ?w=S, the quick start: the first screen is complete at the first paint (laid out by CSS alone), the libraries come
+     after it and three.js with the coil at the first move (or after a few seconds); no loader, no smoke */
+  var fast=m&&/[?&]w=S(&|$)/.test(location.search);
+  if(m)d.classList.add('motion',fast?'fast':'pre');if(!fast)d.classList.add('wait');
+  var load=function(s){return new Promise(function(r){var e=document.createElement('script');e.src=s;e.async=false;e.onload=e.onerror=r;document.head.appendChild(e)})};
+  var L=['lib/gsap-3.12.5.min.js','lib/ScrollTrigger-3.12.5.min.js','lib/lenis-1.1.13.min.js'],T='lib/three-0.149.0-wir.min.js';
+  window.__wirLoad={load:load,libs:L,three:T,fast:fast};
+  // (the entrance with the loader: the libraries at once, in order, as deferred scripts would; and the serif's preload,
+  //  which the entrance waits for)
+  if(!fast){window.__wirLibs=Promise.all(L.concat(T).map(load));
+    var p=document.createElement('link');p.rel='preload';p.as='font';p.type='font/woff2';p.crossOrigin='';p.href='fonts/instrument-serif-it-latin.woff2';document.head.appendChild(p)}})();
 </script>
 <style>
 /* Layout: white intro with a full-width black-weight headline and a small black window that grows into the whole screen,
@@ -81,6 +91,9 @@ html.wait .hd,html.wait main{visibility:hidden;animation:wir-show 0s 15s forward
    preloader, without its pictures); the script takes it over at exactly this size and place and carries it into the O */
 html.pre .box{clip-path:ellipse(calc(var(--r)*5) calc(var(--r)*5.25) at 50% 50svh)}
 html.wait.pre .box{visibility:visible;animation:none}
+/* the quick start (?w=S): no loader; until the script takes the black stage over, the O is its own black oval */
+html.fast:not(.live) .box{visibility:hidden}
+html.fast:not(.live) .hero-t .win{background:var(--ink);border-radius:50%}
 .it{font-family:var(--serif);font-style:italic;font-weight:400}
 .mono{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
 
@@ -792,19 +805,17 @@ html:not(.motion) .stage3{display:none}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="motion-pill" id="mp" hidden><span>System ogranicza animacje.</span><button type="button" id="mpBtn">Włącz animacje</button></div>
 
-<!-- the libraries from this site (the same files as on cdnjs, unpkg and jsdelivr), deferred: they run in order once the
-     page is parsed, before DOMContentLoaded, which is when the main script below starts -->
-<script defer src="lib/gsap-3.12.5.min.js"></script>
-<script defer src="lib/ScrollTrigger-3.12.5.min.js"></script>
-<script defer src="lib/lenis-1.1.13.min.js"></script>
-<script defer src="lib/three-0.149.0-wir.min.js"></script>
+<!-- the libraries (from this site: the same files as on cdnjs, unpkg and jsdelivr) are loaded by the small script in
+     <head>: at once with the loader's entrance, after the first paint with the quick start (?w=S) -->
 <script>
 /* the main script runs once the document is parsed and a frame with the loader's oval is on the screen (two frames
    later), so the oval shows at once — run straight away, it held the first paint for ~2 s on a phone (measured with
    tools/phone_load.py). If no frame comes (a hidden tab), it runs anyway .5 s later */
 (function(){   // (inside a function: a global main() made the tools take our page for the original, which has window.main)
 let ran=false;const run=()=>{if(ran)return;ran=true;main()};
- const start=()=>{requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(run,0)));setTimeout(run,500)};
+ const WL=window.__wirLoad||{libs:[],load:()=>Promise.resolve()};
+ const libs=()=>window.__wirLibs||(window.__wirLibs=Promise.all(WL.libs.map(WL.load)));
+ const start=()=>{requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>libs().then(run),0)));setTimeout(()=>libs().then(run),500)};
  if(document.readyState==='loading')addEventListener('DOMContentLoaded',start);else start();
 function main(){
   /* ================= motion preference ================= */
@@ -817,6 +828,9 @@ function main(){
     // after a few seconds the notice shrinks to a small chip so it never covers the page
     setTimeout(()=>{mp.classList.add('mini');b.textContent=forced?'Ruch: wł.':'Ruch: wył.';b.title=forced?'Wyłącz animacje':'Włącz animacje'},4000)}
   const G=!!window.gsap&&!!window.ScrollTrigger&&!reduce;
+  const FAST=G&&!!WL.fast;
+  // three.js: loaded with the page, or (quick start) only when a coil is first needed
+  let three3=null;const need3=()=>window.THREE?Promise.resolve():(three3||(three3=WL.load(WL.three)));
   const coarse=matchMedia('(pointer: coarse)').matches;      // touch screens: native scrolling, lighter effects
   const small=matchMedia('(max-width: 700px)').matches;
   document.documentElement.classList.toggle('motion',G);
@@ -950,7 +964,7 @@ function main(){
       setProgress:v=>{geo&&geo.setDrawRange(0,Math.floor(full*Math.min(1,Math.max(0,v))/6)*6)}};   // the wire is drawn along its length
   }
   const orbCanvas=document.getElementById('orb1');
-  const coils=[GLCoil(orbCanvas,{lazy:G})||Coil(orbCanvas)];
+  const coils=[FAST?lazyGL(orbCanvas,{},false):(GLCoil(orbCanvas,{lazy:G})||Coil(orbCanvas))];
   // draw only while the intro or the manifesto is on screen (the coil lives on a fixed layer)
   const visible=new Set();const live=new Set();
   const io=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?live.add(e.target):live.delete(e.target));live.size?visible.add(coils[0]):visible.delete(coils[0])});
@@ -959,26 +973,29 @@ function main(){
      entrance is over (later(), one per idle moment), or as soon as their section comes within a screen and a half.
      Made at load they cost ~.4 s of a phone's main thread before the page could show (Lighthouse, 4x slower CPU).
      Until then a stand-in keeps the last pose, shade and place it was given and draws nothing */
-  function lazyGL(canvas,opt){
+  function lazyGL(canvas,opt,sched=true){
     let real;const last={};
     const fw=k=>(...a)=>{if(real)return real[k](...a);last[k]=a};
     // (made in three idle moments — the renderer, then its steps — or all at once when its section comes near)
-    const step=all=>{if(real===undefined){real=GLCoil(canvas,Object.assign({lazy:true},opt));if(real)for(const k in last)real[k](...last[k]);if(!all)return}
+    const step=all=>{if(!window.THREE){if(FAST)need3().then(()=>step(all));return}
+      if(real===undefined){real=GLCoil(canvas,Object.assign({lazy:true},opt));if(real)for(const k in last)real[k](...last[k]);if(!all)return}
       if(real)real.warm(all)};
     const c={make(){step(true)},
+      // (four short tasks, one per frame: the quick start's coil, made when the visitor first moves)
+      prep:()=>need3().then(()=>new Promise(res=>{let i=0;const go=()=>{step(false);if(++i<4)setTimeout(go,16);else res()};go()})),
       draw:t=>{real&&real.draw(t)},size:()=>{real&&real.size()},kick:v=>{real&&real.kick(v)},
       setPose:fw('setPose'),setShade:fw('setShade'),setPos:fw('setPos'),setDark:fw('setDark'),setProgress:fw('setProgress'),dpr:fw('dpr')};
-    for(let i=0;i<4;i++)later(()=>step(false));
+    if(sched)for(let i=0;i<4;i++)later(()=>step(false));
     return c;
   }
   const near=(el,c)=>{const o=new IntersectionObserver(es=>{if(es[0].isIntersecting){o.disconnect();c.make()}},{rootMargin:'150% 0px'});o.observe(el)};
   const orb2=document.getElementById('orb2');
-  const coil2=window.THREE?lazyGL(orb2):null;
+  const coil2=window.THREE||FAST?lazyGL(orb2):null;
   if(coil2){near(document.getElementById('clients'),coil2);
     new IntersectionObserver(es=>es[0].isIntersecting?visible.add(coil2):visible.delete(coil2)).observe(document.getElementById('clients'));
     new ResizeObserver(()=>coil2.size()).observe(orb2)}
   const orb3=document.getElementById('orb3');
-  const coil3=window.THREE?lazyGL(orb3,{mouse:2.5}):null;
+  const coil3=window.THREE||FAST?lazyGL(orb3,{mouse:2.5}):null;
   if(coil3)near(document.getElementById('contact'),coil3);
   window.__wirCoils={intro:coils[0],clients:coil2,contact:coil3};   // for measuring on a real phone
   if(coil3){const vis3=new Set();const io3=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?vis3.add(e.target):vis3.delete(e.target));vis3.size?visible.add(coil3):visible.delete(coil3);document.getElementById('stage3').style.visibility=vis3.size?'visible':'hidden'});
@@ -1383,6 +1400,9 @@ function main(){
      (on a tablet-wide but low window the width alone made it too tall and the note ran onto the stripes). Desktop: the
      note stands beside it; tablets and phones: under it, so the centred title keeps clear of it */
   function fitHero(){
+    // (quick start: the size, the margin and the O's measures stay as CSS has them since the first paint — written again
+    //  here they could move the title; the coil's counter is Inter Tight Black's)
+    if(FAST){FS=Math.round(parseFloat(getComputedStyle(heroT).fontSize));OC={w:.3,h:.405,dx:-.005,dy:0};return}
     measureO();
     const ps=getComputedStyle(pin),avail=pin.clientWidth-2*parseFloat(ps.paddingRight);
     heroT.style.setProperty('--fs','100px');
@@ -1412,7 +1432,7 @@ function main(){
   /* the window and the coil, from the intro's scroll P (0..1) and the entrance state E:
      win 0 → 1 opens the window; go 0 → 1 carries it from the loader's oval (the screen's middle, 10 × 10.5rem, the
      same as the CSS one shown while loading) into the O; coil 0 → 1 grows the coil in; spin keeps it turning faster */
-  const E=G?{win:1,go:0,coil:0,spin:0}:{win:1,go:1,coil:1,spin:0};
+  const E=FAST?{win:1,go:1,coil:0,spin:0}:G?{win:1,go:0,coil:0,spin:0}:{win:1,go:1,coil:1,spin:0};
   const IP={p:0};
   const quadOut=t=>1-(1-t)*(1-t),quartOut=t=>1-Math.pow(1-t,4),clamp=v=>Math.min(1,Math.max(0,v));
   let lastClip='',lastTr='',lastP=-1,sepOn=false,lastKey='';
@@ -1484,6 +1504,14 @@ function main(){
   const show=f=>fontsIn.then(()=>requestAnimationFrame(()=>{relayout();document.documentElement.classList.remove('wait','pre');performance.mark('wir-reveal');f&&f()}));
 
   if(!G){show(stillGo);return}
+  if(FAST){
+    // the coil grows into the O (the loader's entrance, without the loader): at the first move, or after 6 s
+    let woke=false;const EV=['pointermove','pointerdown','touchstart','wheel','keydown','scroll'];
+    const wake=()=>{if(woke)return;woke=true;EV.forEach(e=>removeEventListener(e,wake));
+      coils[0].prep().then(()=>{E.spin=2.5;gsap.to(E,{coil:1,duration:.8,ease:'power3.out'});gsap.to(E,{spin:0,duration:1.4,ease:'power2.out',delay:.3});
+        setTimeout(stillGo,1500)})};
+    show(()=>{document.documentElement.classList.add('live');EV.forEach(e=>addEventListener(e,wake,{passive:true}));setTimeout(wake,6000)});
+  }
   /* ================= GSAP ================= */
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ignoreMobileResize:true});   // the iOS address bar must not re-measure the pinned sections
@@ -1713,7 +1741,7 @@ function main(){
   // frame, each in its own task: that frame looks the same as the loader before it (the oval alone: the coil is still
   // at size 0, the letters and the note turned away), so the page counts as shown ~.1-.3 s earlier and nothing waits
   // longer for the entrance than before
-  show(()=>{heroEnter(enter);setTimeout(()=>{coils[0].warm&&coils[0].warm(true);
+  if(!FAST)show(()=>{heroEnter(enter);setTimeout(()=>{coils[0].warm&&coils[0].warm(true);
     setTimeout(()=>{if(FX==='d3')smokeGL();requestAnimationFrame(()=>requestAnimationFrame(()=>enter.play()))},0)},0)});
 
   function buildScroll(){
