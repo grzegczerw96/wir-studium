@@ -173,6 +173,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
    - telefon w poziomie (844×390): brak układu na niskie ekrany; w intro okno nachodzi na paski i nie mieści się tekst, w manifeście tekst i kwadraty nachodzą na spiralę;
    - płynność na telefonie (klienci, pierwszy przejazd);
    - Safari/iPhone: niesprawdzone.
+   - **Pas na dole stopki w trakcie gestu (telefon, Chrome; zostawione 11.10.2026, do lepszego pomysłu):** gdy palec jest jeszcze na ekranie, Chrome chowa pasek adresu od razu, ale `100dvh` przelicza dopiero po skończonym geście; przez ten czas stopka (`.ft-wrap`, `height:100dvh`, sticky) ma starą wysokość i pod ostatnią linijką widać ok. 56 px czarnego pasa, potem dolny blok przeskakuje na miejsce. Po zatrzymaniu wszystko się zgadza (zmierzone: 649 i 705 px, ostatnia linijka 632 i 688). To zachowanie Chrome przy każdej treści przyczepionej do dołu ekranu. Kandydat na obejście: dolny blok (`.ft-end`) `position:fixed; bottom` na telefonie, gdy stopka jest przypięta (jak paski w intro: takie elementy Chrome przesuwa razem z paskiem adresu), z zachowaniem wysokości głowy stopki (inaczej „Social” na 77% głowy się przesunie); sprawdzać nagraniem ekranu telefonu w trakcie gestu, nie po nim.
 
 ## 6. Jak budować profesjonalne strony z ruchem (przewodnik)
 
