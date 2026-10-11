@@ -1938,7 +1938,10 @@ function main(){
   // the coil sits on the middle of the line (the line is centred below the sticky box's top padding)
   const tkSticky=document.getElementById('tkTitleSticky');
   const cX=()=>innerWidth/2,cY=()=>{const pad=parseFloat(getComputedStyle(tkSticky).paddingTop)||0;return pad+.5*(tkSticky.clientHeight-pad)};
-  const plc=()=>{const p=document.getElementById('tkPlace'),st=document.getElementById('tkFormSticky');if(!isDesk()||!p.offsetWidth)return {x:innerWidth*1.1,y:cY()};
+  // (phones: past the right edge and high, as the original — its coil comes out from the right edge in the upper half,
+  //  ~37 % of the screen's height while the form is in and ~28 % at the end of the footer; ours stood at 52 % and 44 %:
+  //  measured with tools/coil.py, 11.10)
+  const plc=()=>{const p=document.getElementById('tkPlace'),st=document.getElementById('tkFormSticky');if(!isDesk()||!p.offsetWidth)return {x:innerWidth*1.1,y:isDesk()?cY():innerHeight*.37};
     return {x:p.offsetLeft+p.offsetWidth/2,y:p.offsetTop+p.offsetHeight/2}};
   const midEnd=()=>tkFormWrap.offsetTop+2.5*innerHeight;
   // (starts at 70% rather than the bottom edge: our coil layer sits above the white section, so it must not show over the list)
@@ -1967,7 +1970,7 @@ function main(){
       setTimeout(()=>{window.__autoScrolling=false},2150)};
     L.on('scroll',()=>{clearTimeout(snapT);if(!window.__autoScrolling)snapT=setTimeout(snap,180)})}
   gsap.timeline({scrollTrigger:{trigger:'#contact',start:()=>'top+='+midEnd()+' top',endTrigger:'#footer',end:()=>'bottom-='+innerHeight*1.75+' top',scrub:true,invalidateOnRefresh:true}})
-    .fromTo(P3,{x:()=>plc().x,y:()=>plc().y,t:Math.PI/4},{x:()=>isDesk()?plc().x*.97:innerWidth,y:()=>isDesk()?plc().y:cY()*.825,t:Math.PI/2,duration:1,ease:'power4.inOut',immediateRender:false},0)
+    .fromTo(P3,{x:()=>plc().x,y:()=>plc().y,t:Math.PI/4},{x:()=>isDesk()?plc().x*.97:innerWidth,y:()=>isDesk()?plc().y:innerHeight*.3,t:Math.PI/2,duration:1,ease:'power4.inOut',immediateRender:false},0)
     .fromTo(P3,{s:()=>isDesk()?.6:.4},{s:()=>isDesk()?.85:.65,duration:.75,ease:'power1.inOut',immediateRender:false},.25);
   // (the coil layer is cut at the contact section's top edge, so it never shows over the light end of "about")
   const stage3=document.getElementById('stage3'),contactEl=document.getElementById('contact');let s3clip='',s3op=-1;

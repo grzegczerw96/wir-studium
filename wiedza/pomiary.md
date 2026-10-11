@@ -63,7 +63,7 @@ Spirala oryginału to model Spline; jej szerokość „przodem” to ok. **0,68 
 |---|---|---|
 | Koniec hero | 314×306 przodem, środek / 314×192 bokiem, środek | 282×271 przodem / 282×173 bokiem |
 | Góra kontaktu | 536×362, środek / 498×240 | 365×511 (szersza niż ekran) / 370×190 |
-| Stopka, koniec | 462×174 przy 72%, 52% / 432×186 przy 74%, 54% | widoczna część 182×359 przy 75%, 26% (wysuwa się zza prawej krawędzi) / 208×161 przy 72%, 44% |
+| Stopka, koniec | 462×174 przy 72%, 52% / 432×186 przy 74%, 54% | widoczna część 185×362 przy 75%, 27% (wysuwa się zza prawej krawędzi) / 208×180 przy 72%, 30% (po poprawce; wcześniej 44%) |
 
-Różnice, które zostały: na końcu hero cappen ma spiralę przodem (`rotation.x` −45° → 0), nasza jest przechylona bokiem (60°), bo tak zaczyna manifest; na telefonie w stopce pierścień cappen stoi bardziej pionowo i wyżej.
+Różnice, które zostały: na końcu hero cappen ma spiralę przodem (`rotation.x` −45° → 0), nasza jest przechylona bokiem (60°), bo tak zaczyna manifest; w fazie formularza na telefonie cappen dojeżdża do prawej krawędzi wcześniej (przy +1,5 ekranu od góry kontaktu już 88%, u nas jeszcze 50%). Decyzja Grzegorza 11.10: stopka na telefonie jak w cappen, poza końca intro bez zmian.
 
