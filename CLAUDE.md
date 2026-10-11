@@ -53,7 +53,7 @@ Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór te
   - powrót do czerni po nagrodach jest krótszy niż w oryginale: od ostatniej nazwy na 15% ekranu do góry kontaktu przy górze ekranu (telefon ok. 0,6 ekranu, desktop ok. 0,95), żeby lista schodziła na białym, a nie stała na szarym (10.10.2026);
   - brak kursora „DISCOVER” i brak dociągania w manifeście;
   - paski w intro na telefonie przylegają do dolnej krawędzi (w oryginale jest pod nimi 3,5rem bieli; 9.10.2026);
-  - na ekranach dotykowych strona sama nie przewija (bez dociągania u klientów, bez przyciągania formularza i stopki), bo walczy to z palcem i pędem (9.10.2026); **wyjątek: intro** (10.10.2026, prośba Grzegorza): po zdjęciu palca i 0,25 s bez ruchu okno samo dojeżdża do pełnego ekranu (ok. 0,9 s), bez blokady, dotknięcie od razu przerywa;
+  - na ekranach dotykowych strona sama nie przewija (bez dociągania u klientów, bez przyciągania formularza i stopki), bo walczy to z palcem i pędem (9.10.2026); **wyjątki: intro i stopka** (prośby Grzegorza 10–11.10.2026): po zdjęciu palca i 0,25 s bez ruchu intro dojeżdża do pełnego okna (ok. 0,9 s), a stopka po przekroczeniu 10% swojej osi do końca strony (2 s); bez blokady, dotknięcie od razu przerywa;
   - „Kontakt” w menu prowadzi do gotowego formularza, a nie na górę sekcji (tam jest szare przejście koloru; 9.10.2026);
   - nowe hero (układ, krój, wejście z dymem): świadomie inne niż w oryginale, szczegóły w `wiedza/hero.md`.
 - **Nasze dodatki, których oryginał nie ma** (zostawione celowo, do decyzji Grzegorza):
@@ -75,6 +75,7 @@ Stan na 11.10.2026: hero oddane; na start pracy §0a, dwie ścieżki i dobór te
 7. **Po testach przywróć widok przeglądarki** do ustawienia „desktop”.
 
 Drobne pułapki środowiska:
+- **Spirala nie stoi pod tekstem:** jej położenie przy tekście liczyć z żywego układu (wolny pas między blokami tekstu), nie stałym procentem ekranu; `paths.py` sprawdza to regułą `coil-over-text` (pudełko spirali szacuje strona: `window.__P3box`).
 - **Telefon Grzegorza (`phone.py`, `phone_load.py`, adb): dotykać wyłącznie karty z naszą stroną**; inne karty i pliki są prywatne (ze zrzutów tylko dzisiejsze z Chrome).
 - Skrypty z wieloma odwróconymi apostrofami (Markdown, JS) zapisuje się narzędziami do edycji plików, nie przez `bash -c "…"`: bash wykonuje tekst w odwróconych apostrofach jako polecenia.
 - Materiały od Grzegorza: zrzuty z telefonu w `/sdcard/DCIM/Screenshots` (`adb pull` tylko dzisiejszych z Chrome); filmy (`.mp4`) rozkłada się na klatki przez `ffmpeg`. Nagrania cudzych stron w `wiedza/media/` (poza repo).
@@ -182,7 +183,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 4. **Ciągłość.** Nic się nie podmienia między stanami. To, co rośnie, to ten sam obiekt, a jedna bryła przechodzi przez wiele sekcji na stałej warstwie.
 5. **Fale zamiast kolejki.** Wiele elementów rusza się naraz z małym przesunięciem (.035 s między literami, .1 s między liniami).
 6. **Warstwy nie walczą.** Następna treść pojawia się dopiero, gdy poprzednia zniknęła. Tekst nigdy nie stoi na tle bez kontrastu.
-7. **Strona prowadzi użytkownika.** Dociąganie i automatyczne przewijanie sprawiają, że nie da się „utknąć” w połowie przejścia (liczby: `wiedza/pomiary.md`). U nas z myszą lub gładzikiem; na dotyku tylko intro (po zdjęciu palca, §2).
+7. **Strona prowadzi użytkownika.** Dociąganie i automatyczne przewijanie sprawiają, że nie da się „utknąć” w połowie przejścia (liczby: `wiedza/pomiary.md`). U nas z myszą lub gładzikiem; na dotyku tylko intro i stopka (po zdjęciu palca, §2).
 8. **60 kl./s także na telefonie.** Rysujemy tylko to, co widać (IntersectionObserver), na dotyku lżejsze efekty i natywne przewijanie.
 9. **Wersja bez animacji też wygląda dobrze** (`prefers-reduced-motion`, klasa `html.motion`).
 10. **Detale:** stany najechania, widoczny focus, Esc zamyka menu, linki działają z klawiatury.
