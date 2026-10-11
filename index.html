@@ -1452,7 +1452,9 @@ function main(){
     // (a small dense puff at the source, growing from nothing and smoking until the ring is well out)
     '  float puff=exp(-pow(c/.12,2.))*smoothstep(-.3,-.22,f)*(1.-smoothstep(.15,.55,f));',
     '  float sm=clamp(max(core*(.55+.45*tx)+lead*.7*tx+trail*.45*tx,0.)*reach+puff*(.6+.4*tx),0.,1.)*uFade*uAmt*vig;',
-    '  vec2 d=(w-.5)*.025*(core+lead)*(1.-rev*.6);',
+    // (the waver only where the letters are still coming out of the smoke: on the shown part it stopped within a few
+    //  frames as the front passed, and the letter seemed to jump into its shape — measured on the phone, 11.10)
+    '  vec2 d=(w-.5)*.025*(core+lead)*(1.-rev);',
     '  float ta=texture2D(uText,v+d).a*rev;',
     '  float a=sm+ta*(1.-sm);gl_FragColor=vec4(uSmoke*sm+uInk*ta*(1.-sm),a);}'].join('\n');
   let SM=null;
@@ -1549,7 +1551,7 @@ function main(){
     draw();
     // the front crosses in 3.6 s (power2 out: it moves at once and slows only at the end — with sine in-out it hung still
     // for ~.7 s after the oval landed), the smoke thins out from 2.4 s over 1.5 s
-    tl.set(G2.cv,{display:'block'},at)
+    tl.set(G2.cv,{display:'block'},at).call(()=>performance.mark('wir-smoke'),null,at)   // (tools/phone_load.py --letters)
       .to(v,{p:1,duration:3.6,ease:'power2.out',onUpdate:draw},at)
       .to(v,{fade:0,duration:1.5,ease:'power1.out',onUpdate:draw},at+2.4)
       // (any letter not yet handed over by then comes in; then the layer, now under whole page letters, fades away)
@@ -1612,7 +1614,9 @@ function main(){
   // (the smoke's shaders are compiled now, while the loader's oval stands still: at the start of the entrance the
   //  compile cost a 56 ms frame on the phone)
   if(FX==='d3')smokeGL();
-  show(()=>{heroEnter(enter);enter.play()});
+  // (the entrance starts one frame after the reveal: the first frame of the shown page is a long one, and with lag
+  //  smoothing off (Lenis) the coil, meant to grow into the oval over .8 s, appeared whole at once — measured on the phone)
+  show(()=>{heroEnter(enter);requestAnimationFrame(()=>requestAnimationFrame(()=>enter.play()))});
 
   function buildScroll(){
   /* window grows to full screen (the original's curve, normalised): the edges open over the first 75 % (quad out),

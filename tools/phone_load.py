@@ -43,6 +43,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(int(DUR * 1000))
     cdp.send('Page.stopScreencast')
     marks = pg.evaluate("({reveal:Math.round((performance.getEntriesByName('wir-reveal')[0]||{}).startTime||-1),"
+                        "smoke:Math.round((performance.getEntriesByName('wir-smoke')[0]||{}).startTime||-1),"
                         "paint:performance.getEntriesByType('paint').map(e=>e.name+' '+Math.round(e.startTime))})")
     # the title's letters at rest (css px) and the width of the screen they were drawn on
     LET = pg.evaluate("({W:innerWidth,ch:[...document.querySelectorAll('#heroT .ch')].map(c=>{const r=c.getBoundingClientRect();"
@@ -67,6 +68,10 @@ if LETTERS:
     k = w / LET['W']
     boxes = [(c[0], tuple(int(round(v * k)) for v in (c[1] - 2, c[2] - 2, c[3] + 2, c[4] + 2))) for c in LET['ch']]
     gray = [(t, im.convert('L')) for t, im in ims]
+    # (letters only from the start of the title's effect, page mark 'wir-smoke': before it the black oval travels over
+    #  the letters' places and reads as ink)
+    # (+.5 s: the smoke starts while the oval is still landing in the O over the letters next to it)
+    T0 = marks['smoke'] / 1000 + .5 if marks.get('smoke', -1) > 0 else 0
     ev = []
     for li, (ch, bx) in enumerate(boxes):
         d = [0.0]
@@ -78,7 +83,7 @@ if LETTERS:
             ratio = d[i] / (around[len(around) // 2] + .5)
             # (only where a letter's ink is: the smoke's front alone, moving fast over an empty box, is not a jump)
             ink = min(ImageStat.Stat(gray[j][1].crop(bx)).extrema[0][0] for j in (i - 1, i)) < 60
-            if d[i] > 4 and ratio > 4 and ink: ev.append((ratio, d[i], gray[i][0], li, ch, i))
+            if d[i] > 4 and ratio > 4 and ink and gray[i][0] >= T0: ev.append((ratio, d[i], gray[i][0], li, ch, i))
     ev.sort(reverse=True)
     print('letter jumps (time from navigation, letter, change per 16 ms, times its neighbours):')
     for r, dv, t, li, ch, i in ev[:10]: print(f'  {t:5.2f}s  {ch} (#{li})  {dv:5.1f}  ×{r:4.1f}')
