@@ -62,10 +62,12 @@ Na prośbę Grzegorza („95+ na telefonie, nawet kosztem animacji wstępnej”)
 
 | Wersja | Gdzie domyślnie | Podgląd na dowolnym urządzeniu | Lighthouse lokalnie |
 |---|---|---|---|
-| **szybki start** (bez dymu: hero gotowe od pierwszej klatki, czarne O, bryła wyrasta przy pierwszym ruchu) | telefony i tablety | `?w=S` | telefon 96, desktop 100 |
-| **wejście C z dymem** (owal ładowania przelatuje w O, tytuł z dymu d3) | desktop od 1025 px bez ekranu dotykowego (`pointer:coarse`) | `?w=C` | desktop 96 (bez karty graficznej 94), telefon ok. 45 |
+| **szybki start** (bez dymu: hero gotowe od pierwszej klatki, czarne O, bryła wyrasta przy pierwszym ruchu) | telefony, tablety i komputery bez sprzętowej grafiki | `?w=S` | telefon 96, desktop 100 |
+| **wejście C z dymem** (owal ładowania przelatuje w O, tytuł z dymu d3) | desktop od 1025 px bez ekranu dotykowego (`pointer:coarse`), ze sprzętową grafiką | `?w=C` | desktop 96 (bez karty graficznej 94), telefon ok. 45 |
 
 **Jak przełączyć domyślną wersję** (skrypt w `<head>` `index.html`, linia z `var fast=`):
 - szybki start wszędzie: `var fast=m&&!/[?&]w=C(&|$)/.test(q);`
 - dym wszędzie: `var fast=m&&/[?&]w=S(&|$)/.test(q);`
 - obecnie (telefon bez dymu, desktop z dymem): `var fast=m&&(/[?&]w=S(&|$)/.test(q)||!desk&&!/[?&]w=C(&|$)/.test(q));`
+
+**Komputery bez sprzętowej grafiki** (decyzja Grzegorza 12.10, wariant B): szybki start zamiast dymu. Wykrywane raz w `<head>`, przed pierwszą klatką: kontekst WebGL z `failIfMajorPerformanceCaveat:true` (null = przeglądarka sama uznała grafikę za wolną) albo nazwa sterownika (SwiftShader, llvmpipe, Basic Render). Dotyczy też maszyn PageSpeed: **desktopowy wynik PageSpeed mierzy więc szybki start, nie dym** (z dymem PageSpeed dał 59: TBT 21 s, bo dym liczył procesor). Komputer z kartą graficzną widzi dym; jego wynik sprawdzać lokalnie: `lighthouse.py local --only=desktop` (ok. 96).
