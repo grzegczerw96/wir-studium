@@ -6,6 +6,8 @@
 <title>Wir Studio – strony z ruchem</title>
 <meta name="description" content="Małe, niezależne studio, które od 2014 roku projektuje i koduje strony z ruchem dla marek, które nie chcą wyglądać jak wszyscy.">
 <link rel="canonical" href="https://grzegczerw96.github.io/wir-studium/">
+<!-- what the page is about, for search engines (schema.org; Wir is a fictional brand: no address, no outside domain) -->
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://grzegczerw96.github.io/wir-studium/#studio","name":"Wir Studio","url":"https://grzegczerw96.github.io/wir-studium/","description":"Małe, niezależne studio, które od 2014 roku projektuje i koduje strony z ruchem dla marek, które nie chcą wyglądać jak wszyscy.","foundingDate":"2014","knowsAbout":["projektowanie stron internetowych","animacja stron","WebGL","UX/UI","front-end"]},{"@type":"WebSite","@id":"https://grzegczerw96.github.io/wir-studium/#site","url":"https://grzegczerw96.github.io/wir-studium/","name":"Wir Studio","inLanguage":"pl","publisher":{"@id":"https://grzegczerw96.github.io/wir-studium/#studio"}}]}</script>
 <meta name="theme-color" content="#fcfcfc">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pl_PL">
@@ -762,11 +764,58 @@ html:not(.motion) .stage3{display:none}
   </section>
 
   <section class="work" id="work">
-    <div class="cases" id="cases"></div>
+    <div class="cases" id="cases">
+    <article class="case"><a class="case-a" href="#projects">
+      <div class="pic"><div class="img"><i></i></div><div class="tags"><span class="tag">Platforma</span><span class="tag">UX/UI</span></div></div>
+      <div class="cap"><div class="cap-w"><h3>Szlak</h3><p class="desc">Rezerwacje dla sieci <span class="it">górskich schronisk</span>, które działają nawet przy jednej kresce zasięgu.</p></div><span class="ico" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg></span></div></a></article>
+    <article class="case"><a class="case-a" href="#projects">
+      <div class="pic"><div class="img"><i></i></div><div class="tags"><span class="tag">Premiera</span><span class="tag">WebGL</span></div></div>
+      <div class="cap"><div class="cap-w"><h3>Chronos Atelier</h3><p class="desc">Mikrostrona premiery zegarka, na której <span class="it">czas</span> płynie razem z przewijaniem.</p></div><span class="ico" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg></span></div></a></article>
+    <article class="case"><a class="case-a" href="#projects">
+      <div class="pic"><div class="img"><i></i></div><div class="tags"><span class="tag">Aplikacja</span></div></div>
+      <div class="cap"><div class="cap-w"><h3>Pociąg+</h3><p class="desc">Bilety kolejowe w <span class="it">trzech dotknięciach</span> zamiast dziewięciu.</p></div><span class="ico" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg></span></div></a></article>
+    <article class="case"><a class="case-a" href="#projects">
+      <div class="pic"><div class="img"><i></i></div><div class="tags"><span class="tag">Kampania</span><span class="tag">Audio</span></div></div>
+      <div class="cap"><div class="cap-w"><h3>Prąd Festival</h3><p class="desc">Kampania festiwalu muzyki elektronicznej, w której <span class="it">bas</span> steruje animacją.</p></div><span class="ico" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg></span></div></a></article></div>
   </section>
 
   <section class="index" id="projects" aria-label="Wszystkie projekty">
-    <div class="plist" id="rows"></div>
+    <div class="plist" id="rows">
+    <article class="pr"><div class="pr-w">
+      <button class="pr-h" type="button" aria-expanded="false" aria-controls="d0">
+        <span class="pr-hw"><span class="pr-t">Szlak</span><span class="pr-y">2026</span></span>
+        <span class="ptags"><span class="ptag" style="--d:0.16666666666666666s">Platforma</span><span class="ptag" style="--d:0.08333333333333333s">UX/UI</span><span class="ptag" style="--d:0s">Full stack</span></span></button>
+      <div class="pr-d" id="d0" hidden><div class="pr-fig"></div>
+        <div class="pr-a"><p>Nowy system rezerwacji dla 40 schronisk: kolejka offline, synchronizacja po odzyskaniu zasięgu i panel dla gospodarzy.</p><a class="lhc" href="#work"><span class="lhc-l"><span>Zobacz realizację</span></span><span class="ico" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg></span></a></div></div>
+    </div></article>
+    <article class="pr"><div class="pr-w">
+      <button class="pr-h" type="button" aria-expanded="false" aria-controls="d1">
+        <span class="pr-hw"><span class="pr-t">Chronos Atelier</span><span class="pr-y">2025</span></span>
+        <span class="ptags"><span class="ptag" style="--d:0.16666666666666666s">Front-end</span><span class="ptag" style="--d:0.08333333333333333s">WebGL</span><span class="ptag" style="--d:0s">Mikrointerakcje</span></span></button>
+      <div class="pr-d" id="d1" hidden><div class="pr-fig"></div>
+        <div class="pr-a"><p>Strona premiery z modelem 3D zegarka, który składa się podczas przewijania.</p><a class="lhc" href="#work"><span class="lhc-l"><span>Zobacz realizację</span></span><span class="ico" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg></span></a></div></div>
+    </div></article>
+    <article class="pr"><div class="pr-w">
+      <button class="pr-h" type="button" aria-expanded="false" aria-controls="d2">
+        <span class="pr-hw"><span class="pr-t">Pociąg+</span><span class="pr-y">2025</span></span>
+        <span class="ptags"><span class="ptag" style="--d:0.08333333333333333s">Aplikacja</span><span class="ptag" style="--d:0s">UX/UI</span></span></button>
+      <div class="pr-d" id="d2" hidden><div class="pr-fig"></div>
+        <div class="pr-a"><p>Uproszczony zakup biletu i jeden ekran ze wszystkimi przesiadkami.</p><a class="lhc" href="#work"><span class="lhc-l"><span>Zobacz realizację</span></span><span class="ico" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg></span></a></div></div>
+    </div></article>
+    <article class="pr"><div class="pr-w">
+      <button class="pr-h" type="button" aria-expanded="false" aria-controls="d3">
+        <span class="pr-hw"><span class="pr-t">Prąd Festival</span><span class="pr-y">2024</span></span>
+        <span class="ptags"><span class="ptag" style="--d:0.16666666666666666s">Kampania</span><span class="ptag" style="--d:0.08333333333333333s">Animacja</span><span class="ptag" style="--d:0s">Audio</span></span></button>
+      <div class="pr-d" id="d3" hidden><div class="pr-fig"></div>
+        <div class="pr-a"><p>Identyfikacja ruchoma reagująca na dźwięk z mikrofonu odwiedzającego.</p><a class="lhc" href="#work"><span class="lhc-l"><span>Zobacz realizację</span></span><span class="ico" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg></span></a></div></div>
+    </div></article>
+    <article class="pr"><div class="pr-w">
+      <button class="pr-h" type="button" aria-expanded="false" aria-controls="d4">
+        <span class="pr-hw"><span class="pr-t">Herbaciarnia Liść</span><span class="pr-y">2023</span></span>
+        <span class="ptags"><span class="ptag" style="--d:0.08333333333333333s">Sklep</span><span class="ptag" style="--d:0s">CMS</span></span></button>
+      <div class="pr-d" id="d4" hidden><div class="pr-fig"></div>
+        <div class="pr-a"><p>Sklep z herbatą, w którym każda mieszanka ma własną paletę kolorów.</p><a class="lhc" href="#work"><span class="lhc-l"><span>Zobacz realizację</span></span><span class="ico" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg></span></a></div></div>
+    </div></article></div>
   </section>
 
   <section class="about" id="about" aria-label="O nas">
@@ -1129,17 +1178,10 @@ function main(){
   later(()=>[...document.getElementById('thumbs').children].forEach((d,i)=>d.style.backgroundImage=tile(i)));
 
   /* ================= content ================= */
-  const CASES=[
-    {n:'Szlak',y:'2026',tags:['Platforma','UX/UI'],t:'Rezerwacje dla sieci <span class="it">górskich schronisk</span>, które działają nawet przy jednej kresce zasięgu.',o:{tint:[214,226,214],bg:'#1d2a24',turns:18,t:.6}},
-    {n:'Chronos Atelier',y:'2025',tags:['Premiera','WebGL'],t:'Mikrostrona premiery zegarka, na której <span class="it">czas</span> płynie razem z przewijaniem.',o:{tint:[240,214,170],bg:'#16120c',turns:34,t:2.1}},
-    {n:'Pociąg+',y:'2025',tags:['Aplikacja'],t:'Bilety kolejowe w <span class="it">trzech dotknięciach</span> zamiast dziewięciu.',o:{tint:[190,205,255],bg:'#0c1022',turns:22,t:3.4}},
-    {n:'Prąd Festival',y:'2024',tags:['Kampania','Audio'],t:'Kampania festiwalu muzyki elektronicznej, w której <span class="it">bas</span> steruje animacją.',o:{tint:[255,120,100],bg:'#1f0806',turns:40,t:4.8}}
-  ];
+  // (the cards' text is in the page, for search engines and the first paint; here only their pictures, in the same order)
+  const CASES=[{tint:[214,226,214],bg:'#1d2a24',turns:18,t:.6},{tint:[240,214,170],bg:'#16120c',turns:34,t:2.1},{tint:[190,205,255],bg:'#0c1022',turns:22,t:3.4},{tint:[255,120,100],bg:'#1f0806',turns:40,t:4.8}].map(o=>({o}));
   const ARR='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12L12 4M5.5 4H12v6.5"/></svg>';
-  document.getElementById('cases').innerHTML=CASES.map(c=>{const img=c._img=still(720,900,c.o);return `
-    <article class="case"><a class="case-a" href="#projects">
-      <div class="pic"><div class="img"><i style="background-image:${img}"></i></div><div class="tags">${c.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div>
-      <div class="cap"><div class="cap-w"><h3>${c.n}</h3><p class="desc">${c.t}</p></div><span class="ico" aria-hidden="true">${ARR}</span></div></a></article>`}).join('');
+  document.querySelectorAll('#cases .case .img i').forEach((el,k)=>{el.style.backgroundImage=CASES[k]._img=still(720,900,CASES[k].o)});
   const casesEl=document.getElementById('cases');
   /* Fluid image, as in the original: each card picture is a tiny WebGL quad.
      - cover crop at uScale .75 (the picture is 1/.75 larger than its frame)
@@ -1192,13 +1234,6 @@ function main(){
     c.addEventListener('pointerenter',e=>{if(e.pointerType!=='mouse')return;casesEl.classList.add('has-hover');c.classList.add('hot')});
     c.addEventListener('pointerleave',()=>{c.classList.remove('hot');if(!casesEl.querySelector('.hot'))casesEl.classList.remove('has-hover')});
   });
-  const ROWS=[
-    ['Szlak','2026',['Platforma','UX/UI','Full stack'],'Nowy system rezerwacji dla 40 schronisk: kolejka offline, synchronizacja po odzyskaniu zasięgu i panel dla gospodarzy.'],
-    ['Chronos Atelier','2025',['Front-end','WebGL','Mikrointerakcje'],'Strona premiery z modelem 3D zegarka, który składa się podczas przewijania.'],
-    ['Pociąg+','2025',['Aplikacja','UX/UI'],'Uproszczony zakup biletu i jeden ekran ze wszystkimi przesiadkami.'],
-    ['Prąd Festival','2024',['Kampania','Animacja','Audio'],'Identyfikacja ruchoma reagująca na dźwięk z mikrofonu odwiedzającego.'],
-    ['Herbaciarnia Liść','2023',['Sklep','CMS'],'Sklep z herbatą, w którym każda mieszanka ma własną paletę kolorów.']
-  ];
   // pictures for the about section
   const AB=[{tint:[255,170,120],bg:'#c8340f',turns:16,t:.9},{tint:[235,235,235],bg:'#1b1b1b',turns:30,t:2.6},{tint:[230,230,230],bg:'#0a0a0a',turns:22,t:4.2}].map(o=>still(640,800,o));
   document.querySelectorAll('.ab-fig .img i').forEach((i,k)=>i.style.backgroundImage=AB[k]);
@@ -1242,14 +1277,8 @@ function main(){
    inp.addEventListener('input',()=>{send.disabled=inp.value.trim().length<3});
    form.addEventListener('submit',e=>{e.preventDefault();if(send.disabled)return;field.hidden=true;done.hidden=false;send.disabled=true;say('Wersja demonstracyjna: nic nie zostało wysłane')})}
   const rowsEl=document.getElementById('rows');
-  rowsEl.innerHTML=ROWS.map((r,i)=>`
-    <article class="pr"><div class="pr-w">
-      <button class="pr-h" type="button" aria-expanded="false" aria-controls="d${i}">
-        <span class="pr-hw"><span class="pr-t">${r[0]}</span><span class="pr-y">${r[1]}</span></span>
-        <span class="ptags">${r[2].map((x,k)=>`<span class="ptag" style="--d:${(r[2].length-1-k)/12}s">${x}</span>`).join('')}</span></button>
-      <div class="pr-d" id="d${i}" hidden><div class="pr-fig" style="background-image:${still(800,450,{tint:[230,230,230],bg:'#101010',turns:14+i*6,t:i*1.7})}"></div>
-        <div class="pr-a"><p>${r[3]}</p><a class="lhc" href="#work"><span class="lhc-l"><span>Zobacz realizację</span></span><span class="ico" aria-hidden="true">${ARR}</span></a></div></div>
-    </div></article>`).join('');
+  // (the rows are in the page; here only their pictures, in the same order as before)
+  rowsEl.querySelectorAll('.pr-fig').forEach((f,i)=>{f.style.backgroundImage=still(800,450,{tint:[230,230,230],bg:'#101010',turns:14+i*6,t:i*1.7})});
   /* rows open like the original: height from the header to the full row in .6s (quart in-out); on desktop the header
      floats on top and the picture rises from below it; the other rows step back; the page glides so the row sits mid-screen */
   const isDesk=()=>matchMedia('(min-width:1025px)').matches;

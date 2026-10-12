@@ -173,8 +173,14 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 3. **`audit.py` i `paths.py` z prawdziwym paskiem przewijania** (`scrollbars=True`).
 4. **Przewijanie w bok po zmianie szerokości okna** (było już przed hero, sprawdzone na HEAD): gdy w jednej sesji okno rośnie z szerokości telefonu (≤600) do 700–1024 px, strona przewija się w bok o 7–40 px; przy wczytaniu od razu w tej szerokości jest dobrze. `sizes.py --sizes=320x568,700x700,768x1024` pokazuje błąd.
 5. **`sizes.py --critical`**: rozmiary krytyczne z progów i linii przełączenia (§6.3 p. 6) zamiast siatki 178; przy pierwszej sekcji z tabelą reguł. (Jedno polecenie na etap, `check.py`, na razie nie: tabela etapów wystarcza, a każde narzędzie trzeba utrzymywać.)
-6. **Narzędzie porównania obok siebie** (przy następnej pracy nad sekcją odtwarzaną z oryginału): zrzuty oryginału i naszej strony w tych samych miejscach sekcji ułożone w pary w jednym obrazku, plus wykres przebiegu kluczowych wartości (jasność tła, położenie tytułu) w funkcji przewijania. Tak znaleźliśmy przejście do czerni przesunięte o 0,8 ekranu: z liczb, nie z wrażenia. Grzegorz ocenia efekt, Claude dostaje dokładną różnicę.
-7. **Koniec całości: gotowość na wszystkich ekranach** (§3a, uzgodnione 10.10.2026):
+6. **SEO, dalsze kroki** (12.10.2026; zrobione: opis strony, canonical, Open Graph, kolejność nagłówków, treść kart realizacji i listy projektów w HTML zamiast w JS, dane strukturalne JSON-LD `Organization` i `WebSite`):
+   - `sitemap.xml` i `robots.txt` (`robots.txt` musi leżeć w katalogu głównym domeny, a `github.io/wir-studium` to podfolder: na Pages tylko mapa strony) i zgłoszenie w Google Search Console (konto Grzegorza);
+   - obraz do udostępniania `og:image` (1200×630, np. zrzut hero);
+   - prawdziwe obrazy z opisem `alt` zamiast rysowanych w przeglądarce (wyszukiwanie obrazów);
+   - kontrast szarych podpisów `#989a96` (2,76; zmiana koloru z oryginału, decyzja Grzegorza);
+   - poza kodem: więcej treści i podstrony z własnym adresem, własna domena, linki z innych stron.
+7. **Narzędzie porównania obok siebie** (przy następnej pracy nad sekcją odtwarzaną z oryginału): zrzuty oryginału i naszej strony w tych samych miejscach sekcji ułożone w pary w jednym obrazku, plus wykres przebiegu kluczowych wartości (jasność tła, położenie tytułu) w funkcji przewijania. Tak znaleźliśmy przejście do czerni przesunięte o 0,8 ekranu: z liczb, nie z wrażenia. Grzegorz ocenia efekt, Claude dostaje dokładną różnicę.
+8. **Koniec całości: gotowość na wszystkich ekranach** (§3a, uzgodnione 10.10.2026):
    - telefon w poziomie (844×390): brak układu na niskie ekrany; w intro okno nachodzi na paski i nie mieści się tekst, w manifeście tekst i kwadraty nachodzą na spiralę;
    - płynność na telefonie (klienci, pierwszy przejazd);
    - Safari/iPhone: niesprawdzone.
