@@ -1988,11 +1988,14 @@ function main(){
       const tl=gsap.timeline();
       if(fl)tl.fromTo(fl.st,{start:5},{start:0,duration:.75,ease:'power1.out'},0);
       tl.to(pic,{opacity:1,scale:1,duration:.65,ease:'power1.out',clearProps:'transform'},0)}});
-    // the two large cards of every four float: picture and text together slide down 30% of their height
-    // from the moment they enter at the bottom until 125% of a screen later, so they lag behind the small ones
-    if(fluidOK&&(i%4===0||i%4===3))gsap.to(c.querySelector('.case-a'),{yPercent:30,ease:'power1.out',
-      scrollTrigger:{trigger:c.querySelector('.case-a'),start:'top bottom',end:'+=125%',scrub:true,invalidateOnRefresh:true}});
   });
+  // the two large cards of every four float: picture and text together slide down 30% of their height
+  // from the moment they enter at the bottom until 125% of a screen later, so they lag behind the small ones.
+  // Desktops only, through gsap.matchMedia: undone when the window narrows below 1025px (the floated card stayed
+  // 30% down and covered the text of the card above it in the tablet layout) and set up when it widens again
+  if(!coarse)gsap.matchMedia().add('(min-width:1025px)',()=>{
+    gsap.utils.toArray('.case').forEach((c,i)=>{if(i%4===0||i%4===3)gsap.to(c.querySelector('.case-a'),{yPercent:30,ease:'power1.out',
+      scrollTrigger:{trigger:c.querySelector('.case-a'),start:'top bottom',end:'+=125%',scrub:true,invalidateOnRefresh:true}})})});
   let fluidsTicking=false;
   if(fluids.length){fluidsTicking=true;gsap.ticker.add(()=>fluids.forEach(f=>{if(f.st.visible)f.draw()}))}
 
@@ -2006,8 +2009,11 @@ function main(){
   function headerPlay(sec){const L=sec.querySelector('.wi-l'),T=sec.querySelector('.wi-t');
     splitWords(T);splitWords(sec.querySelector('.wi-lt'));
     const W=T.querySelectorAll('.fl'),LW=sec.querySelectorAll('.wi-lt .fl');
+    // (through gsap.matchMedia: the phone/tablet way or the desktop way, switched when the window crosses 1025px — set
+    //  once at load, a page opened narrow and then widened kept the played-once header over the clients' window)
+    gsap.matchMedia().add({desk:'(min-width:1025px)',narrow:'(max-width:1024px)'},ctx=>{
     // phones and tablets: played once as the row comes into view, 1.75× as fast (label from 3rem right, title from 3rem left)
-    if(!isDesk()){
+    if(ctx.conditions.narrow){
       const t=gsap.timeline({paused:true})
         .fromTo(L,{'--p':'50%',opacity:0},{'--p':'0%',opacity:1,duration:.5,ease:'power4.inOut'},0)
         .fromTo(L,{x:()=>3*remPx()},{x:0,duration:.9,ease:'power1.out'},0)
@@ -2025,7 +2031,7 @@ function main(){
       .fromTo(LW,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5*vh,ease:'power4.inOut'},.04*vh)
       .fromTo(W,{'--rx':'-90deg','--sy':1.5},{'--rx':'0deg','--sy':1,duration:.5*vh,ease:'power4.inOut',stagger:{each:.012*vh}},.04*vh)
       .to(L,{x:()=>-sx(),opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh)
-      .to(T,{x:sx,opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh)}
+      .to(T,{x:sx,opacity:0,duration:1*vh,ease:'power1.inOut'},2.2*vh)})}
   headerPlay(document.getElementById('wi'));
   const shade={v:0};if(coils[0].setShade)coils[0].on=()=>shade.v<.999;
   // ends with the texts (S0+3.2 screens) instead of before them
