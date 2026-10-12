@@ -64,9 +64,11 @@
   var m=!matchMedia('(prefers-reduced-motion: reduce)').matches||f;
   /* phones and tablets: the quick start (since 11.10, for the page's speed): the first screen is complete at the first
      paint (laid out by CSS alone), the libraries come after it and three.js with the coil at the first move (or after a
-     few seconds); no loader, no smoke. Desktops (from 1025px with a mouse): the entrance with the loader and the smoke
+     few seconds); no loader, no smoke. Desktops (from 1025px, not a touch screen; "with a
+     mouse" left out the test browsers of PageSpeed, which have no pointer at all, and they measured the quick start
+     instead of what desktops get): the entrance with the loader and the smoke
      (wiedza/hero.md). ?w=S / ?w=C force one or the other */
-  var q=location.search,desk=matchMedia('(min-width:1025px) and (pointer:fine)').matches;
+  var q=location.search,desk=matchMedia('(min-width:1025px)').matches&&!matchMedia('(pointer:coarse)').matches;
   var fast=m&&(/[?&]w=S(&|$)/.test(q)||!desk&&!/[?&]w=C(&|$)/.test(q));
   if(m)d.classList.add('motion',fast?'fast':'pre');if(!fast)d.classList.add('wait');
   var load=function(s){return new Promise(function(r){var e=document.createElement('script');e.src=s;e.async=false;e.onload=e.onerror=r;document.head.appendChild(e)})};

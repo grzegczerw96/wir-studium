@@ -63,7 +63,7 @@ Na prośbę Grzegorza („95+ na telefonie, nawet kosztem animacji wstępnej”)
 | Wersja | Gdzie domyślnie | Podgląd na dowolnym urządzeniu | Lighthouse lokalnie |
 |---|---|---|---|
 | **szybki start** (bez dymu: hero gotowe od pierwszej klatki, czarne O, bryła wyrasta przy pierwszym ruchu) | telefony i tablety | `?w=S` | telefon 96, desktop 100 |
-| **wejście C z dymem** (owal ładowania przelatuje w O, tytuł z dymu d3) | desktop od 1025 px z myszą | `?w=C` | desktop 96 (bez karty graficznej 94), telefon ok. 45 |
+| **wejście C z dymem** (owal ładowania przelatuje w O, tytuł z dymu d3) | desktop od 1025 px bez ekranu dotykowego (`pointer:coarse`) | `?w=C` | desktop 96 (bez karty graficznej 94), telefon ok. 45 |
 
 **Jak przełączyć domyślną wersję** (skrypt w `<head>` `index.html`, linia z `var fast=`):
 - szybki start wszędzie: `var fast=m&&!/[?&]w=C(&|$)/.test(q);`
