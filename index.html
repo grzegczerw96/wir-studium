@@ -72,14 +72,15 @@
   var wS=/[?&]w=S(&|$)/.test(q),wC=/[?&]w=C(&|$)/.test(q);
   /* a desktop without hardware graphics (a virtual machine, a remote desktop, a blocklisted card; PageSpeed's test
      machines too) draws WebGL on the CPU: the smoke there ran at 1-2 frames a second (PageSpeed: 21 s of blocked main
-     thread), so it gets the quick start. Asked once, before the first paint (~50 ms, desktops only): the context the
-     browser itself calls slow (failIfMajorPerformanceCaveat), or a software renderer by name */
-  var soft=false;
-  if(m&&desk&&!wS&&!wC)try{var g=document.createElement('canvas').getContext('webgl',{failIfMajorPerformanceCaveat:true});
-    if(!g)soft=true;else{var x=g.getExtension('WEBGL_debug_renderer_info');
-      soft=/SwiftShader|llvmpipe|softpipe|Basic Render|Software/i.test(String(g.getParameter(x?x.UNMASKED_RENDERER_WEBGL:g.RENDERER)));
-      var lc=g.getExtension('WEBGL_lose_context');lc&&lc.loseContext()}}catch(e){}
-  var fast=m&&(wS||(!desk||soft)&&!wC);
+     thread), so it gets the quick start. Asked in a worker (creating the context took ~1 s on such a machine, which on
+     the page's own thread blocked it: PageSpeed 88): the context the browser itself calls slow
+     (failIfMajorPerformanceCaveat), or a software renderer by name. The desktop shows its loader meanwhile; the main
+     script waits for the answer (window.__wirSoft) and switches to the quick start before the page is shown */
+  if(m&&desk&&!wS&&!wC&&window.Worker&&window.OffscreenCanvas)try{
+    var w=new Worker(URL.createObjectURL(new Blob(["onmessage=function(){var s=false;try{var g=new OffscreenCanvas(1,1).getContext('webgl',{failIfMajorPerformanceCaveat:true});"
+      +"if(!g)s=true;else{var x=g.getExtension('WEBGL_debug_renderer_info');s=/SwiftShader|llvmpipe|softpipe|Basic Render|Software/i.test(String(g.getParameter(x?x.UNMASKED_RENDERER_WEBGL:g.RENDERER)))}}catch(e){}postMessage(s)}"],{type:'text/javascript'})));
+    window.__wirSoft=new Promise(function(r){w.onmessage=function(e){r(e.data);w.terminate()};setTimeout(function(){r(false)},3000)});w.postMessage(0)}catch(e){}
+  var fast=m&&(wS||!desk&&!wC);
   if(m)d.classList.add('motion',fast?'fast':'pre');if(!fast)d.classList.add('wait');
   var load=function(s){return new Promise(function(r){var e=document.createElement('script');e.src=s;e.async=false;e.onload=e.onerror=r;document.head.appendChild(e)})};
   var L=['lib/gsap-3.12.5.min.js','lib/ScrollTrigger-3.12.5.min.js','lib/lenis-1.1.13.min.js'],T='lib/three-0.149.0-wir.min.js';
@@ -851,7 +852,10 @@ html:not(.motion) .stage3{display:none}
 let ran=false;const run=()=>{if(ran)return;ran=true;main()};
  const WL=window.__wirLoad||{libs:[],load:()=>Promise.resolve()};
  const libs=()=>window.__wirLibs||(window.__wirLibs=Promise.all(WL.libs.map(WL.load)));
- const start=()=>{requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(()=>libs().then(run),0)));setTimeout(()=>libs().then(run),500)};
+ // (a desktop without hardware graphics: the quick start, decided here while the loader still covers the page)
+ const soft=()=>Promise.resolve(window.__wirSoft).then(s=>{if(s&&!WL.fast){WL.fast=true;document.documentElement.classList.replace('pre','fast')}});
+ const go=()=>libs().then(soft).then(run);
+ const start=()=>{requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(go,0)));setTimeout(go,500)};
  if(document.readyState==='loading')addEventListener('DOMContentLoaded',start);else start();
 function main(){
   /* ================= motion preference ================= */
