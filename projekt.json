@@ -17,5 +17,8 @@
     "effect_mark": "wir-smoke",
     "letters": "#heroT .ch"
   },
-  "init": "localStorage.setItem('wir-motion','on')"
+  "init": "localStorage.setItem('wir-motion','on')",
+  "covered": {
+    "sel": "a,button,input,textarea,select,[tabindex],.client"
+  }
 }

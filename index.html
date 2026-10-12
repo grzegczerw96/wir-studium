@@ -561,6 +561,9 @@ html.motion .cl-box{height:calc(100svh - var(--gut)*3 - 55px);min-height:0}
    list: two columns of names that flip in pair by pair, small tags rise, hairlines grow; the whole list grows .7 → 1 */
 .awards{--r:inherit;color:#141414;display:flex;flex-direction:column;gap:calc(var(--r)*6.25)}
 .wi--light{color:#141414;background:transparent;padding:0}
+/* the headers' tall transparent tracks (350svh, pulled over the section before) let the mouse through: the awards'
+   one lay over the clients' names from ~70 % of that section, and hovering a name worked only now and then */
+html.motion .wi{pointer-events:none}
 /* the names turn light at once when the page passes mid-grey on its way back to black, so they read in every frame
    (a colour transition would pass through grey-on-grey) */
 .awards.inv,.awards.inv .wi--light{color:#fcfcfc}
@@ -666,6 +669,10 @@ html.motion .footer{height:350svh;margin-top:-50svh}   /* phones/tablets, as in 
    whole; at 350svh 1.3 screens of nothing followed, and had to be scrolled back up again — Grzegorz 11.10) */
 @media (max-width:1024px){html.motion .footer{height:225svh}}
 html.motion .ft-wrap{position:sticky;top:0;height:100svh;height:100dvh}
+/* (the pinned footer screen slides over the end of the contact form while its letters are still invisible: it lets
+   the mouse through, its own links and the mail button take it — the form's send button was unclickable there) */
+html.motion .ft-wrap{pointer-events:none}
+html.motion .ft-wrap a,html.motion .ft-wrap button{pointer-events:auto}
 .ft-head{position:relative;display:flex;flex-direction:column;gap:32px;align-items:flex-start;width:100%}
 @media (min-width:1025px){.ft-head{flex-direction:row;justify-content:space-between;gap:0}}
 .ft-title{margin:0;font:900 calc(var(--r)*3.125)/.9 var(--grot);letter-spacing:-.04em;text-transform:uppercase}

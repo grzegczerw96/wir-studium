@@ -102,6 +102,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 | uniwersalne | `audit.py --section '#id'` | układ w kilku pozycjach przewijania: nachodzenie tekstu, ucięty tekst, przewijanie w bok, prześwit przy krawędzi; 3 ekrany ok. 1 min |
 | uniwersalne | `paths.py` | przejścia między sekcjami przy prawdziwym kółku, w obie strony; reguły „A zgasło, zanim weszło B” (dopisywać w `RULES`) |
 | uniwersalne | `sizes.py` | grupy elementów nie wchodzą na siebie na wielu rozmiarach okna (`--groups`, `--sizes`) |
+| uniwersalne | `covered.py` (warsztat) | klikalne i najeżdżalne elementy zasłonięte przez przezroczystą warstwę (tor sekcji, stopka); cała strona co 1/5 ekranu |
 | uniwersalne | `compare.py` (warsztat) | czy wygląd się zmienił względem commita (`--ref=HEAD`): pudełka, krycie, krój tekstu w 10 miejscach, 2 ekrany; do zmian, które nie mają ruszać wyglądu |
 | uniwersalne | `lighthouse.py` (warsztat) | Lighthouse lokalnie, mediana z N przebiegów; ruch wymuszony i rozmiary plików poprawione o ESET (bez tego wyniki są fałszywe); `--cats`: dostępność, metody, SEO |
 | uniwersalne | `phone.py`, `phone_load.py` | prawdziwy telefon: płynność, dotyk, pasek adresu; nagranie ładowania (`--letters`: skoki liter efektu tytułu) |
