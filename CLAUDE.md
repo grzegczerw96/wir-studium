@@ -110,7 +110,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 **Ścieżka A: odtwarzanie oryginału.** Sprawdzanie to porównanie z oryginałem.
 1. Pomiar: `main.js` i `probe.py` (liczby, krzywe, progi). Responsywności nie wymyślamy: przepisujemy progi oryginału, on je rozwiązał.
 2. Budowa; po każdej zmianie układu `node --check` i `audit.py --section '#id'` na `quick` (ok. 1 min, łapie najwięcej typowych błędów). Gdy sekcja zmienia kolor strony albo dzieli warstwę z sąsiadem, także `paths.py`: prawie wszystkie błędy, które dotarły do Grzegorza, siedziały na styku sekcji (szare tło pod listą, napis nad formularzem, ucięta spirala), a `audit.py` ich nie łapie.
-3. Porównanie liczb w tych samych miejscach (a gdy powstanie, obraz obok siebie: §5, zadanie 6).
+3. Porównanie liczb w tych samych miejscach (a gdy powstanie, obraz obok siebie: §5, zadanie 7).
 4. Telefon raz, na płynność. Grzegorz na końcu ocenia, „czy czuć oryginał”.
 
 **Ścieżka B: własna sekcja (nowa albo przeróbka).** Sprawdzanie to projektowanie reguł.
@@ -240,7 +240,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 ## 7. Lista kontrolna przed oddaniem sekcji
 
 - [ ] Liczby (długość sekcji, progi, czasy, krzywe) wzięte z kodu oryginału albo zmierzone, nie zgadnięte; nowe pomiary dopisane do `wiedza/pomiary.md`.
-- [ ] Sekcja odtwarzana: porównanie z oryginałem w tych samych miejscach (liczby, a gdy powstanie narzędzie z zadania 6, także obraz obok siebie). Sekcja własna (np. hero): porównanie z jej wzorcem w `lab/`.
+- [ ] Sekcja odtwarzana: porównanie z oryginałem w tych samych miejscach (liczby, a gdy powstanie narzędzie z zadania 7, także obraz obok siebie). Sekcja własna (np. hero): porównanie z jej wzorcem w `lab/`.
 - [ ] Przewinięte prawdziwym kółkiem: wolno, szybko, z zatrzymaniem w połowie przejścia, w górę i z powrotem.
 - [ ] Nic nie nachodzi na tekst; kontrast w każdej klatce przejścia kolorów.
 - [ ] Sprawdzanie dobrane do ryzyka (§3a, trzy pytania): nowy ruch sprawdzony co klatkę na telefonie, tablecie i desktopie z paskiem przewijania; zwykły układ: `audit.py` na 3 ekranach.
