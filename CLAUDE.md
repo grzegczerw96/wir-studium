@@ -14,6 +14,7 @@ Stan na 12.10.2026: hero oddane; etap wydajności scalony do `main` 12.10 (§5; 
 | `wiedza/hero.md` | praca nad hero: co wybrane, co jest w labie, wszystkie uwagi Grzegorza |
 | `wiedza/marka.md`, `inspiracje.md`, `katalog-ruchu.md` | przed propozycjami dla sekcji, którą projektujemy (a nie odtwarzamy); dopisywać do katalogu po każdej decyzji. `marka.md` także przy pisaniu tekstów każdej sekcji (ton, słowa) |
 | `tools/README.md` | instalacja narzędzi, ich opcje, znane fałszywe alarmy |
+| `C:\Projekty\warsztat\wydajnosc.md` | praca nad szybkością (PageSpeed, telefon): kamienie milowe, co działa, pułapki pomiaru |
 | `C:\Projekty\warsztat` | warsztat wspólny dla projektów: zasady ogólne, szablon CLAUDE.md, prompty, narzędzia uniwersalne (ustawienia tego projektu w `projekt.json`); wniosek pasujący do każdej strony proponować do `warsztat/zasady-ogolne.md` |
 
 ## 0a. Na start pracy nad sekcją (każda nowa sesja)
@@ -101,6 +102,7 @@ Hero miało „tak” na wszystkie trzy, stąd wiele narzędzi. Zwykła sekcja o
 | uniwersalne | `audit.py --section '#id'` | układ w kilku pozycjach przewijania: nachodzenie tekstu, ucięty tekst, przewijanie w bok, prześwit przy krawędzi; 3 ekrany ok. 1 min |
 | uniwersalne | `paths.py` | przejścia między sekcjami przy prawdziwym kółku, w obie strony; reguły „A zgasło, zanim weszło B” (dopisywać w `RULES`) |
 | uniwersalne | `sizes.py` | grupy elementów nie wchodzą na siebie na wielu rozmiarach okna (`--groups`, `--sizes`) |
+| uniwersalne | `compare.py` (warsztat) | czy wygląd się zmienił względem commita (`--ref=HEAD`): pudełka, krycie, krój tekstu w 10 miejscach, 2 ekrany; do zmian, które nie mają ruszać wyglądu |
 | uniwersalne | `lighthouse.py` (warsztat) | Lighthouse lokalnie, mediana z N przebiegów; ruch wymuszony i rozmiary plików poprawione o ESET (bez tego wyniki są fałszywe); `--cats`: dostępność, metody, SEO |
 | uniwersalne | `phone.py`, `phone_load.py` | prawdziwy telefon: płynność, dotyk, pasek adresu; nagranie ładowania (`--letters`: skoki liter efektu tytułu) |
 | pod konkretny element | `coil.py` | spirala: rozmiar i położenie w oryginale i u nas, w tych samych miejscach strony |

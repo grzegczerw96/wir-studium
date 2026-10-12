@@ -16,5 +16,6 @@
     "reveal_mark": "wir-reveal",
     "effect_mark": "wir-smoke",
     "letters": "#heroT .ch"
-  }
+  },
+  "init": "localStorage.setItem('wir-motion','on')"
 }
