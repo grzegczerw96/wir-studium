@@ -866,7 +866,11 @@ function main(){
      over or the page is first scrolled (stillGo), then done one piece per idle moment, so it never sits between the
      page and its first paint nor in the middle of the entrance */
   const LATER=[];let laterOn=false;
-  const idle=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:500}):setTimeout(f,40);
+  // (and only while the page is not being scrolled: a piece of it landing in a swipe was a .2 s stop on the phone —
+  //  measured with phone.py; calm() waits until nothing has moved for .15 s)
+  let lastMove=0;['scroll','touchmove','wheel'].forEach(e=>addEventListener(e,()=>{lastMove=performance.now()},{passive:true}));
+  const calm=f=>{const k=()=>performance.now()-lastMove>150?f():setTimeout(k,60);k()};
+  const idle=f=>calm(()=>window.requestIdleCallback?requestIdleCallback(f,{timeout:500}):setTimeout(f,40));
   function later(f){LATER.push(f);if(laterOn&&LATER.length===1)idle(laterNext)}
   function laterNext(){const f=LATER.shift();if(f)f();if(LATER.length)idle(laterNext)}
   function laterRun(){if(laterOn)return;laterOn=true;if(LATER.length)idle(laterNext)}
@@ -1009,15 +1013,21 @@ function main(){
     const step=all=>{if(!window.THREE){if(FAST)need3().then(()=>step(all));return}
       if(real===undefined){real=GLCoil(canvas,Object.assign({lazy:true},opt));if(real)for(const k in last)real[k](...last[k]);if(!all)return}
       if(real)real.warm(all)};
+    let n2=0;
     const c={make(){step(true)},
+      // (one more of the four steps; true while some are left)
+      prep2:()=>{step(false);return ++n2<4},
       // (four short tasks, one per frame: the quick start's coil, made when the visitor first moves)
-      prep:()=>need3().then(()=>new Promise(res=>{let i=0;const go=()=>{step(false);if(++i<4)setTimeout(go,16);else res()};go()})),
+      prep:()=>new Promise(r=>calm(r)).then(need3).then(()=>new Promise(res=>{let i=0;const go=()=>{step(false);if(++i<4)setTimeout(()=>calm(go),16);else res()};calm(go)})),
       draw:t=>{real&&real.draw(t)},size:()=>{real&&real.size()},kick:v=>{real&&real.kick(v)},
       setPose:fw('setPose'),setShade:fw('setShade'),setPos:fw('setPos'),setDark:fw('setDark'),setProgress:fw('setProgress'),dpr:fw('dpr')};
     if(sched)for(let i=0;i<4;i++)later(()=>step(false));
     return c;
   }
-  const near=(el,c)=>{const o=new IntersectionObserver(es=>{if(es[0].isIntersecting){o.disconnect();c.make()}},{rootMargin:'150% 0px'});o.observe(el)};
+  // (four screens ahead: made at the next calm moment, in its short steps; just ahead: at once, whatever the scroll)
+  const near=(el,c)=>{
+    const far=new IntersectionObserver(es=>{if(es[0].isIntersecting){far.disconnect();const s=()=>{if(c.prep2())calm(()=>setTimeout(s,16))};calm(s)}},{rootMargin:'400% 0px'});far.observe(el);
+    const o=new IntersectionObserver(es=>{if(es[0].isIntersecting){o.disconnect();c.make()}},{rootMargin:'60% 0px'});o.observe(el)};
   const orb2=document.getElementById('orb2');
   const coil2=window.THREE||FAST?lazyGL(orb2):null;
   if(coil2){near(document.getElementById('clients'),coil2);
