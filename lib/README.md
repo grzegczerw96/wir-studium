@@ -22,7 +22,7 @@ Potem na początek pliku z powrotem nagłówek licencji MIT Three.js (jest w pli
 Nowa klasa `THREE.X` w `index.html` = dopisać ją do `entry.js` i zbudować od nowa (inaczej `THREE.X` jest `undefined`).
 Lista użytych klas: `grep -o "THREE\.[A-Za-z0-9]*" index.html | sort -u`.
 
-**Jedna poprawka w źródle** (`src/renderers/WebGLRenderer.js` r149, przed budową): lista uniformów materiału liczona
+**Jedna poprawka w źródle** (`build/three.module.js` r149 w `node_modules`, przed budową: esbuild bierze ten plik, nie `src/`): lista uniformów materiału liczona
 leniwie przy pierwszym rysowaniu (`setProgram`), a nie w `getProgram` (w nowszych wersjach Three.js jest tak samo).
 Dzięki temu `renderer.compile()` nie czeka na kompilację shaderów, a z `KHR_parallel_shader_compile` i
 `renderer.debug.checkShaderErrors=false` (ustawia to `GLCoil`) kompilacja idzie w tle; strona czeka na nią klatka po

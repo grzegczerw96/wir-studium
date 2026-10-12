@@ -930,7 +930,8 @@ function main(){
     //  link status at once only with checkShaderErrors; ready() tells when all programs are done)
     const gl0=renderer.getContext(),PSC=gl0.getExtension('KHR_parallel_shader_compile');
     if(PSC)renderer.debug.checkShaderErrors=false;
-    const ready=()=>!PSC||renderer.info.programs.every(p=>gl0.getProgramParameter(p.program,PSC.COMPLETION_STATUS_KHR));
+    let isReady=false;
+    const ready=()=>isReady||(isReady=built&&(!PSC||renderer.info.programs.every(p=>gl0.getProgramParameter(p.program,PSC.COMPLETION_STATUS_KHR))));
     const scene=new THREE.Scene();
     const cam=new THREE.PerspectiveCamera(30,1,.1,100);cam.position.set(0,0,9);
     // a dark studio with a few softbox strips, baked once into an environment map for the reflections
@@ -973,7 +974,8 @@ function main(){
     let spin=0,last=0,vel=0,mx=0,my=0,tmx=0,tmy=0,tilt=1.05,pscale=1,dark=0;
     if(!coarse)addEventListener('pointermove',e=>{tmx=e.clientX/innerWidth-.5;tmy=e.clientY/innerHeight-.5},{passive:true});
     function draw(t){
-      if(!built)return;
+      // (not before its shaders are done: a draw would wait for them — .17 s in one frame on a desktop)
+      if(!ready())return;
       if(!W)size();if(!W)return;
       const dt=Math.min(.05,Math.max(0,t-last));last=t;
       spin+=dt*(.32+Math.min(vel,4)*.8);vel*=.93;            // scroll speed spins it faster, then it calms down
@@ -1139,20 +1141,25 @@ function main(){
     if(!gl)return null;
     const sh=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);return o};
     const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,FLUID_VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FLUID_FS));gl.linkProgram(pr);
-    if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return null;
+    // (the program is asked for only when its picture has arrived, long after the load: until then it compiles in the
+    //  background — asked at once, the seven of them were ~70 ms of the desktop's start)
+    let U=null,tex=null;
+    function setup(){
+    if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return false;
     gl.useProgram(pr);
     const buf=(data,name)=>{const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);const l=gl.getAttribLocation(pr,name);gl.enableVertexAttribArray(l);gl.vertexAttribPointer(l,2,gl.FLOAT,false,0,0)};
     buf([-1,-1,1,-1,-1,1,1,1],'position');buf([0,0,1,0,0,1,1,1],'uv');
-    const U={};['uResolution','uTextureResolution','uMouse','intensity','startIntensity','uScale','parallaxY','uTexture'].forEach(n=>U[n]=gl.getUniformLocation(pr,n));
-    const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+    U={};['uResolution','uTextureResolution','uMouse','intensity','startIntensity','uScale','parallaxY','uTexture'].forEach(n=>U[n]=gl.getUniformLocation(pr,n));
+    tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
     [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(k=>gl.texParameteri(gl.TEXTURE_2D,k,gl.CLAMP_TO_EDGE));
     gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
     gl.uniform1f(U.uScale,.75);gl.uniform1i(U.uTexture,0);
+    return true}
     const st={hover:0,start:0,ready:false,visible:false,v:[0,0],dv:[0,0],t:[0,0]};
-    const img=new Image();img.onload=()=>{gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
+    const img=new Image();img.onload=()=>{if(!setup())return;gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
       gl.uniform2f(U.uTextureResolution,img.naturalWidth,img.naturalHeight);st.ready=true;pic.classList.add('gl');size();draw()};
     stillSrc(url).then(u=>{img.src=u});
-    function size(){const d=Math.min(devicePixelRatio||1,1.5),w=pic.clientWidth,h=pic.clientHeight;cv.width=Math.max(1,w*d|0);cv.height=Math.max(1,h*d|0);gl.viewport(0,0,cv.width,cv.height);gl.uniform2f(U.uResolution,w,h)}
+    function size(){const d=Math.min(devicePixelRatio||1,1.5),w=pic.clientWidth,h=pic.clientHeight;cv.width=Math.max(1,w*d|0);cv.height=Math.max(1,h*d|0);gl.viewport(0,0,cv.width,cv.height);if(U)gl.uniform2f(U.uResolution,w,h)}
     function draw(){if(!st.ready)return;
       // spring toward the mouse target, in -1..1 space around the frame centre (the original's tracker)
       for(let i=0;i<2;i++){st.dv[i]+=(st.t[i]-st.v[i])*.1;st.dv[i]*=.65;st.v[i]+=st.dv[i]}
