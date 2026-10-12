@@ -57,3 +57,15 @@ Na prośbę Grzegorza („95+ na telefonie, nawet kosztem animacji wstępnej”)
 - **Bryła:** three.js ładuje się przy pierwszym ruchu (mysz, dotyk, kółko, klawisz, przewinięcie) albo po 6 s; bryła powstaje w 4 krótkich krokach i wyrasta w O (0,8 s power3.out, zawirowanie 2,5 → 0 w 1,4 s), jak w wejściu C, ale bez przelotu owalu i bez dymu.
 - **Wynik:** Lighthouse telefon 96 (wejście C: ok. 45), desktop 100; CLS 0.
 - **Podział (Grzegorz, 11.10):** szybki start na telefonach i tabletach, wejście C z dymem na desktopach (od 1025 px, `pointer:fine`). Na desktopie shadery bryły i dymu kompilują się w tle (`KHR_parallel_shader_compile`, three r149 z leniwą listą uniformów: `lib/README.md`), a wejście czeka na nie przy nieruchomym owalu: Lighthouse desktop 80 → 96 (bez karty graficznej 94): do tego shadery cieczy sprawdzane dopiero przy obrazku, a bryła nie rysuje się przed gotowymi shaderami. Zostaje Speed Index (ok. 1,9 s) z długości samego wejścia. LCP liczony jest już przy odsłonięciu (0,86 s), więc sztuczki z loaderem (napis w loaderze, zasłona nad gotowym tekstem; sprawdzone 12.10 na stronach testowych: LCP 2,06 s → 0,04 s) dałyby na desktopie najwyżej ok. 1 punkt.
+
+### Dwie wersje wejścia (stan po scaleniu 12.10.2026)
+
+| Wersja | Gdzie domyślnie | Podgląd na dowolnym urządzeniu | Lighthouse lokalnie |
+|---|---|---|---|
+| **szybki start** (bez dymu: hero gotowe od pierwszej klatki, czarne O, bryła wyrasta przy pierwszym ruchu) | telefony i tablety | `?w=S` | telefon 96, desktop 100 |
+| **wejście C z dymem** (owal ładowania przelatuje w O, tytuł z dymu d3) | desktop od 1025 px z myszą | `?w=C` | desktop 96 (bez karty graficznej 94), telefon ok. 45 |
+
+**Jak przełączyć domyślną wersję** (skrypt w `<head>` `index.html`, linia z `var fast=`):
+- szybki start wszędzie: `var fast=m&&!/[?&]w=C(&|$)/.test(q);`
+- dym wszędzie: `var fast=m&&/[?&]w=S(&|$)/.test(q);`
+- obecnie (telefon bez dymu, desktop z dymem): `var fast=m&&(/[?&]w=S(&|$)/.test(q)||!desk&&!/[?&]w=C(&|$)/.test(q));`
