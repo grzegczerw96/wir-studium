@@ -547,7 +547,9 @@ html.motion .cl-box{height:calc(100svh - var(--gut)*3 - 55px);min-height:0}
 .cl-text .w{display:inline-block;color:#fcfcfc;transition:color .35s cubic-bezier(.45,0,.55,1)}
 .cl-text .client{cursor:pointer;pointer-events:all}
 @media (min-width:600px){.cl-text{font-size:calc(var(--r)*2.875)}}
-@media (min-width:1025px){
+/* (with a mouse at any width: from 1025px only, a desktop window narrower than that showed the client's mark but did
+   not dim the other names) */
+@media (hover:hover) and (pointer:fine){
   .cl-text:hover .w{color:rgba(252,252,252,.1);transition-timing-function:cubic-bezier(.5,1,.89,1)}
   .cl-text .client:hover .w{color:#fcfcfc}
 }
@@ -1182,7 +1184,13 @@ function main(){
   }
   // (the squares of the manifesto, the clients' marks and the award posters are drawn later(): ~.25 s on a phone)
   document.getElementById('thumbs').innerHTML=[...Array(8).keys()].map(()=>`<div class="thumb"></div>`).join('');
-  later(()=>[...document.getElementById('thumbs').children].forEach((d,i)=>d.style.backgroundImage=tile(i)));
+  // (each set of pictures is drawn once: in an idle moment after the entrance, or at once when its section comes
+  //  within a screen and a half — scrolling straight on from the hero, the manifesto's squares were empty at first)
+  //  (one picture per idle moment, not waiting for a still page: ~10 ms each on a phone)
+  const soon=(el,list)=>{let i=0,go=false;const step=()=>{if(i<list.length){list[i++]();if(i<list.length)window.requestIdleCallback?requestIdleCallback(step,{timeout:120}):setTimeout(step,16)}};
+    const g=()=>{if(go)return;go=true;step()};later(g);
+    const o=new IntersectionObserver(es=>{if(es[0].isIntersecting){o.disconnect();g()}},{rootMargin:'75% 0px'});o.observe(el)};
+  soon(document.getElementById('mani'),[...document.getElementById('thumbs').children].map((d,i)=>()=>{d.style.backgroundImage=tile(i)}));
 
   /* ================= content ================= */
   // (the cards' text is in the page, for search engines and the first paint; here only their pictures, in the same order)
@@ -1260,7 +1268,7 @@ function main(){
   // a small mark for every client (shown top right while its name is hovered)
   const clNames=[...document.querySelectorAll('#clText .client')];
   document.getElementById('clImgs').innerHTML=clNames.map(()=>`<i></i>`).join('');
-  later(()=>[...document.getElementById('clImgs').children].forEach((d,k)=>d.style.backgroundImage=tile(k%8,200)));
+  soon(document.getElementById('clients'),[...document.getElementById('clImgs').children].map((d,k)=>()=>{d.style.backgroundImage=tile(k%8,200)}));
   const clMarks=[...document.querySelectorAll('#clImgs i')];
   clNames.forEach((n,k)=>{const on=v=>()=>{if(!window.gsap){clMarks[k].style.opacity=v;return}gsap.killTweensOf(clMarks[k]);
       gsap.to(clMarks[k],{opacity:v,duration:.35,ease:v?'power1.out':'power1.inOut',delay:v?0:.125})};
@@ -1275,7 +1283,7 @@ function main(){
     if(k%3===0){g.globalAlpha=.25;for(let i=0;i<6;i++){g.fillRect(x+12,y+64+i*14,cw*(.4+((i*37+k*13)%50)/100),6)}g.globalAlpha=1}
     else{g.strokeStyle=P[1];g.globalAlpha=.6;g.lineWidth=3;g.beginPath();g.arc(x+cw/2,y+ch*.55,cw*.24,0,Math.PI*(1+k%2));g.stroke();g.globalAlpha=1}
     return `url(${c.toDataURL('image/jpeg',.88)})`}
-  later(()=>document.querySelectorAll('.aw-fig i').forEach((i,k)=>i.style.backgroundImage=poster(k)));
+  soon(document.getElementById('awards'),[...document.querySelectorAll('.aw-fig i')].map((el,k)=>()=>{el.style.backgroundImage=poster(k)}));
   // chat form: Enter (or a click) opens the question, typing enables the button; nothing is sent anywhere
   {const form=document.getElementById('tkForm'),field=document.getElementById('tkField'),inp=document.getElementById('tkInput'),send=document.getElementById('tkSend'),done=document.getElementById('tkDone');
    const open=()=>{if(!field.hidden)return;field.hidden=false;form.querySelector('.tk-go').style.opacity=.4;inp.focus({preventScroll:true})};
